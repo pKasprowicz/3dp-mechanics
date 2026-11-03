@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 20 · Reference appendix</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.conv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; align-items: center; }
+.conv input[type=number] { width: 100%; }
+.conv select { width: 100%; }
+dl.gloss dt { font-weight: 700; margin-top: 10px; }
+dl.gloss dd { margin: 2px 0 0; color: var(--muted); }
+input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+</style>
+</head>
+<body data-root="../" data-ch="20">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part D · Practice · Chapter 20</p>
+<h1>Reference appendix</h1>
+<p class="lead">Formulas, tables, a unit converter and a glossary, all in one place. Everything here appears somewhere in the earlier chapters; this page is for quick lookup when you are at the CAD screen or the workbench. Values for plastics and standard parts are typical, and any dimension that matters should be verified with calipers.</p>
+
+<h2>20.1 Where to find what</h2>
+<table>
+  <tr><th>If you need to...</th><th>Go to</th></tr>
+  <tr><td>count degrees of freedom, spot over-constraint</td><td><a href="01-thinking-about-mechanisms.html">Ch 1</a></td></tr>
+  <tr><td>size a part for strength or stiffness; friction; safety factors</td><td><a href="02-mechanics-you-need.html">Ch 2</a></td></tr>
+  <tr><td>choose a material or understand heat, creep, anisotropy</td><td><a href="03-materials-and-technologies.html">Ch 3</a></td></tr>
+  <tr><td>orient, set clearances, compensate holes, print-in-place</td><td><a href="04-design-for-3d-printing.html">Ch 4</a></td></tr>
+  <tr><td>design linkages, toggles, straight-line mechanisms</td><td><a href="05-linkages.html">Ch 5</a></td></tr>
+  <tr><td>design a cam and check pressure angle</td><td><a href="06-cams-and-followers.html">Ch 6</a></td></tr>
+  <tr><td>gears, ratios, planetary, printed gear rules</td><td><a href="07-gears.html">Ch 7</a></td></tr>
+  <tr><td>belts, chains, cables, linear belt drives</td><td><a href="08-belts-chains-cables.html">Ch 8</a></td></tr>
+  <tr><td>leadscrews, guides, jamming, critical speed</td><td><a href="09-screws-and-linear-motion.html">Ch 9</a></td></tr>
+  <tr><td>bearings, shafts, couplings, hub connections</td><td><a href="10-bearings-shafts-joints.html">Ch 10</a></td></tr>
+  <tr><td>ratchets, Geneva drives, detents, escapements</td><td><a href="11-intermittent-motion.html">Ch 11</a></td></tr>
+  <tr><td>living hinges, flexures, snap-fits, printed springs</td><td><a href="12-compliant-mechanisms.html">Ch 12</a></td></tr>
+  <tr><td>screws, inserts, nut traps, adhesives, bought springs</td><td><a href="13-fasteners-joints-springs.html">Ch 13</a></td></tr>
+  <tr><td>latches, locks, clutches, torque limiters</td><td><a href="14-latching-locking-clutching.html">Ch 14</a></td></tr>
+  <tr><td>print vs buy, standard sizes, motor mounts</td><td><a href="15-hybrid-builds.html">Ch 15</a></td></tr>
+  <tr><td>motors, steppers, servos, sizing an actuator</td><td><a href="16-actuation.html">Ch 16</a></td></tr>
+  <tr><td>fix a problem, tolerance stack-up, thermal expansion</td><td><a href="17-problems-and-solutions.html">Ch 17</a></td></tr>
+  <tr><td>the workflow, tools, printer profile, checklist</td><td><a href="18-workflow-and-tools.html">Ch 18</a></td></tr>
+  <tr><td>see it all applied</td><td><a href="19-case-studies.html">Ch 19</a></td></tr>
+</table>
+
+<h2>20.2 Formula cheat sheet</h2>
+<table>
+  <tr><th>Topic</th><th>Formula</th><th>Notes</th></tr>
+  <tr><td>Mobility (planar)</td><td>M = 3(n − 1) − 2j₁ − j₂</td><td>n incl. ground; check special geometry</td></tr>
+  <tr><td>Grashof</td><td>s + l ≤ p + q</td><td>some link turns fully</td></tr>
+  <tr><td>Moment, work, power</td><td>M = F·d;  P = T·ω;  ω = 2π·rpm/60</td><td>kgf·cm × 0.0981 = N·m</td></tr>
+  <tr><td>Stress, strain</td><td>σ = F/A;  ε = ΔL/L;  σ = E·ε</td><td>MPa = N/mm²</td></tr>
+  <tr><td>Beam bending (rectangle)</td><td>I = b·t³/12;  σ = M·c/I;  cantilever δ = F·L³/(3EI), σ = 6FL/(b t²)</td><td>Thickness cubed in stiffness, squared in strength</td></tr>
+  <tr><td>Simply supported, centre load</td><td>δ = F·L³/(48·E·I)</td><td></td></tr>
+  <tr><td>Euler buckling</td><td>P = π²·E·I/(K·L)²</td><td>K = 1 pinned, 2 free-fixed, 0.5 fixed</td></tr>
+  <tr><td>Torsion, round shaft</td><td>τ = 16·T/(π·d³)</td><td>Cubic in diameter</td></tr>
+  <tr><td>Stress concentration</td><td>σ_peak = Kt·σ_nom;  Kt ≈ 1 + 2√(d/r) (notch)</td><td>Fillet every inside corner</td></tr>
+  <tr><td>Friction</td><td>F ≤ μ·N;  slope holds if tan θ ≤ μ</td><td>φ = atan μ</td></tr>
+  <tr><td>Bearing / PV</td><td>P = F/(d·L);  v = π·d·n/60000;  PV = P·v</td><td>MPa, m/s, rpm, mm</td></tr>
+  <tr><td>Spur gear</td><td>m = d/z;  a = m(z₁+z₂)/2;  i = z₂/z₁</td><td>z ≥ 17 at 20°; contact ratio ≥ 1.2</td></tr>
+  <tr><td>Lewis gear tooth</td><td>F_t = σ·b·m·Y;  Y ≈ π(0.154 − 0.912/z)</td><td>Use conservative σ for plastics</td></tr>
+  <tr><td>Planetary</td><td>Z_r = Z_s + 2Z_p;  i = 1 + Z_r/Z_s (ring fixed)</td><td>(Z_s + Z_r)/N integer</td></tr>
+  <tr><td>Timing belt</td><td>d = z·p/π;  L ≈ 2C + π(D+d)/2 + (D−d)²/(4C)</td><td>≥ 6 teeth in mesh</td></tr>
+  <tr><td>Chain</td><td>D = p/sin(180°/z);  speed variation ≈ 1 − cos(π/z)</td><td>≥ 17 teeth</td></tr>
+  <tr><td>Capstan</td><td>T_load = T_hold·e^(μθ)</td><td>θ in radians</td></tr>
+  <tr><td>Power screw</td><td>λ = atan(l/(π·d_m));  η = tanλ(1 − μ′tanλ)/(tanλ + μ′);  F = 2π·η·T/l</td><td>self-locking if tan λ ≤ μ′</td></tr>
+  <tr><td>Slider jam</td><td>jams when a ≥ L/(2μ)</td><td>a = push offset, L = span</td></tr>
+  <tr><td>Screw critical speed</td><td>n ≈ 1.22×10⁸·k·d/L² rpm (mm)</td><td>k = 0.36, 1, 1.56, 2.27</td></tr>
+  <tr><td>Wedge / latch face</td><td>P_open = F·tan(φ + β)</td><td>β &gt; 0 undercut</td></tr>
+  <tr><td>Roller clutch</td><td>locks if wedge angle α &lt; 2·atan(μ)</td><td></td></tr>
+  <tr><td>Toggle</td><td>F_out = F_in/(2·tan α)</td><td>α from straight</td></tr>
+  <tr><td>Slider-crank</td><td>x = r cosθ + √(l² − (e − r sinθ)²)</td><td>stroke ≈ 2r</td></tr>
+  <tr><td>Cam pressure angle</td><td>tan φ = (ds/dθ)/(R_prime + s)</td><td>keep ≤ 30°</td></tr>
+  <tr><td>Strain in a hinge</td><td>ε = t·θ/(2L)</td><td>long, thin hinges</td></tr>
+  <tr><td>Snap-fit arm</td><td>ε = 1.5·t·y/L²;  F = 3EI·y/L³</td><td>taper to half: ≈ 0.92·t·y/L²</td></tr>
+  <tr><td>Parallel flexure</td><td>k = 2·E·b·t³/L³;  ε = 3tδ/L²;  shortening ≈ 3δ²/(5L)</td><td></td></tr>
+  <tr><td>Compression spring</td><td>k = G·d⁴/(8·D³·n)</td><td>G ≈ 79 000 MPa steel</td></tr>
+  <tr><td>Torsion spring</td><td>k = E·d⁴/(64·D·n) per rad</td><td></td></tr>
+  <tr><td>Bolt preload</td><td>F = T/(K·d), K ≈ 0.2</td><td>plastic crushes first</td></tr>
+  <tr><td>Torque limiter</td><td>disc: n·μ·F·r;  ball: N·r·F_ball·tan(φ+β)</td><td>slip between running and weakest</td></tr>
+  <tr><td>Thermal expansion</td><td>ΔL = α·L·ΔT</td><td>PLA ≈ 68 µm/m·K</td></tr>
+  <tr><td>Tolerance stack</td><td>worst case Σtol;  RSS √(Σtol²)</td><td></td></tr>
+  <tr><td>Pendulum</td><td>T = 2π√(L/g)</td><td>seconds pendulum ≈ 0.994 m</td></tr>
+  <tr><td>Hole compensation</td><td>model = nominal − fit + shrink</td><td>fit &lt; 0 for interference</td></tr>
+</table>
+
+<h2>20.3 Unit converter</h2>
+<div class="sim">
+  <div class="row"><label>Quantity <select id="uc-cat"></select></label></div>
+  <div class="conv">
+    <div><input type="number" id="uc-a" value="1" step="any"><select id="uc-ua"></select></div>
+    <div><input type="number" id="uc-b" step="any"><select id="uc-ub"></select></div>
+  </div>
+  <div class="readout" id="uc-note" style="margin-top:10px"></div>
+</div>
+
+<h2>20.4 Typical material properties (FDM-printed, indicative)</h2>
+<table>
+  <tr><th>Material</th><th>Density (g/cm³)</th><th>E (GPa)</th><th>Tensile, along layers (MPa)</th><th>Softens at (°C)</th><th>Shrinkage</th><th>α (µm/m·K)</th></tr>
+  <tr><td>PLA</td><td>1.24</td><td>~3</td><td>~45</td><td>55–60</td><td>0.2–0.5%</td><td>~68</td></tr>
+  <tr><td>PETG</td><td>1.27</td><td>~2</td><td>~40</td><td>70–80</td><td>0.3–0.6%</td><td>~60</td></tr>
+  <tr><td>ABS</td><td>1.04</td><td>~2</td><td>~35</td><td>~90</td><td>0.7–1.0%</td><td>~90</td></tr>
+  <tr><td>ASA</td><td>1.07</td><td>~2</td><td>~35</td><td>~90</td><td>0.6–0.9%</td><td>~90</td></tr>
+  <tr><td>PC</td><td>1.20</td><td>~2.2</td><td>~55</td><td>110–120</td><td>0.6–0.9%</td><td>~65</td></tr>
+  <tr><td>Nylon PA6 / PA12</td><td>1.14 / 1.01</td><td>~1.5</td><td>~45</td><td>70–90 dry</td><td>1–1.5%</td><td>~90</td></tr>
+  <tr><td>PA-CF</td><td>~1.2</td><td>~5</td><td>~60–70</td><td>100+</td><td>0.3–0.6%</td><td>~28</td></tr>
+  <tr><td>TPU 95A</td><td>1.2</td><td>~0.04</td><td>~25 (elastic)</td><td>~60</td><td>~0.5%</td><td>~150</td></tr>
+  <tr><td>Steel (silver steel rod)</td><td>7.85</td><td>210</td><td>500–900</td><td>—</td><td>—</td><td>12</td></tr>
+  <tr><td>Aluminium 6061</td><td>2.70</td><td>69</td><td>~300</td><td>—</td><td>—</td><td>23</td></tr>
+  <tr><td>Brass</td><td>8.5</td><td>~100</td><td>300–500</td><td>—</td><td>—</td><td>19</td></tr>
+</table>
+<p>Printed strength across the layers is typically 30–70% of the in-layer value; for sustained loads derate to 30–50% to allow for creep (chapters 2 and 3). Treat every number as a starting point and test your own prints.</p>
+
+<h2>20.5 Fit and clearance starting points (0.4 mm nozzle)</h2>
+<table>
+  <tr><th>Fit</th><th>Diametral clearance</th><th>Remarks</th></tr>
+  <tr><td>Press fit</td><td>−0.1 to 0</td><td>test first; do not rely on it alone</td></tr>
+  <tr><td>Snug / locating</td><td>0.1–0.2</td><td></td></tr>
+  <tr><td>Sliding / running</td><td>0.2–0.3 (more for horizontal holes)</td><td>pin hinges, shafts in bushings</td></tr>
+  <tr><td>Free / print-in-place gap</td><td>0.3–0.5</td><td>round Z gaps to layer-height multiples</td></tr>
+  <tr><td>Hole shrink</td><td>0.1–0.4</td><td>measure with a coupon</td></tr>
+  <tr><td>Gear backlash (pitch circle)</td><td>0.1–0.3</td><td>module 1–2</td></tr>
+  <tr><td>Nut pocket across-flats</td><td>+0.2 to +0.4</td><td></td></tr>
+  <tr><td>Counterbore for socket head</td><td>head Ø + 0.4–0.6, depth head + 0.3</td><td></td></tr>
+  <tr><td>Wall minimum</td><td>0.8 mm (2 lines); 1.2–2 mm functional</td><td></td></tr>
+</table>
+
+<h2>20.6 Fastener and insert sizes (ISO metric, typical)</h2>
+<table>
+  <tr><th>Size</th><th>Pitch</th><th>Clearance hole</th><th>SHCS head Ø × H</th><th>Nut AF × thickness</th><th>Washer OD</th><th>Insert OD / hole / length</th><th>Self-tap pilot</th></tr>
+  <tr><td>M2</td><td>0.4</td><td>2.4</td><td>3.8 × 2</td><td>4 × 1.6</td><td>5</td><td>3.2 / 2.8 / 4</td><td>1.6</td></tr>
+  <tr><td>M2.5</td><td>0.45</td><td>2.9</td><td>4.5 × 2.5</td><td>5 × 2</td><td>6</td><td>3.8 / 3.2 / 4</td><td>2.0</td></tr>
+  <tr><td>M3</td><td>0.5</td><td>3.4</td><td>5.5 × 3</td><td>5.5 × 2.4</td><td>7</td><td>4.6 / 4.0 / 5.7</td><td>2.5</td></tr>
+  <tr><td>M4</td><td>0.7</td><td>4.5</td><td>7 × 4</td><td>7 × 3.2</td><td>9</td><td>5.9 / 5.1 / 8</td><td>3.3</td></tr>
+  <tr><td>M5</td><td>0.8</td><td>5.5</td><td>8.5 × 5</td><td>8 × 4</td><td>10</td><td>6.8 / 5.8 / 9.5</td><td>4.2</td></tr>
+  <tr><td>M6</td><td>1.0</td><td>6.6</td><td>10 × 6</td><td>10 × 5</td><td>12</td><td>8 / 7.2 / 12</td><td>5.0</td></tr>
+  <tr><td>M8</td><td>1.25</td><td>9</td><td>13 × 8</td><td>13 × 6.5</td><td>16</td><td>10.5 / 9.5 / 12</td><td>6.8</td></tr>
+</table>
+<p>Hole values for inserts and pilots are the diameters of the <em>printed</em> hole; add your measured shrink for the modelled diameter. Always check the insert maker's datasheet.</p>
+
+<h2>20.7 Bearings and standard parts</h2>
+<table>
+  <tr><th>Part</th><th>Dimensions (mm)</th></tr>
+  <tr><td>683 / 693 / 623 / 624 / 625</td><td>3×7×3 / 3×8×4 / 3×10×4 / 4×13×5 / 5×16×5 (bore × OD × width)</td></tr>
+  <tr><td>685 / 695 / 688</td><td>5×11×5 / 5×13×4 / 8×16×5</td></tr>
+  <tr><td>608 / 6000 / 6001</td><td>8×22×7 / 10×26×8 / 12×28×8</td></tr>
+  <tr><td>LM6UU / LM8UU / LM10UU / LM12UU</td><td>OD × length: 12×19 / 15×24 / 19×29 / 21×30 (rods 6 / 8 / 10 / 12)</td></tr>
+  <tr><td>NEMA 11 / 14 / 17 / 23</td><td>Face 28.2 / 35.2 / 42.3 / 56.4; bolt square 23 / 26 / 31 / 47.14; pilot Ø22 / 22 / 22 / 38.1</td></tr>
+  <tr><td>GT2 belt and pulleys</td><td>Pitch 2 mm; 16T/20T; bore 5 or 8; pitch Ø = z·2/π (20T = 12.73)</td></tr>
+  <tr><td>2020 extrusion</td><td>20×20; slot 6.2; M5 T-nuts</td></tr>
+  <tr><td>Fan hole spacing</td><td>40 / 60 / 80 / 120 mm fans: 32 / 50 / 71.5 / 105 mm</td></tr>
+  <tr><td>Disc magnets</td><td>Ø6×3, 8×3, 10×3, 12×3 (pocket Ø + 0.1–0.2)</td></tr>
+</table>
+
+<h2>20.8 Glossary</h2>
+<input class="search" id="gl-q" type="search" placeholder="Search the glossary...">
+<dl class="gloss" id="gl"></dl>
+
+<h2>20.9 Further reading and resources</h2>
+<p>Books that reward a long shelf life (find them in a library or second-hand):</p>
+<ul>
+  <li><strong>Machinery's Handbook</strong> (Oberg et al.): the workshop encyclopaedia of formulas, tables, threads, fits and gears.</li>
+  <li><strong>Shigley's Mechanical Engineering Design</strong> (Budynas and Nisbett): the standard text on machine elements: shafts, gears, bearings, screws, springs, fatigue.</li>
+  <li><strong>Design of Machinery</strong> (Norton): linkages, cams and kinematics, with a practical flavour.</li>
+  <li><strong>Roark's Formulas for Stress and Strain</strong>: the lookup for beams, plates, stress concentration.</li>
+  <li><strong>Compliant Mechanisms</strong> (Howell): the pseudo-rigid-body method and flexure design.</li>
+  <li><strong>Mechanisms and Mechanical Devices Sourcebook</strong> (Chironis and Sclater) and <strong>507 Mechanical Movements</strong> (Henry T. Brown, public domain): catalogues of mechanisms for inspiration.</li>
+  <li><strong>Precision Machine Design</strong> (Slocum): exact constraint, kinematic couplings, error budgets.</li>
+</ul>
+<p>On the web: the manufacturer wikis for your printer and slicer (the Bambu Lab wiki for your X2D and AMS), the knowledge bases of other printer makers (they contain careful material notes), the Cornell KMODDL collection of historical mechanism models, bearing and screw suppliers' catalogues (a free education in standard sizes), and the many hobbyist channels that test printed parts to destruction (search for test results on printed gears, threads and insert pull-out). Treat any single test as one data point.</p>
+
+<h2>20.10 A suggested learning path</h2>
+<ol>
+  <li>Print the fit coupon (chapter 4) in your two most-used materials; fill in your printer profile (chapter 18).</li>
+  <li>Build a few small projects that each exercise a different joint: a hinge with a snap latch, a cam-driven automaton, a belt-driven slider, a gear train.</li>
+  <li>Break things on purpose: load printed beams, hinges, snap-fits and screw holes until they fail; compare with the calculators.</li>
+  <li>Start a notebook with the lessons, the settings that worked and the parameters you settled on.</li>
+  <li>Return to this compendium whenever a new project hits an unfamiliar problem. Most are one of those in chapter 17.</li>
+</ol>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script>
+/* ---------- unit converter ---------- */
+(function () {
+  const U = {
+    'Torque': { base: 'N·m', u: { 'N·m': 1, 'N·mm': 0.001, 'kgf·cm': 0.0980665, 'kgf·m': 9.80665, 'oz·in': 0.00706155, 'lbf·in': 0.112985, 'lbf·ft': 1.35582 }, note: 'Hobby motors and servos quote kgf·cm or oz·in.' },
+    'Force': { u: { 'N': 1, 'kN': 1000, 'kgf': 9.80665, 'lbf': 4.44822 }, note: '1 kg hanging pulls with 9.81 N.' },
+    'Length': { u: { 'mm': 0.001, 'µm': 1e-6, 'cm': 0.01, 'm': 1, 'in': 0.0254, 'thou (mil)': 2.54e-5, 'ft': 0.3048 }, note: '1 in = 25.4 mm exactly.' },
+    'Pressure / stress': { u: { 'Pa': 1, 'kPa': 1e3, 'MPa (N/mm²)': 1e6, 'bar': 1e5, 'psi': 6894.757, 'ksi': 6.894757e6, 'kgf/cm²': 98066.5 }, note: '1 MPa = 1 N/mm² ≈ 145 psi.' },
+    'Rotational speed': { u: { 'rpm': 1, 'rad/s': 9.549297, 'rev/s (Hz)': 60, 'deg/s': 1 / 6 }, note: 'P = T·ω with ω in rad/s.' },
+    'Power': { u: { 'W': 1, 'mW': 0.001, 'kW': 1000, 'hp (mechanical)': 745.7 }, note: '' },
+    'Mass': { u: { 'g': 0.001, 'kg': 1, 'oz': 0.0283495, 'lb': 0.453592 }, note: '' }
+  };
+  const cat = document.getElementById('uc-cat'), a = document.getElementById('uc-a'), b = document.getElementById('uc-b'), ua = document.getElementById('uc-ua'), ub = document.getElementById('uc-ub'), note = document.getElementById('uc-note');
+  Object.keys(U).forEach(k => cat.add(new Option(k, k)));
+  const fill = () => { [ua, ub].forEach(s => { s.innerHTML = ''; Object.keys(U[cat.value].u).forEach(k => s.add(new Option(k, k))); }); ub.selectedIndex = Math.min(2, ub.options.length - 1); ua.selectedIndex = 0; note.textContent = U[cat.value].note; calc('a'); };
+  const f = () => U[cat.value].u;
+  function calc(from) { const F = f(); if (from === 'b') { a.value = fmt(+b.value * F[ub.value] / F[ua.value]); } else { b.value = fmt(+a.value * F[ua.value] / F[ub.value]); } }
+  const fmt = v => (Math.abs(v) >= 1e6 || (Math.abs(v) < 1e-3 && v !== 0)) ? v.toExponential(4) : String(+v.toPrecision(7));
+  cat.onchange = fill; a.oninput = () => calc('a'); b.oninput = () => calc('b'); ua.onchange = () => calc('a'); ub.onchange = () => calc('a'); fill();
+})();
+
+/* ---------- glossary ---------- */
+(function () {
+  const G = [
+    ['Addendum', 'Height of a gear tooth above the pitch circle (1·m).'], ['Anisotropy', 'Properties that differ by direction; printed parts are weakest between layers.'], ['Backlash', 'Free play between mating parts when the direction reverses.'],
+    ['Base circle', 'The circle from which an involute is generated; also the smallest circle of a cam.'], ['Bushing', 'A sleeve bearing that a shaft turns or slides in.'], ['Cam', 'A shaped body that drives a follower through a designed motion.'],
+    ['Centre distance', 'Distance between the axes of two meshing gears or pulleys.'], ['Chordal action', 'Speed variation of a chain wrapped on a polygonal sprocket.'], ['Clearance fit', 'A fit with a positive gap between hole and shaft.'],
+    ['Compliant mechanism', 'A mechanism that moves by elastic deformation of its parts instead of joints.'], ['Contact ratio', 'Average number of tooth pairs in contact; want > 1.2.'], ['Coupler', 'The floating link of a four-bar; also a device joining two shafts.'],
+    ['Creep', 'Slow permanent deformation of a material under constant load.'], ['Dead centre', 'A linkage position where the output cannot be driven by the input (transmission angle 0° or 180°).'], ['Degrees of freedom', 'Independent motions a body or mechanism can make.'],
+    ['Detent', 'A spring-loaded element that clicks into a notch to hold a position.'], ['Diametral pitch', 'Teeth per inch of pitch diameter; DP = 25.4/module.'], ['Dwell', 'A period where the follower or output stands still.'],
+    ['Elephant foot', 'Flared first layers of a print, caused by squashing on the bed.'], ['Escapement', 'A mechanism releasing a wheel one tooth at a time under control of an oscillator.'], ['Fatigue', 'Failure under repeated loading at stresses below the static strength.'],
+    ['Fillet', 'A rounded inside corner that reduces stress concentration.'], ['Flexure', 'A thin section designed to bend, acting as a hinge or spring.'], ['Follower', 'The part driven by a cam.'],
+    ['Friction angle', 'φ = atan μ; a wedge holds if its slope angle is smaller.'], ['Geneva drive', 'Continuous-to-indexing mechanism with a pin and a slotted star wheel.'], ['Grashof condition', 's + l ≤ p + q: some link of a four-bar can turn fully.'],
+    ['Ground link', 'The fixed frame of a mechanism.'], ['Heat-set insert', 'A knurled brass threaded insert melted into a plastic part.'], ['Helical gear', 'A gear with teeth cut at an angle to the axis; smooth and quiet.'],
+    ['Infill', 'The internal fill pattern of a print.'], ['Interference fit', 'A fit where the shaft is larger than the hole (press fit).'], ['Involute', 'Tooth profile curve giving constant velocity ratio.'],
+    ['Kinematics', 'The study of motion without regard to forces.'], ['Lead', 'Axial advance per revolution of a screw (pitch × starts).'], ['Lead angle', 'Helix angle of a thread: atan(lead/(π·d_m)).'],
+    ['Linkage', 'A chain of rigid links connected by joints.'], ['Living hinge', 'A thin flexing strip joining two rigid sections.'], ['Mobility', 'Number of inputs needed to fix a mechanism; the Grübler count.'],
+    ['Module', 'Gear tooth size: pitch diameter ÷ teeth (mm).'], ['Over-constraint', 'The same degree of freedom removed more than once; it binds unless dimensions agree exactly.'], ['Pawl', 'A lever that engages a ratchet to drive or hold it.'],
+    ['Pitch', 'Distance between adjacent teeth or threads.'], ['Pitch circle', 'The imaginary circle on which two gears roll without slipping.'], ['Pressure angle', 'Angle of force between meshing teeth (20° standard) or between follower motion and the cam normal.'],
+    ['Pressure angle (cam)', 'The angle between the follower direction and the contact normal; keep ≤ 30°.'], ['PV', 'Bearing pressure × sliding speed; the wear/heat limit of a plain bearing.'], ['Ratchet', 'A wheel with asymmetric teeth allowing one-way motion.'],
+    ['RSS', 'Root-sum-square: a statistical way to combine tolerances.'], ['Safety factor', 'Allowable stress divided by actual stress.'], ['Self-locking', 'A mechanism that cannot be driven backward by its load because of friction.'],
+    ['Shrinkage', 'Contraction of plastic on cooling; makes holes smaller and parts smaller.'], ['Snap-fit', 'A joint using a flexing hook that snaps over an undercut.'], ['Stick-slip', 'Jerky sliding when static friction exceeds kinetic friction in a springy system.'],
+    ['Strain', 'Relative deformation, ΔL/L.'], ['Stress', 'Force per unit area, MPa.'], ['Stress concentration', 'Local rise in stress at corners, holes and notches.'],
+    ['Tolerance stack-up', 'The accumulation of dimensional tolerances in a chain of parts.'], ['Torque', 'A turning moment, force × distance.'], ['Transmission angle', 'Angle between coupler and output link in a four-bar; best near 90°.'],
+    ['Undercut (gear)', 'Material cut away at the root of a gear with too few teeth.'], ['Undercut (snap-fit)', 'The recess behind a hook that retains it.'], ['Worm gear', 'A screw meshing with a gear wheel; high ratio, often self-locking.']
+  ];
+  const dl = document.getElementById('gl'), q = document.getElementById('gl-q');
+  function render() { const f = q.value.trim().toLowerCase(); dl.innerHTML = G.filter(g => !f || g[0].toLowerCase().includes(f) || g[1].toLowerCase().includes(f)).map(g => '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>').join(''); }
+  q.oninput = render; render();
+})();
+</script>
+</body>
+</html>

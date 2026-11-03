@@ -1,0 +1,27 @@
+// Single source of truth for the table of contents. Set built:true when a chapter page exists.
+window.CHAPTERS = [
+  { part: 'A · Foundations' },
+  { n: 1, slug: '01-thinking-about-mechanisms', title: 'How to think about mechanisms', built: true },
+  { n: 2, slug: '02-mechanics-you-need', title: 'Mechanics you need', built: true },
+  { n: 3, slug: '03-materials-and-technologies', title: 'Materials and printing technologies', built: true },
+  { n: 4, slug: '04-design-for-3d-printing', title: 'Design for 3D printing (DfAM)', built: true },
+  { part: 'B · Mechanism catalog' },
+  { n: 5, slug: '05-linkages', title: 'Linkages', built: true },
+  { n: 6, slug: '06-cams-and-followers', title: 'Cams and followers', built: true },
+  { n: 7, slug: '07-gears', title: 'Gears', built: true },
+  { n: 8, slug: '08-belts-chains-cables', title: 'Belts, chains and flexible drives', built: true },
+  { n: 9, slug: '09-screws-and-linear-motion', title: 'Screws and linear motion', built: true },
+  { n: 10, slug: '10-bearings-shafts-joints', title: 'Rotary joints, bearings and shafts', built: true },
+  { n: 11, slug: '11-intermittent-motion', title: 'Intermittent and indexing motion', built: true },
+  { n: 12, slug: '12-compliant-mechanisms', title: 'Compliant mechanisms and living hinges', built: true },
+  { n: 13, slug: '13-fasteners-joints-springs', title: 'Fasteners, joints and springs', built: true },
+  { n: 14, slug: '14-latching-locking-clutching', title: 'Latching, locking and clutching', built: true },
+  { part: 'C · Putting it together' },
+  { n: 15, slug: '15-hybrid-builds', title: 'Hybrid builds: printed + off-the-shelf', built: true },
+  { n: 16, slug: '16-actuation', title: 'Actuation basics', built: true },
+  { n: 17, slug: '17-problems-and-solutions', title: 'Common problems and proven solutions', built: true },
+  { n: 18, slug: '18-workflow-and-tools', title: 'Design workflow and tools', built: true },
+  { part: 'D · Practice' },
+  { n: 19, slug: '19-case-studies', title: 'Worked case studies', built: true },
+  { n: 20, slug: '20-reference-appendix', title: 'Reference appendix', built: true }
+];

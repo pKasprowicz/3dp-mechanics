@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 14 · Latching, locking and clutching</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="14">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 14</p>
+<h1>Latching, locking and clutching</h1>
+<p class="lead">Something has to hold the lid shut, keep the arm at its angle, and give way before the gear breaks. Latches hold, locks stop unwanted release, and clutches connect or disconnect rotation. They share a handful of ideas: a hook face that either pulls itself closed or pushes itself open, a friction wedge that holds without a spring, and an over-centre geometry that locks by itself. Understand those and you can design all of them.</p>
+
+<h2>14.1 Three jobs, three vocabularies</h2>
+<table>
+  <tr><th>Job</th><th>Question it answers</th><th>Examples</th></tr>
+  <tr><td><strong>Latch</strong></td><td>How do I hold this part closed or in place until I choose to release it?</td><td>Box lid catch, door latch, battery cover, drawer catch, hook-and-eye</td></tr>
+  <tr><td><strong>Lock</strong></td><td>How do I make sure it cannot release by accident, vibration or load?</td><td>Twist-lock, safety pin, interlock, two-step release, ratchet backstop, padlock</td></tr>
+  <tr><td><strong>Clutch</strong></td><td>How do I connect or disconnect rotation, or limit the torque?</td><td>Slip clutch, dog clutch, one-way clutch (chapter 11), torque limiter</td></tr>
+</table>
+<p>Two basic ways to hold something:</p>
+<ul>
+  <li><strong>Positive (geometric) hold:</strong> a hook, pin, tooth or detent physically blocks the motion. Strong and independent of friction, but needs a deliberate release motion.</li>
+  <li><strong>Friction hold:</strong> a wedge, clamp or over-centre toggle holds by friction and preload. Adjustable and silent, but can slip if the preload relaxes (creep!) or friction falls.</li>
+</ul>
+
+<h2>14.2 The hook face: does it lock itself or release itself?</h2>
+<p>The most useful single idea for latches. A load pulls on a hook or pawl through a face that is inclined by an angle β relative to the load. Count β positive when the face <strong>undercuts</strong> (the load tends to pull the hook <em>deeper</em>) and negative when it <strong>ramps out</strong> (the load tends to push the hook <em>open</em>). With friction coefficient μ (friction angle φ = atan μ), the sideways force needed to open the latch is</p>
+<div class="eq">P_open = F · tan(φ + β)</div>
+<ul>
+  <li><strong>β &gt; 0 (undercut):</strong> opening force is positive and grows with β: the latch locks harder under load. Positive lock; release needs deliberate effort (often relieving the load first). If φ + β approaches 90° it cannot be opened under load at all.</li>
+  <li><strong>−φ &lt; β &lt; 0 (shallow ramp):</strong> friction still holds it; the latch is <em>self-locking but easy to release</em>. This is the usual sweet spot for latches meant to be operated by hand.</li>
+  <li><strong>β &lt; −φ (steep ramp):</strong> the load pushes the latch open by itself (P_open negative): you need a spring or detent to keep it closed. Fine for a snap-fit that you want to pop open, bad for a safety catch.</li>
+</ul>
+<p>The same rule governs a ratchet pawl (chapter 11), a dovetail (chapter 13), a wedge lock, a bayonet ramp, and the tooth of a snap-fit. When a printed latch opens by itself under load, the face angle is almost always the reason.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Hook face angle vs self-locking</h4>
+  <p class="desc">A load F acts on the hook face. Move the slider from undercut (positive β) through square (0°) to ramp (negative). The curve shows the sideways force needed to open the latch, relative to the load; below zero the latch opens by itself.</p>
+  <canvas id="hk-canvas"></canvas>
+  <div class="controls" id="hk-ctl"></div>
+  <div class="readout" id="hk-out"></div>
+</div>
+
+<h2>14.3 Latch designs</h2>
+<table>
+  <tr><th>Design</th><th>How it works</th><th>Printing notes</th></tr>
+  <tr><td><strong>Sliding bolt</strong></td><td>A spring pushes a bolt into a hole or notch; pull it back to release</td><td>Print flat; bolt in a closed channel with 0.2–0.3 mm clearance; metal spring</td></tr>
+  <tr><td><strong>Pivoting hook / pawl</strong></td><td>A lever with a hook snaps over a pin or catch</td><td>Pivot on a pin or screw; spring return; print the hook in the plane of load</td></tr>
+  <tr><td><strong>Snap-fit latch</strong></td><td>A cantilever with a ramp (chapter 12)</td><td>Cheapest; a single part; limited cycles</td></tr>
+  <tr><td><strong>Draw latch / over-centre lever</strong></td><td>A toggle pulls two parts together and locks over centre</td><td>Chapter 5; needs rigid links and a stop; metal pins</td></tr>
+  <tr><td><strong>Twist-lock / bayonet</strong></td><td>Rotate a quarter turn so ramps pull the parts tight</td><td>Ramp angle sets the clamp force and the friction holding it (see 14.4)</td></tr>
+  <tr><td><strong>Cam lever</strong></td><td>An eccentric on a pivot clamps by rotating</td><td>Quick adjusters and clamps; eccentric must lock past its high point</td></tr>
+  <tr><td><strong>Ball detent</strong></td><td>A spring-loaded ball drops into a hole</td><td>Light holding (chapter 11); metal ball, metal spring plunger</td></tr>
+  <tr><td><strong>Push-push latch</strong></td><td>A heart-shaped cam steps through latched and released states on successive pushes</td><td>Fun to print; needs careful tolerances; spring return</td></tr>
+  <tr><td><strong>Magnetic catch</strong></td><td>A magnet pulls a steel plate; no moving parts</td><td>Glued magnets; holding force is small and falls steeply with a gap</td></tr>
+  <tr><td><strong>Hasp / hook and eye / padlock pins</strong></td><td>A loop over a staple, a pin through both</td><td>Strong and simple; the pin must be metal</td></tr>
+</table>
+
+<h3>Human factors: how hard should it release?</h3>
+<p>A latch is operated by a hand. A comfortable fingertip push is about <strong>5–15 N</strong>, a thumb press 10–30 N, a firm squeeze or pull 30–60 N. A snap that needs more than ~30 N for a small latch feels stiff, and below ~3 N it rattles open. Design the release force and then check it (the beam formulas of chapter 12 for snap latches, the wedge formula above for hooks). Make the <strong>release motion different from the loading direction</strong> (slide or press, not just pull) so the latch can't be opened by the load itself.</p>
+
+<h2>14.4 Friction wedges and twist-locks</h2>
+<p>A wedge or ramp holds by friction if its slope angle is less than the friction angle: <strong>tan θ ≤ μ</strong>. The same condition makes a screw self-locking (chapter 9). For a twist-lock whose ramps have lead angle λ, the clamp force from the twist is as for a screw (F = 2π·η·T/lead) and the lock holds without a spring if tan λ ≤ μ. Too steep and it unwinds under vibration; too shallow and it takes many turns. Use a deliberate <strong>detent at the end of the twist</strong> so it can't drift open.</p>
+<p>Friction locks have one weakness: <strong>plastic creep and wear</strong> reduce the clamp force over time, and friction varies with dirt and lubricant. For anything that must stay locked, add a positive element (a pin, a click, a detent) in addition to friction.</p>
+
+<h3>Interlocks, two-step release, fail-safe</h3>
+<ul>
+  <li><strong>Two-step release:</strong> require two independent motions (slide then lift; press and turn) to open a latch that could injure or spill.</li>
+  <li><strong>Fail-safe direction:</strong> decide which way the latch should fail. A brake that engages when power is lost, a lid that stays closed on a broken spring, a guard that cannot be opened while the machine runs.</li>
+  <li><strong>Don't rely on a printed latch for safety.</strong> Use a metal pin or a purpose-made lock where failure could hurt someone.</li>
+</ul>
+
+<h2>14.5 Clutches and torque limiters</h2>
+<p>A clutch connects two shafts. <strong>Dog clutches</strong> (jaws that engage) are positive and can transmit large torque, but only engage at rest or low speed. <strong>Friction clutches</strong> (discs, cones, or a spring-loaded pad) engage smoothly and slip beyond a set torque. <strong>One-way clutches</strong> (chapter 11) slip in one direction only.</p>
+<p>A <strong>torque limiter</strong> is the most useful clutch in a printed gearbox: it slips at a set torque so a jam or stall doesn't strip the gears. Two common types:</p>
+<div class="eq">Friction disc:   T_slip = n · μ · F · r_mean          (n friction faces, spring force F)<br>
+Ball detent:     T_slip = N · r · F_ball · tan(φ + β)    (N balls on radius r, each pushed by F_ball into a flank ramp β)</div>
+<p>The slip torque must sit in a window: <strong>above the normal running torque</strong> (with margin for acceleration and friction), and <strong>below what the weakest part can take</strong> (a gear tooth, a hub screw, a printed shaft). Set it with a spring and an adjuster screw, and test with a torque wrench or a lever and a luggage scale.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · Torque limiter design window</h4>
+  <p class="desc">Choose the clutch type and size it. The bar shows the running torque, the slip torque you built, and the strength of the weakest part. Green when the slip torque sits comfortably between them.</p>
+  <canvas id="tl-canvas"></canvas>
+  <div class="row"><label>Type <select id="tl-type"><option value="ball">Ball detent</option><option value="disc">Friction disc</option></select></label></div>
+  <div class="controls" id="tl-ctl"></div>
+  <div class="readout" id="tl-out"></div>
+</div>
+<ul>
+  <li>Friction-disc clutches heat up when slipping: use them for brief overloads, not continuous slip (a printed PLA clutch will soften and weld). A bit of silicone grease or a felt/rubber facing stabilises the friction.</li>
+  <li>A ball-detent limiter clicks as it slips and re-engages at the next detent: audible feedback, repeatable torque, but it wears the pockets over time (metal balls in soft plastic make dimples).</li>
+  <li>Keep the spring <strong>preload adjustable</strong>, and use a bought steel spring (chapter 13).</li>
+</ul>
+
+<h2>14.6 One-way wedge clutches</h2>
+<p>A roller or sprag clutch holds a roller in a narrowing wedge between two surfaces. Turn one way and the roller is pushed toward the wide end (free); turn the other way and it wedges tight and locks. It locks if the <strong>included wedge angle α is less than twice the friction angle</strong>:</p>
+<div class="eq">α &lt; 2 · atan(μ)</div>
+
+<div class="sim">
+  <h4>Simulation 3 · Roller wedge clutch</h4>
+  <p class="desc">A roller sits in a wedge-shaped gap, pushed toward the narrow end by torque. Whether it jams or squeezes out depends on the wedge angle and friction.</p>
+  <canvas id="rw-canvas"></canvas>
+  <div class="controls" id="rw-ctl"></div>
+  <div class="readout" id="rw-out"></div>
+</div>
+<p>Real roller clutches use a very small angle (3–8°) to give margin against varying friction. Printed versions with steel balls or rollers work for light torque; use hard, smooth, clean surfaces and keep lubricant off the wedge surfaces unless it is designed for.</p>
+
+<h2>14.7 Designing latches and clutches for printing</h2>
+<ul>
+  <li><strong>Orient for the load:</strong> a hook loaded across the layers will delaminate. Print hooks, pawls and levers lying flat so the layers run along the load path (chapter 4).</li>
+  <li><strong>Use metal where it matters:</strong> pivot pins, balls, detent pins, springs, and any pin that takes a sharp load. A printed bolt in shear snaps.</li>
+  <li><strong>Clearances:</strong> 0.2–0.3 mm on sliding bolts and pivots; a latch that binds in humid or warm conditions was probably designed with too little.</li>
+  <li><strong>Allow for creep:</strong> holding force relaxes when a printed spring or snap is held loaded for weeks. Design with margin or put a positive stop in series.</li>
+  <li><strong>Add end stops and a visible state</strong> (a window, a colour, a click) so the user knows it's latched.</li>
+  <li><strong>Make the first failure benign:</strong> design the weak link (a sacrificial pin, a slip clutch) so it fails before the expensive part.</li>
+</ul>
+
+<h2>14.8 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Latch pops open under load</td><td>Hook face leans the wrong way (β &lt; −φ)</td><td>Undercut the face a few degrees (β &gt; 0), or add a positive stop</td></tr>
+  <tr><td>Latch won't release under load</td><td>Face undercut too much, friction high</td><td>Reduce undercut; relieve the load before release; add a release lever with more reach</td></tr>
+  <tr><td>Latch won't catch</td><td>Too little lead-in, too much clearance variation, weak spring</td><td>Chamfer the lead-in; stiffer spring; adjust</td></tr>
+  <tr><td>Rattles in the closed position</td><td>Slack in the pivot or catch</td><td>Preload spring; tighter fit; a rubber pad</td></tr>
+  <tr><td>Hook snaps at the root</td><td>Printed standing up, no fillet, thin</td><td>Print flat; fillet; thicker; PETG or nylon</td></tr>
+  <tr><td>Twist-lock loosens by itself</td><td>Ramp too steep (tan λ &gt; μ), vibration</td><td>Shallower ramp; detent at the end of the twist</td></tr>
+  <tr><td>Slip clutch slips too early/late</td><td>Wrong preload or friction; drift as plastic wears</td><td>Adjustable spring; measure the torque; stable facing material</td></tr>
+  <tr><td>Clutch overheats, smells, welds</td><td>Continuous slip</td><td>Use only for overload; add a ball-detent type or stop the motor</td></tr>
+  <tr><td>Roller clutch slips (won't lock)</td><td>Wedge angle too large for the friction</td><td>Smaller wedge angle; cleaner and harder surfaces</td></tr>
+</table>
+
+<h2>14.9 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Positive hold chosen for anything that must not release; friction hold only with margin.</li>
+  <li>☐ Hook face angle checked: P = F·tan(φ + β) is positive under load.</li>
+  <li>☐ Release force 5–30 N for a hand latch; release motion differs from the load direction.</li>
+  <li>☐ Torque limiter slip torque sits between running torque and the weakest part's strength.</li>
+  <li>☐ Metal pins, balls and springs where the load is concentrated.</li>
+  <li>☐ Printed flat, 0.2–0.3 mm clearances, end stops, visible state.</li>
+</ul>
+<ul>
+  <li>Cutting a ramp-shaped latch face because it prints without supports, then wondering why it pops open.</li>
+  <li>Relying on a printed spring or snap to hold a load for weeks.</li>
+  <li>Using a friction clutch as a continuous speed controller.</li>
+  <li>Locking something dangerous with a single printed part.</li>
+</ul>
+
+<h2>14.10 Check yourself</h2>
+<details class="quiz"><summary>A plastic latch has μ = 0.3. How steeply can the hook face lean out (ramp) and still hold under load without a spring?</summary>
+<p>φ = atan 0.3 = 16.7°. The latch holds as long as β ≥ −φ, so a ramp up to about <strong>16–17°</strong> still self-holds (needing a push to release), but steeper than that and the load pushes it open by itself. For margin keep it to ~10° or use a square (0°) or slightly undercut face.</p></details>
+<details class="quiz"><summary>A ball-detent torque limiter has 4 balls on a 15 mm radius, 40 N total spring force, flank ramp β = 45° and μ = 0.15. What is the slip torque?</summary>
+<p>Per ball F = 10 N. φ = atan 0.15 = 8.5°. tan(53.5°) = 1.35. Tangential force per ball = 13.5 N. T = 4 × 13.5 N × 0.015 m = <strong>0.81 N·m</strong>.</p></details>
+<details class="quiz"><summary>A roller clutch works with steel-on-steel (μ = 0.1). What is the largest wedge angle that still locks?</summary>
+<p>α &lt; 2·atan(0.1) = 2 × 5.7° = <strong>11.4°</strong>. Real designs use 3–8° so the clutch still locks if the surfaces are a bit oily.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2, R2D = 180 / Math.PI, D2R = Math.PI / 180;
+
+/* ---------- Sim 1: hook face angle ---------- */
+(function () {
+  const S = { beta: 5, mu: 0.25, F: 20 };
+  const P = (b, mu) => Math.tan(Math.atan(mu) + b * D2R); // P_open / F
+  const canvas = document.getElementById('hk-canvas'), out = document.getElementById('hk-out');
+  const view = Sim.make(canvas, 0.7, (c, w, h, col) => {
+    const topH = h * 0.5, cx = w * 0.3, cy = topH * 0.5, b = S.beta * D2R, p = P(S.beta, S.mu);
+    const col2 = p > 0.2 ? col.good : p > 0 ? col.accent2 : col.warn;
+    // hook block above, pin below pulled up; the contact face is inclined by beta
+    const bw = 130, bh = 50, f = Math.tan(b) * bw / 2;
+    c.fillStyle = col2 + '55'; c.strokeStyle = col2; c.lineWidth = 2; c.beginPath();
+    c.moveTo(cx - bw / 2, cy - bh); c.lineTo(cx + bw / 2, cy - bh); c.lineTo(cx + bw / 2, cy + 6 - f); c.lineTo(cx - bw / 2, cy + 6 + f); c.closePath(); c.fill(); c.stroke();
+    Sim.dot(c, cx, cy + 6 + 14, 14, col.surface, col.ink);
+    const ar = (x1, y1, x2, y2, color, label) => { Sim.line(c, x1, y1, x2, y2, color, 3); const a = Math.atan2(y2 - y1, x2 - x1); c.fillStyle = color; c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - 10 * Math.cos(a - 0.4), y2 - 10 * Math.sin(a - 0.4)); c.lineTo(x2 - 10 * Math.cos(a + 0.4), y2 - 10 * Math.sin(a + 0.4)); c.fill(); c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText(label, x2 + (x2 - x1) * 0.0, y2 + (y2 > y1 ? 14 : -6)); };
+    ar(cx, cy + 40, cx, cy + 62, col.warn, ''); ar(cx, cy + 34, cx, cy - 4, col.warn, '');
+    const hx = Math.max(-80, Math.min(80, p * 60));
+    ar(cx + bw / 2 + 6, cy - bh / 2, cx + bw / 2 + 6 + hx + (hx >= 0 ? 12 : -12), cy - bh / 2, p >= 0 ? col.good : col.warn, '');
+    c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('load F on the pin ↑', cx - 60, cy + 100); c.fillText(p >= 0 ? 'force needed to open →' : '← the latch pushes itself open', cx + bw / 2 - 10, cy - bh / 2 - 16 + 2);
+    c.fillText('face β = ' + S.beta + '° (' + (S.beta > 0 ? 'undercut' : S.beta < 0 ? 'ramp' : 'square') + ')', cx - bw / 2, cy - bh - 8);
+    // plot P/F vs beta
+    const l = 40, r = 12, pt = topH + 18, pb = h - 24, pw = w - l - r, ph = pb - pt, X = bb => l + (bb + 45) / 90 * pw, ymax = 3, YP = v => pb - (Math.max(-1, Math.min(ymax, v)) + 1) / (ymax + 1) * ph;
+    c.fillStyle = col.warn + '22'; c.fillRect(l, YP(0), pw, pb - YP(0)); c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.textAlign = 'right';
+    [-1, 0, 1, 2, 3].forEach(v => { c.beginPath(); c.moveTo(l, YP(v)); c.lineTo(l + pw, YP(v)); c.stroke(); c.fillText(v + 'F', l - 4, YP(v) + 4); });
+    c.textAlign = 'center'; [-45, -20, 0, 20, 45].forEach(bb => c.fillText(bb + '°', X(bb), h - 8));
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath(); let pen = false; for (let bb = -45; bb <= 45; bb += 0.5) { const v = P(bb, S.mu); if (Math.atan(S.mu) * R2D + bb >= 89) { pen = false; continue; } pen ? c.lineTo(X(bb), YP(v)) : c.moveTo(X(bb), YP(v)); pen = true; } c.stroke();
+    Sim.dot(c, X(S.beta), YP(p), 6, col2, col.surface);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('opening force vs face angle β (below 0 the latch opens itself)', l + 4, pt + 10);
+  });
+  function info() {
+    const phi = Math.atan(S.mu) * R2D, p = P(S.beta, S.mu), Po = p * S.F;
+    out.innerHTML = 'Friction angle φ = <strong>' + phi.toFixed(1) + '°</strong>. Opening force P = F·tan(φ + β) = <strong>' + Po.toFixed(1) + ' N</strong> for a ' + S.F + ' N load → ' +
+      (S.beta + phi >= 89 ? '<strong style="color:var(--good)">cannot be opened under load (locks solid)</strong>' : Po > 0.25 * S.F ? '<strong style="color:var(--good)">positive hold: releasing under load takes real effort; unload before releasing</strong>' : Po > 0 ? '<strong style="color:var(--accent2)">self-holding by friction only: easy to release, but little margin</strong>' : '<strong style="color:var(--warn)">self-releasing: it needs a holding force of ' + (-Po).toFixed(1) + ' N from a spring or detent</strong>') + '. The latch opens by itself for β below −' + phi.toFixed(0) + '°.';
+    view.redraw();
+  }
+  const hs = document.getElementById('hk-ctl');
+  [['beta', 'Face angle β', -40, 40, 1, 0, '°'], ['mu', 'Friction μ', 0.05, 0.8, 0.01, 2, ''], ['F', 'Load F', 2, 100, 1, 0, ' N']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
+})();
+
+/* ---------- Sim 2: torque limiter ---------- */
+(function () {
+  const S = { F: 40, N: 4, r: 15, beta: 45, mu: 0.15, run: 0.3, cap: 2 }, type = document.getElementById('tl-type');
+  const slip = () => type.value === 'ball' ? S.N * S.r / 1000 * (S.F / S.N) * Math.tan(Math.atan(S.mu) + S.beta * D2R) : S.N * S.mu * S.F * S.r / 1000; // N used as number of faces for discs
+  const canvas = document.getElementById('tl-canvas'), out = document.getElementById('tl-out');
+  const view = Sim.make(canvas, 0.3, (c, w, h, col) => {
+    const T = slip(), mx = Math.max(S.cap * 1.3, T * 1.1, S.run * 1.5), l = 14, pw = w - 28, X = v => l + Math.min(v, mx) / mx * pw, y = h * 0.36, lo = S.run * 1.3, hi = S.cap / 1.5;
+    c.fillStyle = col.line; c.fillRect(l, y, pw, 22);
+    if (hi > lo) { c.fillStyle = col.good + '55'; c.fillRect(X(lo), y, X(hi) - X(lo), 22); }
+    const mark = (v, color, label, up) => { c.fillStyle = color; c.fillRect(X(v) - 2, y - 8, 4, 38); c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText(label, Math.max(40, Math.min(w - 50, X(v))), up ? y - 14 : y + 46); };
+    mark(S.run, col.ink, 'running ' + S.run.toFixed(2), true); mark(S.cap, col.warn, 'weakest part ' + S.cap.toFixed(2), true); mark(T, T >= lo && T <= hi ? col.good : col.accent2, 'slip ' + T.toFixed(2) + ' N·m', false);
+  });
+  function info() {
+    const T = slip(), lo = S.run * 1.3, hi = S.cap / 1.5, ok = T >= lo && T <= hi;
+    out.innerHTML = 'Slip torque <strong>' + T.toFixed(2) + ' N·m</strong>. Window: ' + lo.toFixed(2) + ' (1.3× running) to ' + hi.toFixed(2) + ' (weakest part ÷ 1.5) → ' + (hi <= lo ? '<strong style="color:var(--warn)">no valid window: the weakest part is too close to the running torque; strengthen it or reduce the load</strong>' : ok ? '<strong style="color:var(--good)">in the window</strong>' : T < lo ? '<strong style="color:var(--warn)">too low: it will slip in normal use</strong>' : '<strong style="color:var(--warn)">too high: the part will break before it slips</strong>') + '.';
+    view.redraw();
+  }
+  const hs = document.getElementById('tl-ctl');
+  [['F', 'Spring force', 5, 200, 1, 0, ' N'], ['N', 'Balls / faces', 1, 8, 1, 0, ''], ['r', 'Radius', 8, 40, 1, 0, ' mm'], ['beta', 'Flank ramp β', 20, 70, 1, 0, '°'], ['mu', 'Friction μ', 0.05, 0.6, 0.01, 2, ''], ['run', 'Running torque', 0.02, 2, 0.02, 2, ' N·m'], ['cap', 'Weakest part', 0.1, 5, 0.1, 1, ' N·m']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  type.onchange = info; info();
+})();
+
+/* ---------- Sim 3: roller wedge ---------- */
+(function () {
+  const S = { a: 8, mu: 0.12 };
+  const canvas = document.getElementById('rw-canvas'), out = document.getElementById('rw-out');
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const a = S.a * D2R, lock = S.a < 2 * Math.atan(S.mu) * R2D, color = lock ? col.good : col.warn, d = 46, apexX = w * 0.9, cy = h * 0.5, len = w * 0.8;
+    c.strokeStyle = col.muted; c.lineWidth = 6; c.lineCap = 'round'; [1, -1].forEach(s => { c.beginPath(); c.moveTo(apexX, cy); c.lineTo(apexX - len * Math.cos(a / 2), cy + s * len * Math.sin(a / 2)); c.stroke(); });
+    const rr = d / 2;
+    const rxc = apexX - (d / 2) / Math.sin(a / 2);
+    c.fillStyle = color + '66'; c.strokeStyle = color; c.lineWidth = 3; c.beginPath(); c.arc(rxc, cy, rr, 0, TAU); c.fill(); c.stroke();
+    const ar = (x1, y1, x2, y2, cc) => { Sim.line(c, x1, y1, x2, y2, cc, 3); const an = Math.atan2(y2 - y1, x2 - x1); c.fillStyle = cc; c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - 9 * Math.cos(an - 0.4), y2 - 9 * Math.sin(an - 0.4)); c.lineTo(x2 - 9 * Math.cos(an + 0.4), y2 - 9 * Math.sin(an + 0.4)); c.fill(); };
+    ar(rxc - rr - 46, cy, rxc - rr - 6, cy, col.accent2); c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('torque pushes the roller toward the narrow end', 10, h - 12);
+    c.fillText(lock ? 'LOCKED: it wedges' : 'SLIPS: it squeezes out', 10, 20);
+  });
+  function info() {
+    const phi = Math.atan(S.mu) * R2D, lim = 2 * phi, lock = S.a < lim;
+    out.innerHTML = 'Friction angle φ = ' + phi.toFixed(1) + '° → the largest locking wedge angle is 2φ = <strong>' + lim.toFixed(1) + '°</strong>. Your ' + S.a + '° wedge: ' + (lock ? '<strong style="color:var(--good)">locks</strong> (margin ' + (lim - S.a).toFixed(1) + '°)' : '<strong style="color:var(--warn)">slips</strong>') + '. Real designs use 3–8° so it still locks if the surfaces get oily.';
+    view.redraw();
+  }
+  const hs = document.getElementById('rw-ctl');
+  Sim.slider(hs, { label: 'Wedge angle α', min: 1, max: 40, step: 0.5, dec: 1, value: S.a, unit: '°', onInput: v => { S.a = v; info(); } });
+  Sim.slider(hs, { label: 'Friction μ', min: 0.03, max: 0.6, step: 0.01, dec: 2, value: S.mu, onInput: v => { S.mu = v; info(); } });
+  info();
+})();
+</script>
+</body>
+</html>

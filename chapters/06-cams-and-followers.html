@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 6 · Cams and followers</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="6">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 6</p>
+<h1>Cams and followers</h1>
+<p class="lead">A cam is a shaped wheel that pushes a follower through a motion you have drawn in advance: rise here, hold there, drop fast, rest. Where a linkage gives you whatever motion its geometry happens to produce, a cam lets you <em>specify the motion first</em> and cut the shape to match. And a 3D printer will happily make any shape.</p>
+
+<h2>6.1 What cams are for</h2>
+<ul>
+  <li><strong>Dwells.</strong> The follower sits still while the cam keeps turning. Linkages struggle to do this; a cam does it by making part of the profile a circle centred on the shaft.</li>
+  <li><strong>Timed sequences.</strong> Several cams on one shaft run several followers in a fixed order: engine valves, vending machines, packaging, sewing machines, and every mechanical automaton and music box.</li>
+  <li><strong>Arbitrary motion laws.</strong> Slow where you need precision or low force, fast where you don't.</li>
+  <li><strong>Simple conversion</strong> from continuous rotation to reciprocating motion, with one motor and almost no parts.</li>
+</ul>
+<p>The price is a <strong>higher pair</strong> (chapter 1): the cam touches the follower along a line or a point, not a surface, so contact stress is high and wear is the main failure mode. For printed cams, the contact design (section 6.5) matters as much as the profile.</p>
+
+<h2>6.2 Anatomy and vocabulary</h2>
+<table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td><strong>Base circle</strong></td><td>The smallest circle on the cam, centred on the shaft. The follower is at its lowest position here.</td></tr>
+  <tr><td><strong>Lift (stroke), h</strong></td><td>How far the follower moves from lowest to highest.</td></tr>
+  <tr><td><strong>Rise, dwell, return</strong></td><td>The phases of one revolution: the follower goes up over the rise angle β₁, rests over the dwell angle, goes down over the return angle β₂, then rests again at the bottom.</td></tr>
+  <tr><td><strong>Pitch curve</strong></td><td>The path traced by the <em>centre</em> of a roller follower. The real cam surface is this curve offset inward by the roller radius.</td></tr>
+  <tr><td><strong>Prime circle</strong></td><td>The smallest circle centred on the shaft that touches the pitch curve (base circle + roller radius).</td></tr>
+  <tr><td><strong>Pressure angle φ</strong></td><td>The angle between the follower's direction of motion and the direction of the contact force (the normal to the cam surface). Only the cosine of it pushes the follower; the rest squeezes it sideways against its guide.</td></tr>
+</table>
+<p><strong>Cam types:</strong> <em>plate (disc) cams</em> (what most people mean; the follower moves perpendicular to the shaft), <em>cylindrical (barrel) cams</em> with a groove around a drum so the follower slides along the axis, <em>face cams</em> with a groove in a flat face (positive drive: the groove pushes both ways), and <em>eccentric cams</em> (a circle mounted off-centre, the simplest cam of all).</p>
+<p><strong>Follower types:</strong> <em>knife-edge</em> (a point: theoretical only, wears instantly), <em>roller</em> (rolls: low friction, can be bearing-mounted), <em>flat-faced</em> (a flat pad: handles any convex cam, no undercutting, but slides), <em>mushroom / spherical</em> (a rounded tip: forgiving, slides). Followers either <em>translate</em> in a guide or <em>oscillate</em> on a pivot arm, and may be <em>offset</em> from the shaft centre line to reduce pressure angle on the working stroke.</p>
+
+<h2>6.3 Motion laws: how the follower moves between positions</h2>
+<p>The most important cam decision is not the shape, it is the <strong>law of motion</strong> for each rise and return. The shape follows from it. Compare four common ones over a rise of height <em>h</em> across the cam angle β (with ω the cam's angular speed):</p>
+<table>
+  <tr><th>Law</th><th>Displacement s(ξ), ξ = θ/β</th><th>Peak velocity</th><th>Peak acceleration</th><th>Character</th></tr>
+  <tr><td>Uniform (constant velocity)</td><td>h·ξ</td><td>1.00 · hω/β</td><td>∞ (impulse at the ends)</td><td>Simple, but every start and stop is a shock. Avoid at speed.</td></tr>
+  <tr><td>Simple harmonic</td><td>h/2 · (1 − cos πξ)</td><td>1.57 · hω/β</td><td>4.93 · hω²/β²</td><td>Smooth in the middle; still a jump in acceleration at the ends if there is a dwell.</td></tr>
+  <tr><td>Cycloidal</td><td>h · (ξ − sin 2πξ / 2π)</td><td>2.00 · hω/β</td><td>6.28 · hω²/β²</td><td>Acceleration starts and ends at zero: gentlest on the mechanism, quietest. Higher peaks.</td></tr>
+  <tr><td>3-4-5 polynomial</td><td>h · (10ξ³ − 15ξ⁴ + 6ξ⁵)</td><td>1.88 · hω/β</td><td>5.77 · hω²/β²</td><td>Similar smoothness to cycloidal with slightly lower peaks.</td></tr>
+</table>
+<p>Why it matters: the force needed to accelerate the follower is <strong>F = m·a</strong>, and acceleration scales with <strong>ω²</strong>: double the speed and the inertia force quadruples. A law with a sudden jump in acceleration also has a sudden jump in force: noise, wear, and in a printed part, cracks. <strong>Default to cycloidal or 3-4-5</strong> for anything fast, simple harmonic for low-speed and simple, and uniform only for slow, light, forgiving mechanisms.</p>
+<p>Spreading the same lift over a <em>larger rise angle β</em> lowers velocity (∝ 1/β) and acceleration (∝ 1/β²). Use as much angle as the timing allows.</p>
+
+<h2>6.4 Pressure angle and base circle size</h2>
+<p>For a translating roller follower on the shaft centre line, the pressure angle follows from the profile:</p>
+<div class="eq">tan φ = (ds/dθ) / (R_prime + s)       (R_prime = base circle radius + roller radius)</div>
+<p>The steeper the rise and the smaller the cam, the larger φ. Above about <strong>30°</strong> a translating follower starts to jam in its guide, because a large part of the force pushes it sideways and friction in the guide grows. The cure is almost always <strong>a bigger base circle</strong>, a longer rise angle, or an offset follower. Also check for <strong>undercutting</strong>: when the pitch curve bends more sharply than the roller radius, the offset surface forms a cusp and the cam cannot produce the intended motion. Fix: a bigger base circle or a smaller roller.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Cam designer</h4>
+  <p class="desc">Design the motion, and the cam shape follows. Choose the lift, the angles and the law. The lower plots show displacement (orange), velocity (blue) and acceleration (green), and the pressure angle with a 30° limit. You can export the profile as an SVG to use in your CAD.</p>
+  <canvas id="cm-canvas"></canvas>
+  <div class="row"><label>Motion law <select id="cm-law"></select></label><button id="cm-run" class="on">Pause</button><button id="cm-svg">Download profile (SVG)</button></div>
+  <div class="controls" id="cm-ctl"></div>
+  <div class="readout" id="cm-out"></div>
+</div>
+
+<h3>Try these</h3>
+<ol>
+  <li>Set the rise angle to 40° with a 20 mm lift and watch the pressure angle plot cross the 30° line. Raise the base radius until it comes back under.</li>
+  <li>Set a 20 mm lift, a 40° rise and return, a 10 mm base circle and an 8 mm roller: the undercut warning appears (the pitch curve bends tighter than the roller) and the drawn profile develops a pinch. Enlarge the base circle or shrink the roller to clear it.</li>
+  <li>Switch the law between uniform and cycloidal at 200 rpm and compare peak acceleration and the inertia force.</li>
+</ol>
+
+<h2>6.5 Followers, contact and wear</h2>
+<p>A cam is a high-stress joint: the force from the follower acts on a line contact of almost zero width, and printed plastic is soft. Choose the contact deliberately:</p>
+<ul>
+  <li><strong>Roller on a bearing.</strong> Best for loads and life: a small ball bearing (e.g. a 623 or 624 skate-type) on an M3/M4 shoulder bolt as the roller. The plastic cam is then rolled, not scraped. Use a <em>wide</em> roller or cam face to spread load.</li>
+  <li><strong>Printed roller on a pin.</strong> Works for light loads and toys, but the bore wears and sticks. Use nylon on a steel pin.</li>
+  <li><strong>Flat or mushroom follower sliding on the cam.</strong> Simple (no bearing), but sliding friction and heat wear the surface. Use a smooth printed tip (nylon, or a different material than the cam), a little grease, and a low speed.</li>
+  <li><strong>Cam thickness.</strong> Make the cam thick (8–12 mm) rather than thin, to lower contact stress (the Hertz contact stress falls with the length of the line). A pair of cams side by side is better than one thin one.</li>
+</ul>
+
+<h2>6.6 Keeping the follower on the cam</h2>
+<p>A plate cam only <em>pushes</em>. To make the follower come back, you need a <strong>return spring</strong> (the common option), gravity (slow, vertical, light), or a <strong>positive-drive</strong> arrangement: a groove (face/barrel cam) that grips the follower both ways, or a pair of followers on opposite sides.</p>
+<p>The spring has to do more than push the follower down: at high speed it must supply <strong>the force to decelerate the rising follower and keep it in contact</strong>, otherwise the follower <strong>jumps</strong> off the cam when the profile starts to fall away faster than the follower can follow. The contact force is roughly <code>N = F_preload + k·s + m·a</code> (a is negative when the follower is decelerating). If N falls below zero, contact is lost, and the follower bangs back down: noise, wear and a missed motion.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · Will the follower jump?</h4>
+  <p class="desc">Contact force between cam and follower over one revolution, from the spring and the follower's inertia. Where the curve dips below zero (red), the follower leaves the cam. Increase the speed or the mass, or reduce the spring preload, until it jumps, then find the fix.</p>
+  <canvas id="jp-canvas"></canvas>
+  <div class="row"><label>Motion law <select id="jp-law"></select></label></div>
+  <div class="controls" id="jp-ctl"></div>
+  <div class="readout" id="jp-out"></div>
+</div>
+
+<h2>6.7 Building a cam system</h2>
+<h3>Timing diagram</h3>
+<p>For multiple cams on one shaft (automata, sequencers), draw a <strong>timing diagram</strong> first: a horizontal axis for shaft angle 0–360°, and one row per follower showing rise, dwell and return. Overlap and phase relationships are obvious in the diagram and invisible in the 3D model. Fix the phases by a <strong>key, D-shaft, or index marks</strong> on each cam.</p>
+<h3>Cam on a shaft</h3>
+<ul>
+  <li>Use a <strong>D-shaft or a shaft with a flat and a set screw</strong>, or a hub with an M3 grub screw into a nut trap. A plain press fit of a printed cam on a round steel rod will slip (chapter 10).</li>
+  <li>The cam bore should be reamed, or placed as a vertical-axis hole in print (round and accurate).</li>
+</ul>
+<h3>Printing the profile</h3>
+<ul>
+  <li>Print the cam <strong>flat on the bed</strong>, so the cam surface is a vertical wall with smooth, continuous layers around the profile, and the profile is cut in XY (the most accurate plane).</li>
+  <li>The CAD profile must be <strong>smooth</strong>: export a spline or a dense polygon (at least 360 points). A rough STL (visible facets) gives follower noise at every facet. The SVG export in Simulation 1 gives you 720 points.</li>
+  <li>Use <strong>3–4 walls</strong> so the cam surface is solid wall (chapter 4); don't rely on infill near the edge.</li>
+  <li>Build the <strong>shape tolerances</strong> into the plan: a 0.1 mm profile error is a 0.1 mm follower error, but it is also a speed bump the follower sees every turn. Use slower speeds and bearings to hide it.</li>
+  <li>Cams and followers typically wear in the first hours and then stabilise: print the cam in <strong>nylon or PETG</strong>, not PLA, for any moving duty (chapter 3).</li>
+</ul>
+
+<h2>6.8 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+  <tr><td>Follower jams or stalls mid-rise</td><td>Pressure angle too high</td><td>Bigger base circle, longer rise angle, offset the follower, or reduce the guide friction (longer guide, lubricant)</td></tr>
+  <tr><td>Follower bounces or chatters at speed</td><td>Spring too weak, or law has an acceleration jump</td><td>Stiffer spring or preload; switch to cycloidal / 3-4-5; slower rpm; lighter follower</td></tr>
+  <tr><td>Ticking once per revolution</td><td>Profile discontinuity at the seam, or a print seam bump</td><td>Place the seam in a dwell; sand the bump; smoother CAD profile</td></tr>
+  <tr><td>Wear groove in the cam</td><td>Sliding contact, soft material, narrow follower</td><td>Roller with bearing, wider contact, nylon, lubricant</td></tr>
+  <tr><td>Cam slips on shaft</td><td>Round bore, no key</td><td>D-shaft, set screw, or key</td></tr>
+  <tr><td>Motion does not match the design</td><td>Undercut, or the roller radius missing from the CAD offset</td><td>Check the pitch-vs-surface offset; use a smaller roller</td></tr>
+</table>
+
+<h2>6.9 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Timing diagram drawn; motion law chosen for each segment.</li>
+  <li>☐ Max pressure angle ≤ 30° (translating follower); no undercutting.</li>
+  <li>☐ Inertia force at the top speed computed; spring preload covers it with margin.</li>
+  <li>☐ Contact design: roller on a bearing, wide face, nylon or PETG.</li>
+  <li>☐ Cam fixed to the shaft positively (D-shaft, key or grub screw).</li>
+  <li>☐ Profile exported smooth; printed flat, 3+ walls.</li>
+</ul>
+<ul>
+  <li>Using a uniform-velocity law "because it's the simplest" and hearing every stroke.</li>
+  <li>Making the cam small to save plastic: pressure angle and undercutting will punish it.</li>
+  <li>Forgetting that the cam surface is the pitch curve <em>offset</em> by the roller radius.</li>
+  <li>Relying on a rubber band that goes slack over time as the return.</li>
+</ul>
+
+<h2>6.10 Check yourself</h2>
+<details class="quiz"><summary>You double the cam speed. What happens to the follower's peak acceleration and inertia force?</summary>
+<p>Acceleration scales with ω², so it quadruples, and so does the inertia force F = m·a. The spring has to support that.</p></details>
+<details class="quiz"><summary>The follower jams in its guide mid-rise. Which single design change helps most?</summary>
+<p>Increase the base circle radius (or lengthen the rise angle): this lowers the pressure angle, so less of the force pushes the follower sideways.</p></details>
+<details class="quiz"><summary>Why prefer cycloidal over simple harmonic motion for a fast printed mechanism?</summary>
+<p>Cycloidal acceleration starts and ends at zero, so there are no sudden force steps at the start and end of each stroke (SHM jumps from 0 to peak acceleration at the ends when a dwell follows). That lowers noise, wear and fatigue, at the cost of a slightly higher peak acceleration.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2, D2R = Math.PI / 180;
+// Normalised rise laws: [s, ds/dxi, d2s/dxi2] for xi in [0,1]
+const LAWS = {
+  'Uniform': x => [x, 1, 0],
+  'Simple harmonic': x => [(1 - Math.cos(Math.PI * x)) / 2, Math.PI / 2 * Math.sin(Math.PI * x), Math.PI ** 2 / 2 * Math.cos(Math.PI * x)],
+  'Cycloidal': x => [x - Math.sin(TAU * x) / TAU, 1 - Math.cos(TAU * x), TAU * Math.sin(TAU * x)],
+  '3-4-5 polynomial': x => [10 * x ** 3 - 15 * x ** 4 + 6 * x ** 5, 30 * x ** 2 - 60 * x ** 3 + 30 * x ** 4, 60 * x - 180 * x ** 2 + 120 * x ** 3]
+};
+// Follower motion at cam angle th (rad): s (mm), v = ds/dth (mm/rad), a = d2s/dth2 (mm/rad^2)
+function motion(p, th) {
+  th = ((th % TAU) + TAU) % TAU; const f = LAWS[p.law];
+  if (th < p.b1) { const q = f(th / p.b1); return { s: p.h * q[0], v: p.h / p.b1 * q[1], a: p.h / p.b1 ** 2 * q[2] }; }
+  if (th < p.b1 + p.d1) return { s: p.h, v: 0, a: 0 };
+  if (th < p.b1 + p.d1 + p.b2) { const q = f((th - p.b1 - p.d1) / p.b2); return { s: p.h * (1 - q[0]), v: -p.h / p.b2 * q[1], a: -p.h / p.b2 ** 2 * q[2] }; }
+  return { s: 0, v: 0, a: 0 };
+}
+
+/* ---------- Sim 1: cam designer ---------- */
+(function () {
+  const S = { h: 20, b1: 100 * D2R, d1: 40 * D2R, b2: 100 * D2R, law: 'Cycloidal', Rb: 30, Rr: 6, rpm: 120, th: 0.4 };
+  const lawSel = document.getElementById('cm-law'); Object.keys(LAWS).forEach(k => lawSel.add(new Option(k, k))); lawSel.value = S.law;
+  const N = 720;
+  function build() {
+    const Rp = S.Rb + S.Rr, pitch = [], surf = [], mo = [];
+    for (let i = 0; i < N; i++) {
+      const th = i / N * TAU, m = motion(S, th), r = Rp + m.s, psi = Math.PI / 2 - th; mo.push(m); pitch.push([r * Math.cos(psi), r * Math.sin(psi)]);
+    }
+    let undercut = false, phiMax = 0, vMax = 0, aMax = 0;
+    for (let i = 0; i < N; i++) {
+      const a = pitch[(i + N - 1) % N], b = pitch[(i + 1) % N], tx = b[0] - a[0], ty = b[1] - a[1], L = Math.hypot(tx, ty) || 1;
+      const n = [-ty / L, tx / L], P = pitch[i]; // clockwise traversal: outward normal is (-ty, tx)/L
+      surf.push([P[0] - S.Rr * n[0], P[1] - S.Rr * n[1]]);
+      const m = mo[i], r = Rp + m.s, den = r * r + 2 * m.v * m.v - r * m.a;
+      if (S.Rr > 0 && den > 0 && Math.pow(r * r + m.v * m.v, 1.5) / den < S.Rr) undercut = true;
+      phiMax = Math.max(phiMax, Math.atan(Math.abs(m.v) / r) / D2R); vMax = Math.max(vMax, Math.abs(m.v)); aMax = Math.max(aMax, Math.abs(m.a));
+    }
+    return { Rp, pitch, surf, mo, undercut, phiMax, vMax, aMax };
+  }
+  let M = build();
+  const canvas = document.getElementById('cm-canvas'), out = document.getElementById('cm-out');
+  const view = Sim.make(canvas, 1.25, (c, w, h, col) => {
+    const topH = h * 0.5, Rmax = S.Rb + 2 * S.Rr + S.h, sc = Math.min((w - 20) / (2 * Rmax + 8), (topH - 10) / (Rmax + S.Rb + S.Rr + 30));
+    const cx = w / 2, cy = 10 + (Rmax + S.Rr + 26) * sc, th = S.th, ca = Math.cos(th), sa = Math.sin(th);
+    const T = p => [cx + (p[0] * ca - p[1] * sa) * sc, cy - (p[0] * sa + p[1] * ca) * sc]; // rotate CCW by th, flip y
+    c.beginPath(); M.surf.forEach((p, i) => { const q = T(p); i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); }); c.closePath();
+    c.fillStyle = col.accent + '55'; c.fill(); c.strokeStyle = M.undercut ? col.warn : col.accent; c.lineWidth = 2.5; c.stroke();
+    if (S.Rr > 0) { c.strokeStyle = col.line; c.setLineDash([3, 4]); c.lineWidth = 1; c.beginPath(); M.pitch.forEach((p, i) => { const q = T(p); i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); }); c.closePath(); c.stroke(); c.setLineDash([]); }
+    Sim.dot(c, cx, cy, 4, col.ink);
+    // follower
+    const m = motion(S, th), fy = cy - (M.Rp + m.s) * sc, topG = cy - (M.Rp + S.h + S.Rr + 22) * sc;
+    c.fillStyle = col.muted; c.fillRect(cx - 14, topG - 4, 8, 34); c.fillRect(cx + 6, topG - 4, 8, 34);
+    Sim.line(c, cx, fy, cx, topG - 14, col.accent2, 5);
+    if (S.Rr > 0) { c.beginPath(); c.arc(cx, fy, S.Rr * sc, 0, TAU); c.fillStyle = col.surface; c.fill(); c.strokeStyle = col.accent2; c.lineWidth = 3; c.stroke(); }
+    else { c.fillStyle = col.accent2; c.beginPath(); c.moveTo(cx, fy); c.lineTo(cx - 6, fy - 12); c.lineTo(cx + 6, fy - 12); c.fill(); }
+    // plots
+    const l = 38, r = 10, pw = w - l - r, PX = a => l + a / TAU * pw, mid = k => k;
+    const p1t = topH + 8, p1b = topH + h * 0.27, p2t = topH + h * 0.31, p2b = h - 18;
+    c.font = '12px system-ui'; c.textAlign = 'left';
+    c.strokeStyle = col.line; c.lineWidth = 1; c.beginPath(); c.moveTo(l, (p1t + p1b) / 2); c.lineTo(l + pw, (p1t + p1b) / 2); c.stroke();
+    const curve = (fn, color) => { c.strokeStyle = color; c.lineWidth = 2; c.beginPath(); for (let i = 0; i < N; i++) { const y = Math.max(-1.4, Math.min(1.4, fn(i))); const py = (p1t + p1b) / 2 - y * (p1b - p1t) / 2 * 0.68; i ? c.lineTo(PX(i / N * TAU), py) : c.moveTo(PX(i / N * TAU), py); } c.stroke(); };
+    const vref = S.h / Math.min(S.b1, S.b2) * 2, aref = TAU * S.h / Math.min(S.b1, S.b2) ** 2;
+    curve(i => (M.mo[i].s - S.h / 2) / (S.h / 2), col.accent2); curve(i => M.mo[i].v / vref, col.accent); curve(i => M.mo[i].a / aref, col.good);
+    if (S.law === 'Uniform') { c.strokeStyle = col.good; [S.b1, S.b1 + S.d1, S.b1 + S.d1 + S.b2].forEach(a => { c.beginPath(); c.moveTo(PX(a), p1t); c.lineTo(PX(a), p1b); c.stroke(); }); }
+    c.fillStyle = col.accent2; c.fillText('position', l + 4, p1t + 10); c.fillStyle = col.accent; c.fillText('velocity', l + 64, p1t + 10); c.fillStyle = col.good; c.fillText('acceleration', l + 124, p1t + 10);
+    // pressure angle
+    const PY = a => p2b - Math.min(a, 60) / 60 * (p2b - p2t);
+    c.strokeStyle = col.warn; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(l, PY(30)); c.lineTo(l + pw, PY(30)); c.stroke(); c.setLineDash([]);
+    c.fillStyle = col.muted; c.textAlign = 'right'; c.fillText('30°', l - 4, PY(30) + 4); c.fillText('0°', l - 4, PY(0) + 4);
+    c.strokeStyle = M.phiMax > 30 ? col.warn : col.good; c.lineWidth = 2.5; c.beginPath();
+    for (let i = 0; i < N; i++) { const ph = Math.atan(Math.abs(M.mo[i].v) / (M.Rp + M.mo[i].s)) / D2R; i ? c.lineTo(PX(i / N * TAU), PY(ph)) : c.moveTo(PX(i / N * TAU), PY(ph)); } c.stroke();
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('pressure angle', l + 4, p2t + 10);
+    c.textAlign = 'center'; [0, 90, 180, 270, 360].forEach(d => c.fillText(d + '°', PX(d * D2R), h - 4));
+    const mx = PX(((th % TAU) + TAU) % TAU); c.strokeStyle = col.ink; c.setLineDash([3, 3]); c.lineWidth = 1; c.beginPath(); c.moveTo(mx, p1t); c.lineTo(mx, p2b); c.stroke(); c.setLineDash([]);
+  });
+  function info() {
+    const w = S.rpm * TAU / 60, vmax = M.vMax * w / 1000, amax = M.aMax * w * w / 1000;
+    const pa = M.phiMax <= 30 ? ['good', 'OK'] : M.phiMax <= 40 ? ['accent2', 'high: guide friction will be noticeable'] : ['warn', 'too high: expect jamming'];
+    out.innerHTML = 'Peak pressure angle <strong style="color:var(--' + pa[0] + ')">' + M.phiMax.toFixed(0) + '° (' + pa[1] + ')</strong>. ' + (M.undercut ? '<strong style="color:var(--warn)">Undercut: the roller is too large for the profile curvature.</strong> ' : '') +
+      'At ' + S.rpm + ' rpm: peak follower speed <strong>' + vmax.toFixed(2) + ' m/s</strong>' + (S.law === 'Uniform' ? ', acceleration spikes at each segment boundary' : ', peak acceleration <strong>' + amax.toFixed(1) + ' m/s²</strong> (' + (amax / 9.81).toFixed(1) + ' g)') + '.';
+  }
+  const refresh = () => { M = build(); view.redraw(); info(); };
+  const hs = document.getElementById('cm-ctl'), sl = {};
+  const fixAngles = () => { // keep rise+dwell+return <= 350 deg
+    let t = (S.b1 + S.d1 + S.b2) / D2R; if (t > 350) { let ex = t - 350, dd = Math.min(ex, S.d1 / D2R); S.d1 -= dd * D2R; ex -= dd; const db = Math.min(ex / 2, S.b2 / D2R - 20); S.b2 -= db * D2R; S.b1 -= (ex - db) * D2R; sl.b1.set(Math.round(S.b1 / D2R)); sl.d1.set(Math.round(S.d1 / D2R)); sl.b2.set(Math.round(S.b2 / D2R)); }
+  };
+  const add = (k, label, mn, mx, unit, conv) => { sl[k] = Sim.slider(hs, { label, min: mn, max: mx, value: conv ? S[k] / D2R : S[k], unit, onInput: v => { S[k] = conv ? v * D2R : v; if (conv) fixAngles(); refresh(); } }); };
+  add('h', 'Lift h', 5, 30, ' mm'); add('b1', 'Rise angle', 30, 200, '°', true); add('d1', 'High dwell', 0, 200, '°', true); add('b2', 'Return angle', 30, 200, '°', true);
+  add('Rb', 'Base radius', 10, 60, ' mm'); add('Rr', 'Roller radius', 0, 12, ' mm'); add('rpm', 'Speed', 10, 400, ' rpm');
+  lawSel.onchange = () => { S.law = lawSel.value; refresh(); };
+  const loop = Sim.loop(dt => { S.th = (S.th + dt * 1.1) % TAU; view.redraw(); });
+  document.getElementById('cm-run').onclick = e => loop.toggle(e.target);
+  loop.toggle(document.getElementById('cm-run'));
+  document.getElementById('cm-svg').onclick = () => {
+    const pts = M.surf.map(p => p[0].toFixed(3) + ',' + (-p[1]).toFixed(3)), R = S.Rb + S.h + S.Rr + 2, sz = 2 * R;
+    const svg = '<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="' + sz + 'mm" height="' + sz + 'mm" viewBox="' + -R + ' ' + -R + ' ' + sz + ' ' + sz + '">\n' +
+      '<!-- cam: lift ' + S.h + ' mm, base radius ' + S.Rb + ' mm, roller radius ' + S.Rr + ' mm, law ' + S.law + '. Follower axis points up at start (0 deg); the cam turns counter-clockwise when viewed from above. Units: mm. -->\n' +
+      '<polygon fill="none" stroke="#000" stroke-width="0.1" points="' + pts.join(' ') + '"/>\n<circle cx="0" cy="0" r="2.5" fill="none" stroke="#000" stroke-width="0.1"/>\n</svg>\n';
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })); a.download = 'cam_profile.svg'; a.click();
+  };
+  refresh();
+})();
+
+/* ---------- Sim 2: follower jump ---------- */
+(function () {
+  const S = { h: 10, beta: 90, rpm: 150, m: 30, pre: 2, k: 0.3, law: 'Cycloidal' };
+  const lawSel = document.getElementById('jp-law'); Object.keys(LAWS).forEach(k => lawSel.add(new Option(k, k))); lawSel.value = S.law;
+  const prof = () => { const b = S.beta * D2R; return { h: S.h, b1: b, b2: b, d1: (TAU - 2 * b) / 2, law: S.law }; };
+  const force = (p, th, rpm) => { const m = motion(p, th), w = rpm * TAU / 60; return S.pre + S.k * m.s + S.m / 1000 * m.a * w * w / 1000; };
+  const Nmin = rpm => { const p = prof(); let mn = 1e9; for (let i = 0; i < 720; i++) mn = Math.min(mn, force(p, i / 720 * TAU, rpm)); return mn; };
+  const canvas = document.getElementById('jp-canvas'), out = document.getElementById('jp-out');
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const p = prof(), l = 46, r = 12, t = 14, b = h - 26, pw = w - l - r, ph = b - t, vals = [];
+    for (let i = 0; i <= 720; i++) vals.push(force(p, i / 720 * TAU, S.rpm));
+    const hi = Math.max(5, Math.max(...vals) * 1.1), lo = Math.min(-2, Math.min(...vals) * 1.1), PX = i => l + i / 720 * pw, PY = v => b - (v - lo) / (hi - lo) * ph;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'right';
+    [lo, 0, hi].forEach(v => { c.beginPath(); c.moveTo(l, PY(v)); c.lineTo(l + pw, PY(v)); c.stroke(); c.fillText(v.toFixed(0) + ' N', l - 4, PY(v) + 4); });
+    c.textAlign = 'center'; [0, 90, 180, 270, 360].forEach(d => c.fillText(d + '°', l + d / 360 * pw, h - 8));
+    c.fillStyle = col.warn + '33'; c.fillRect(l, PY(0), pw, b - PY(0));
+    c.lineWidth = 2.5; for (let i = 0; i < 720; i++) { c.strokeStyle = vals[i] < 0 || vals[i + 1] < 0 ? col.warn : col.good; c.beginPath(); c.moveTo(PX(i), PY(vals[i])); c.lineTo(PX(i + 1), PY(vals[i + 1])); c.stroke(); }
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('cam–follower contact force (negative = follower leaves the cam)', l + 6, t + 10);
+  });
+  function info() {
+    const mn = Nmin(S.rpm); let lo = 1, hi = 3000; if (Nmin(hi) >= 0) lo = hi; else { for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; Nmin(mid) >= 0 ? lo = mid : hi = mid; } }
+    out.innerHTML = 'Minimum contact force <strong style="color:var(--' + (mn >= 0 ? 'good' : 'warn') + ')">' + mn.toFixed(1) + ' N</strong> → ' + (mn >= 0 ? 'follower stays on the cam.' : '<strong style="color:var(--warn)">the follower jumps.</strong>') +
+      ' Speed limit with this spring and mass: about <strong>' + (lo >= 3000 ? '> 3000' : Math.round(lo)) + ' rpm</strong>. Fix by a stiffer spring, more preload, lower mass, a longer rise angle or a smoother law.';
+    view.redraw();
+  }
+  const hs = document.getElementById('jp-ctl');
+  [['h', 'Lift', 3, 25, 1, ' mm'], ['beta', 'Rise/return angle', 40, 160, 1, '°'], ['rpm', 'Speed', 20, 600, 5, ' rpm'], ['m', 'Follower mass', 5, 150, 1, ' g'], ['pre', 'Spring preload', 0, 15, 0.5, ' N'], ['k', 'Spring rate', 0, 2, 0.05, ' N/mm']]
+    .forEach(([k, l, mn, mx, st, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec: st < 1 ? (st < 0.1 ? 2 : 1) : 0, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  lawSel.onchange = () => { S.law = lawSel.value; info(); };
+  info();
+})();
+</script>
+</body>
+</html>

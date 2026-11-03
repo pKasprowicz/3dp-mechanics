@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 12 · Compliant mechanisms and living hinges</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="12">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 12</p>
+<h1>Compliant mechanisms and living hinges</h1>
+<p class="lead">Every mechanism so far moved because separate parts slid or rolled against each other. A compliant mechanism moves because a single part <em>bends</em>. There is no pin, no bore, no backlash, no wear, and no assembly: print it in one go, and it works. This is where FDM printing shines, because making a thin flexible web next to a thick rigid block is free. It also comes with one hard constraint, strain, that decides whether the part lasts one flex or a million.</p>
+
+<h2>12.1 Why compliant</h2>
+<table>
+  <tr><th>Advantage</th><th>Cost</th></tr>
+  <tr><td>One part: no assembly, no fasteners, no clearance to tune</td><td>Limited travel: you can only bend so far</td></tr>
+  <tr><td>No friction, no backlash, no lubricant, no wear in the joint</td><td>Motion needs force, because bending stores energy in the part (it acts like a spring)</td></tr>
+  <tr><td>Repeatable, smooth motion; no stick-slip</td><td>Fatigue and creep: plastics tire and relax</td></tr>
+  <tr><td>Easy to miniaturise</td><td>Stiffness depends on material, temperature and layer quality</td></tr>
+  <tr><td>Built-in spring return and detent</td><td>Off-axis stiffness is limited: flexures twist and wobble</td></tr>
+</table>
+<p>Use compliant elements for: hinges on lids and clips, snap-fit latches, spring returns, precision micro-adjusters, grippers, buttons and bistable switches, and anywhere a printed pin hinge would wear out.</p>
+
+<h2>12.2 The beam rules that matter</h2>
+<p>All the flexures here are variations of the beam of chapter 2. With width <em>b</em> and thickness <em>t</em> (the dimension in the bending direction), the second moment of area is <code>I = b·t³/12</code>. The three results you need:</p>
+<div class="eq">Strain in a bent strip       ε = t · κ / 2        (κ = curvature, 1/radius)<br>
+Uniform bend through angle θ over length L:   ε = t · θ / (2L)<br>
+End-loaded cantilever, deflection δ:   F = 3EI·δ / L³,    ε_max = 3·t·δ / (2L²)<br>
+Bending stiffness of a hinge strip:   M = E·I·θ / L</div>
+<p>The point: <strong>strain depends on thickness over radius.</strong> A thinner strip, or a longer strip bent through the same angle, gives a lower strain. Doubling t doubles the strain but multiplies stiffness by 8 (t³). To make a flexible hinge, make it thin and long, not short and chunky.</p>
+
+<h3>Strain limits of printed plastics</h3>
+<p>Every flexure design is a strain budget. Rough guide values for printed parts (single bend to failure, and repeated cycling for thousands of flexes); the cyclic allowance is much lower because of fatigue:</p>
+<table>
+  <tr><th>Material</th><th>Single flex, max strain</th><th>Cyclic, max strain</th><th>Comment</th></tr>
+  <tr><td>PLA</td><td>~1.5%</td><td>~0.5%</td><td>Brittle: avoid for any repeated flexing</td></tr>
+  <tr><td>PETG</td><td>~4%</td><td>~1.5%</td><td>Decent hinges, snap-fits</td></tr>
+  <tr><td>ABS / ASA</td><td>~3%</td><td>~1%</td><td>OK</td></tr>
+  <tr><td>Nylon (PA)</td><td>~8%</td><td>~3%</td><td>The best rigid printed flexure material</td></tr>
+  <tr><td>PA-CF</td><td>~2%</td><td>~0.7%</td><td>Stiff: good for small-travel flexures, not hinges</td></tr>
+  <tr><td>TPU</td><td>~40%</td><td>~15%</td><td>For large motion, low force, rubbery feel</td></tr>
+</table>
+<p>These are indicative guide values: the real limit depends on print quality, layer orientation, temperature and the thickness of the hinge. Always print a test strip and flex it until it dies. And note the consequence for living hinges: bending a 0.5 mm strip through 90° over 3 mm gives ε = 0.5 × 1.57 / (2 × 3) = 13%: far beyond any rigid printed plastic's limit. <strong>Short, thick printed "living hinges" break; long thin ones survive.</strong> (Injection-moulded polypropylene hinges tolerate ~30% because the polymer chains align on the first bend: a trick you can't copy in FDM.)</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Living hinge designer</h4>
+  <p class="desc">A thin strip joins two rigid blocks. Set the strip thickness and length, the angle it must bend through, and the material. The bar compares the strain with the single-flex and cyclic limits. The hinge's shape is drawn with the correct bend radius.</p>
+  <canvas id="lh-canvas"></canvas>
+  <div class="row"><label>Material <select id="lh-mat"></select></label></div>
+  <div class="controls" id="lh-ctl"></div>
+  <div class="readout" id="lh-out"></div>
+</div>
+
+<h3>Spread the bend</h3>
+<p>If the angle needed is large and the strip can't be long, split the bend across several hinges in a row (a series of thin grooves). Each takes θ/n, and the strain per groove falls by n. A segmented "box lid" strip, a multi-fold hinge, and a flexible spine all rely on this.</p>
+
+<h3>Printing a living hinge</h3>
+<ul>
+  <li>Print the strip <strong>flat on the bed</strong> with its length in the XY plane: the strain runs along the extruded lines, the strong direction (chapter 4). Never print a strip standing so that bending strains the layer bonds.</li>
+  <li><strong>Thickness 0.4–0.8 mm</strong> (two to four extrusion lines, or two to four layers if flat); hinge length ≥ 8–10 mm for 90° in PETG, shorter for small angles; <strong>no infill</strong> in the strip, only perimeters.</li>
+  <li>Place the <strong>seam</strong> away from the hinge; a seam is a weak spot at the exact location of highest strain.</li>
+  <li>Taper the hinge into the rigid blocks with <strong>generous fillets</strong> so the strain doesn't concentrate at the edge (chapter 2).</li>
+  <li><strong>Rest angle:</strong> a printed bent strip has zero strain where it was printed. Print the hinge in the position it is held in most often (for a box, closed or half-open) so it sits relaxed, rather than storing a permanent strain that makes it creep.</li>
+  <li>Use <strong>PETG or nylon</strong>, not PLA. Print slower and a bit hotter for the best layer bonding.</li>
+</ul>
+
+<h2>12.3 Flexure elements</h2>
+<table>
+  <tr><th>Element</th><th>What it does</th><th>Notes</th></tr>
+  <tr><td><strong>Strip (leaf) hinge</strong></td><td>One rotation axis across a thin web</td><td>Simple and compact; the rotation axis shifts slightly as it bends</td></tr>
+  <tr><td><strong>Notch hinge</strong> (round or elliptical groove)</td><td>Rotation concentrated at one short spot</td><td>Short and precise but high strain: small angles only (a few degrees)</td></tr>
+  <tr><td><strong>Cantilever beam</strong></td><td>Spring, snap-fit arm, latch, detent</td><td>The most useful element (see 12.4)</td></tr>
+  <tr><td><strong>Parallel leaf flexure</strong></td><td>A guided linear motion: two beams between a frame and a shuttle</td><td>Straight guide without a bearing; parasitic shortening and limited travel</td></tr>
+  <tr><td><strong>Double parallelogram</strong></td><td>A parallel flexure with the parasitic shortening cancelled</td><td>Better straightness; more material</td></tr>
+  <tr><td><strong>Torsion bar / strip</strong></td><td>Rotation by twisting</td><td>Short wide-thin strips give large angles</td></tr>
+  <tr><td><strong>Bistable (buckled) beam</strong></td><td>Snaps between two stable shapes</td><td>Click buttons, switches, toggles; needs a tuned precompression</td></tr>
+  <tr><td><strong>Constant-force / zero-stiffness beam</strong></td><td>Force stays nearly flat over travel</td><td>Constant clamping forces, tuned by experiment</td></tr>
+</table>
+
+<h3>Pseudo-rigid-body model: use your linkage knowledge</h3>
+<p>A flexible cantilever bent by an end force behaves approximately like a <strong>rigid link</strong> of length γL (γ ≈ 0.85) connected to the base by a pin with a <strong>torsional spring</strong>, K ≈ 2.25·EI/L. This lets you treat compliant mechanisms like the linkages of chapter 5: draw the pivots, add springs, and check the geometry. It is the quickest path from an idea ("a gripper that closes by squeezing a flexible frame") to dimensions.</p>
+
+<h3>The parallel flexure</h3>
+<p>Two leaf springs of length L, thickness t, width b, joined between a base and a shuttle, give a nearly straight linear motion with a spring-like stiffness:</p>
+<div class="eq">k = 24·E·I / L³ = 2·E·b·t³ / L³             (both leaves)<br>
+Strain at the leaf ends   ε = 3·t·δ / L²<br>
+Parasitic shortening      ≈ 3·δ² / (5·L)     (the shuttle also moves a little toward the base)</div>
+
+<div class="sim">
+  <h4>Simulation 2 · Parallel flexure stage</h4>
+  <p class="desc">A shuttle suspended on two leaf springs moves sideways by δ. The stage's stiffness, strain at the leaves and the parasitic shortening update live; the travel limit is the largest δ keeping the strain within the cyclic limit.</p>
+  <canvas id="pf-canvas"></canvas>
+  <div class="row"><label>Material <select id="pf-mat"></select></label></div>
+  <div class="controls" id="pf-ctl"></div>
+  <div class="readout" id="pf-out"></div>
+</div>
+
+<h2>12.4 Snap-fits</h2>
+<p>A snap-fit is a cantilever with a hook: it deflects as the mating part pushes past, then springs back and holds. The same strain rule decides the design. For a straight cantilever of constant thickness, the strain at the root for a hook that must deflect by <em>y</em> is</p>
+<div class="eq">ε = 1.5 · t · y / L²          (tapering the thickness to half at the tip: ε ≈ 0.92 · t · y / L²)<br>
+Deflection force F = 3·E·I·y / L³<br>
+Mating (push-on) force  W = F · (μ + tan α) / (1 − μ · tan α)       (α = lead-in angle of the hook)</div>
+<ul>
+  <li><strong>Make it longer, or taper it.</strong> Length enters squared in the strain: doubling L cuts ε by 4. A tapered arm spreads the strain evenly along the beam instead of concentrating it at the root.</li>
+  <li><strong>Fillet the root</strong> (radius ≥ 0.5·t). A sharp root is where printed snap-fits break.</li>
+  <li><strong>Print flat</strong>: the arm's length lies in the XY plane so layers run along it.</li>
+  <li><strong>Lead-in angle</strong> controls the force to snap on (30°: gentle; 60°: hard). The <strong>return angle</strong> controls whether it releases: a 90° return face locks permanently, 45° lets it be pulled off.</li>
+  <li><strong>Permanent vs. repeated use:</strong> a snap-fit used once can use the single-flex limit; one used often must obey the cyclic limit.</li>
+  <li>Test the fit after a few dozen cycles: printed hooks creep and loosen.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 3 · Snap-fit cantilever</h4>
+  <p class="desc">A hook on a cantilever arm that deflects by y when mated. Adjust the arm's length and thickness, the undercut y and the lead-in angle. The readout reports strain, deflection force and push-on force (with friction 0.3) against the material's limits.</p>
+  <canvas id="sf-canvas"></canvas>
+  <div class="row"><label>Material <select id="sf-mat"></select></label><label><input type="checkbox" id="sf-taper"> thickness tapered to half at the tip</label></div>
+  <div class="controls" id="sf-ctl"></div>
+  <div class="readout" id="sf-out"></div>
+</div>
+
+<h2>12.5 Springs from plastic</h2>
+<ul>
+  <li><strong>Printed springs are good for light, short-travel, occasional use</strong> and bad for permanent preload. Plastic <strong>creeps</strong>: a PLA spring compressed for a few weeks has lost much of its force. Nylon and PETG do better, and TPU springs are soft but long-lived.</li>
+  <li>The best printed springs are <strong>bending springs</strong> printed flat: leaf springs, zigzag/serpentine strips, spiral springs and flexure beams. A printed coil spring loads the wire in torsion across layer boundaries, a weak mode with short life.</li>
+  <li><strong>For constant forces, buy a spring.</strong> Steel springs cost cents, do not creep, and have well-known rates (chapter 13).</li>
+  <li>Use printed springs where the spring is <em>part of the mechanism</em> (a returning button, a latch) and the load is modest; in that case design for the cyclic strain limit, as above.</li>
+</ul>
+
+<h2>12.6 Design workflow</h2>
+<ol>
+  <li><strong>Sketch the motion as a rigid-body linkage</strong> (chapter 5), then replace pivots by thin sections or flexible beams.</li>
+  <li><strong>Pick the material</strong> from the strain limit and the force you need.</li>
+  <li><strong>Size the flexing member</strong> with the beam formulas: choose t for a strain well below the limit at the largest deflection; choose L from the force and the stiffness.</li>
+  <li><strong>Check the stiffness</strong>: the actuation force is the spring force of the flexure; make sure your input (a finger, a motor, a spring) can deliver it.</li>
+  <li><strong>Check the unwanted motions</strong>: out-of-plane stiffness (increase b, add a second flexure), buckling in compression (shorten, thicken), parasitic shortening.</li>
+  <li><strong>Print a test coupon</strong> and flex it to failure; adjust t and L. Print the final part in the same orientation and settings.</li>
+</ol>
+
+<h2>12.7 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Hinge snaps on the first bend</td><td>Strain far over the limit (short or thick strip); PLA; layers peel</td><td>Thinner, longer; PETG/nylon; print flat; spread the bend over several hinges</td></tr>
+  <tr><td>Hinge works, then cracks after dozens of flexes</td><td>Cyclic strain too high; sharp ends; seam in the hinge</td><td>Lower strain (longer/thinner); fillets; move the seam</td></tr>
+  <tr><td>Hinge takes a set / won't spring back</td><td>Creep, or the printed rest position differs from the held position</td><td>Print at the rest angle; nylon; don't store it flexed</td></tr>
+  <tr><td>Hinge is too stiff</td><td>Thick strip (stiffness ∝ t³)</td><td>Thinner strip, wider and shorter flexure, or a softer material</td></tr>
+  <tr><td>Snap-fit breaks at the root</td><td>Sharp corner; short arm; layers peel</td><td>Root fillet, longer or tapered arm, print flat</td></tr>
+  <tr><td>Snap-fit gets loose</td><td>Creep, or too small an undercut</td><td>Bigger undercut, stiffer material, a deliberate retention rib</td></tr>
+  <tr><td>Flexure stage twists or wobbles out of plane</td><td>Leaves too narrow or thin</td><td>Wider leaves (stiffness ∝ b³ out of plane) or a second pair of leaves</td></tr>
+  <tr><td>Motion not straight</td><td>Parasitic shortening</td><td>Double parallelogram; reduce δ</td></tr>
+  <tr><td>Force varies with temperature</td><td>Stiffness of plastic falls as it warms</td><td>Choose a higher-Tg material; avoid heat</td></tr>
+</table>
+
+<h2>12.8 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Strain checked: ε = tθ/2L (hinge) or 1.5ty/L² (snap-fit) vs the cyclic limit.</li>
+  <li>☐ Material: PETG or nylon for flexures. PLA only for single-use.</li>
+  <li>☐ Printed flat, strain along the layers; seam away from the flexing area.</li>
+  <li>☐ Fillets at every flexure root.</li>
+  <li>☐ Printed at the rest position; no permanent strain.</li>
+  <li>☐ Stiffness (force needed) and off-axis stiffness checked.</li>
+  <li>☐ A test coupon flexed to failure.</li>
+</ul>
+<ul>
+  <li>Copying a polypropylene living hinge from a food container into FDM PLA.</li>
+  <li>Making the hinge short "for neatness".</li>
+  <li>Printing a snap-fit hook standing up.</li>
+  <li>Holding a PLA spring under constant load.</li>
+</ul>
+
+<h2>12.9 Check yourself</h2>
+<details class="quiz"><summary>A 0.5 mm PETG strip must bend 45° repeatedly. With a cyclic limit of 1.5%, how long must the hinge be?</summary>
+<p>θ = 0.785 rad. L = t·θ / (2ε) = 0.5 × 0.785 / (2 × 0.015) = <strong>13 mm</strong>. A 3 mm hinge would reach 6.5% strain: it would last a handful of flexes at best.</p></details>
+<details class="quiz"><summary>A snap-fit arm 15 mm long and 1.5 mm thick must deflect 1 mm. Strain? Is PLA acceptable for a part clipped on only once?</summary>
+<p>ε = 1.5·1.5·1 / 15² = 2.25/225 = <strong>1.0%</strong>. PLA's single-flex limit is about 1.5%, so it would survive one-time assembly but not repeated use (cyclic limit 0.5%). PETG (cyclic limit 1.5%) is comfortable.</p></details>
+<details class="quiz"><summary>You double the thickness of a flexure leaf to stop it twisting. What happens to its stiffness and strain?</summary>
+<p>Stiffness ∝ t³: eight times stiffer. Strain at a given deflection ∝ t: twice as high. So you need eight times the force and you are closer to the strain limit. Widening the leaf (b) raises the out-of-plane stiffness (∝ b³) with only a linear increase in the working stiffness, and is usually the better fix.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2;
+// E in MPa; strain limits in % [single flex, cyclic]. Indicative values for printed parts.
+const MAT = { 'PLA': { E: 3000, s: 1.5, c: 0.5 }, 'PETG': { E: 2000, s: 4, c: 1.5 }, 'ABS / ASA': { E: 2000, s: 3, c: 1 }, 'Nylon (PA)': { E: 1500, s: 8, c: 3 }, 'PA-CF': { E: 5000, s: 2, c: 0.7 }, 'TPU 95A': { E: 40, s: 40, c: 15 } };
+const fillSel = (id, def) => { const s = document.getElementById(id); Object.keys(MAT).forEach(k => s.add(new Option(k, k))); s.value = def; return s; };
+// horizontal strain bar: value vs single and cyclic limits (percent), log-ish capped scale
+function strainBar(c, w, y, h, eps, m, col) {
+  const l = 10, pw = w - 20, mx = Math.max(m.s * 1.6, eps * 1.1, 1), X = v => l + Math.min(v, mx) / mx * pw;
+  c.fillStyle = col.good + '55'; c.fillRect(l, y, X(m.c) - l, h); c.fillStyle = col.accent2 + '55'; c.fillRect(X(m.c), y, X(m.s) - X(m.c), h); c.fillStyle = col.warn + '55'; c.fillRect(X(m.s), y, l + pw - X(m.s), h);
+  c.fillStyle = col.ink; c.fillRect(X(eps) - 2, y - 4, 4, h + 8);
+  c.font = '11px system-ui'; c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('cyclic ' + m.c + '%', X(m.c) - 38, y + h + 14); c.textAlign = 'center'; c.fillText('single flex ' + m.s + '%', X(m.s), y + h + 28);
+  c.textAlign = 'left'; c.fillStyle = col.ink; c.fillText('strain ' + eps.toFixed(1) + '%', Math.min(X(eps) + 6, w - 90), y - 8);
+}
+const verdict = (eps, m) => eps <= m.c ? ['good', 'within the cyclic limit: should survive thousands of flexes'] : eps <= m.s ? ['accent2', 'within the single-flex limit only: a few to dozens of flexes'] : ['warn', 'over the limit: it will crack'];
+
+/* ---------- Sim 1: living hinge ---------- */
+(function () {
+  const S = { t: 0.5, L: 12, b: 20, th: 90 }, sel = fillSel('lh-mat', 'PETG');
+  const canvas = document.getElementById('lh-canvas'), out = document.getElementById('lh-out');
+  const eps = () => S.t * (S.th * Math.PI / 180) / (2 * S.L) * 100;
+  const view = Sim.make(canvas, 0.8, (c, w, h, col) => {
+    const m = MAT[sel.value], th = S.th * Math.PI / 180, sc = Math.min(14, 90 / S.L), bl = 70, bh = 30, cx = w * 0.36, cy = h * 0.2, L = S.L * sc, th0 = Math.max(2, S.t * sc);
+    const color = verdict(eps(), m)[0]; const cc = col[color];
+    c.fillStyle = col.muted + '88'; c.fillRect(cx - L / 2 - bl, cy - bh / 2, bl, bh); c.strokeStyle = col.muted; c.strokeRect(cx - L / 2 - bl, cy - bh / 2, bl, bh);
+    // arc of the strip from the left block's edge; bends downward by th
+    const rho = th > 0.01 ? L / th : 1e6, ax = cx - L / 2, ay = cy;
+    c.strokeStyle = cc; c.lineWidth = th0; c.lineCap = 'butt'; c.beginPath();
+    for (let i = 0; i <= 40; i++) { const a = th * i / 40, x = ax + rho * Math.sin(a), y = ay + rho * (1 - Math.cos(a)); i ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke();
+    const ex = ax + rho * Math.sin(th), ey = ay + rho * (1 - Math.cos(th));
+    c.save(); c.translate(ex, ey); c.rotate(th); c.fillStyle = col.accent + '88'; c.fillRect(0, -bh / 2, bl, bh); c.strokeStyle = col.accent; c.strokeRect(0, -bh / 2, bl, bh); c.restore();
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('strip drawn at ' + sc.toFixed(1) + ' px/mm; thickness exaggerated if tiny', 10, h * 0.76);
+    strainBar(c, w, h * 0.86, 14, eps(), m, col);
+  });
+  function info() {
+    const m = MAT[sel.value], e = eps(), v = verdict(e, m), I = S.b * S.t ** 3 / 12, M = m.E * I * (S.th * Math.PI / 180) / S.L, th = S.th * Math.PI / 180;
+    const Lc = S.t * th / (2 * m.c / 100), Ls = S.t * th / (2 * m.s / 100);
+    out.innerHTML = 'Strain <strong style="color:var(--' + v[0] + ')">' + e.toFixed(1) + '%</strong>: ' + v[1] + '. Bending torque to hold ' + S.th + '°: <strong>' + (M).toFixed(0) + ' N·mm</strong>. For this angle and thickness you need a hinge length of ≥ <strong>' + Lc.toFixed(1) + ' mm</strong> for cyclic use, ≥ ' + Ls.toFixed(1) + ' mm for a one-off. Or spread the bend over <strong>' + Math.max(1, Math.ceil(e / m.c)) + '</strong> hinges.';
+    view.redraw();
+  }
+  const hs = document.getElementById('lh-ctl');
+  [['t', 'Thickness t', 0.2, 1.5, 0.05, 2, ' mm'], ['L', 'Hinge length L', 0.5, 30, 0.5, 1, ' mm'], ['b', 'Width b', 5, 40, 1, 0, ' mm'], ['th', 'Bend angle', 10, 180, 5, 0, '°']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  sel.onchange = info; info();
+})();
+
+/* ---------- Sim 2: parallel flexure ---------- */
+(function () {
+  const S = { L: 30, t: 0.6, b: 12, d: 2 }, sel = fillSel('pf-mat', 'PETG');
+  const canvas = document.getElementById('pf-canvas'), out = document.getElementById('pf-out');
+  const eps = () => 3 * S.t * S.d / (S.L * S.L) * 100;
+  const view = Sim.make(canvas, 0.55, (c, w, h, col) => {
+    const m = MAT[sel.value], sc = Math.min((h * 0.62) / (S.L * 1.25), 6), amp = Math.max(1, Math.min(6, 0.18 * S.L / Math.max(S.d, 0.01))), d = S.d * amp * sc, Lp = S.L * sc, par = 3 * (S.d * amp) ** 2 / (5 * S.L) * sc;
+    const x0 = w * 0.34, top = 16, color = col[verdict(eps(), m)[0]], bw = 150, gap = Math.max(40, 12 * 1.2 * Math.min(sc, 4) + 20);
+    c.fillStyle = col.muted + '88'; c.fillRect(x0 - 20, top + Lp + 14 - par * 0, bw, 16); // base (bottom)
+    const yb = top + Lp + par; // shuttle (top) is lowered by the parasitic shortening
+    // leaves from the base (y = top + Lp + 14 ... ) up to the shuttle; leaf x positions
+    [x0 + 10, x0 + bw - 30].forEach(lx => {
+      c.strokeStyle = color; c.lineWidth = Math.max(2, S.t * sc); c.beginPath();
+      for (let i = 0; i <= 30; i++) { const s = i / 30, off = d * (3 * s * s - 2 * s * s * s); const y = top + Lp + 14 - s * (Lp - par), x = lx + off; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke();
+    });
+    c.fillStyle = col.accent + '88'; c.fillRect(x0 - 20 + d, top - 16 + par, bw, 16); c.strokeStyle = col.accent; c.strokeRect(x0 - 20 + d, top - 16 + par, bw, 16);
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('motion shown ×' + amp.toFixed(1), 10, h * 0.62 + 8);
+    strainBar(c, w, h * 0.78, 16, eps(), m, col);
+  });
+  function info() {
+    const m = MAT[sel.value], e = eps(), v = verdict(e, m), k = 2 * m.E * S.b * S.t ** 3 / S.L ** 3, dmax = m.c / 100 * S.L ** 2 / (3 * S.t);
+    out.innerHTML = 'Stiffness <strong>' + k.toFixed(2) + ' N/mm</strong> → force at δ = ' + S.d + ' mm: <strong>' + (k * S.d).toFixed(2) + ' N</strong> · strain <strong style="color:var(--' + v[0] + ')">' + e.toFixed(1) + '%</strong> (' + v[1] + ') · parasitic shortening <strong>' + (3 * S.d ** 2 / (5 * S.L)).toFixed(3) + ' mm</strong> · cyclic travel limit about <strong>±' + dmax.toFixed(1) + ' mm</strong>.';
+    view.redraw();
+  }
+  const hs = document.getElementById('pf-ctl');
+  [['L', 'Leaf length L', 10, 60, 1, 0, ' mm'], ['t', 'Leaf thickness t', 0.3, 2, 0.05, 2, ' mm'], ['b', 'Leaf width b', 4, 30, 1, 0, ' mm'], ['d', 'Displacement δ', 0, 8, 0.1, 1, ' mm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  sel.onchange = info; info();
+})();
+
+/* ---------- Sim 3: snap-fit ---------- */
+(function () {
+  const S = { L: 18, t: 1.6, b: 6, y: 1.2, a: 30 }, sel = fillSel('sf-mat', 'PETG'), taper = document.getElementById('sf-taper');
+  const canvas = document.getElementById('sf-canvas'), out = document.getElementById('sf-out');
+  const eps = () => (taper.checked ? 0.92 : 1.5) * S.t * S.y / (S.L * S.L) * 100;
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const m = MAT[sel.value], sc = Math.min((w * 0.7) / S.L, 14), amp = Math.max(1, Math.min(4, 0.2 * S.L / S.y)), t0 = Math.max(3, S.t * sc), x0 = w * 0.12, y0 = h * 0.3, color = col[verdict(eps(), m)[0]], dy = S.y * amp * sc;
+    c.fillStyle = col.muted + '88'; c.fillRect(x0 - 28, y0 - 40, 28, 130);
+    c.fillStyle = color + '88'; c.strokeStyle = color; c.lineWidth = 2; c.beginPath();
+    const N = 30, top = [], bot = [];
+    for (let i = 0; i <= N; i++) { const s = i / N, th = t0 * (taper.checked ? 1 - 0.5 * s : 1), yy = y0 + dy * (3 * s * s - s * s * s) / 2; top.push([x0 + s * S.L * sc, yy - th / 2]); bot.push([x0 + s * S.L * sc, yy + th / 2]); }
+    top.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); const tip = bot[N]; c.lineTo(tip[0], tip[1] + S.y * sc * 1.4); c.lineTo(tip[0] - S.y * sc * 1.4 / Math.tan(S.a * Math.PI / 180), tip[1]); bot.slice().reverse().forEach(p => c.lineTo(p[0], p[1])); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('deflection drawn ×' + amp.toFixed(1), 10, h * 0.55);
+    strainBar(c, w, h * 0.72, 16, eps(), m, col);
+  });
+  function info() {
+    const m = MAT[sel.value], e = eps(), v = verdict(e, m), I = S.b * S.t ** 3 / 12, F = 3 * m.E * I * S.y / S.L ** 3, ta = Math.tan(S.a * Math.PI / 180), W = F * (0.3 + ta) / (1 - 0.3 * ta);
+    out.innerHTML = 'Root strain <strong style="color:var(--' + v[0] + ')">' + e.toFixed(2) + '%</strong>: ' + v[1] + '. Deflection force <strong>' + F.toFixed(1) + ' N</strong>' + (taper.checked ? ' (somewhat less when tapered)' : '') + '; push-on force with a ' + S.a + '° lead-in ≈ <strong>' + W.toFixed(1) + ' N</strong>.' + (e > m.c ? ' Fix: longer arm (strain falls as L²), thinner, shallower undercut, taper, or a tougher material.' : '');
+    view.redraw();
+  }
+  const hs = document.getElementById('sf-ctl');
+  [['L', 'Arm length L', 6, 40, 1, 0, ' mm'], ['t', 'Arm thickness t', 0.8, 4, 0.1, 1, ' mm'], ['b', 'Arm width b', 3, 15, 1, 0, ' mm'], ['y', 'Undercut y', 0.4, 3, 0.1, 1, ' mm'], ['a', 'Lead-in angle', 15, 70, 1, 0, '°']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  sel.onchange = taper.onchange = info; info();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 8 · Belts, chains and flexible drives</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="8">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 8</p>
+<h1>Belts, chains and flexible drives</h1>
+<p class="lead">When two shafts are far apart, gears become a pile of large wheels. A loop of belt, chain or cable does the same job with a fraction of the material, forgives misalignment, and is quiet. Flexible drives are also the easiest way to turn a motor's rotation into a long, fast linear motion, which is why your printer's own axes run on belts.</p>
+
+<h2>8.1 When to use which</h2>
+<table>
+  <tr><th></th><th>Timing belt</th><th>Friction belt (flat, V, round)</th><th>Chain</th><th>Cable / capstan</th><th>Gears</th></tr>
+  <tr><td>Exact ratio, no slip</td><td>Yes</td><td>No (slips by design)</td><td>Yes</td><td>Capstan: no; fixed drum: yes</td><td>Yes</td></tr>
+  <tr><td>Shaft spacing</td><td>Any, flexible</td><td>Any</td><td>Any, flexible</td><td>Any</td><td>Fixed, close</td></tr>
+  <tr><td>Load capacity</td><td>Medium</td><td>Low–medium</td><td>High</td><td>Low–medium (cable strength)</td><td>High</td></tr>
+  <tr><td>Noise</td><td>Low</td><td>Very low</td><td>Medium</td><td>Low</td><td>Medium</td></tr>
+  <tr><td>Lubrication</td><td>None</td><td>None</td><td>Needed</td><td>None</td><td>Helpful</td></tr>
+  <tr><td>Overload behaviour</td><td>Skips teeth</td><td>Slips (protects the drive)</td><td>Breaks or skips</td><td>Slips or stretches</td><td>Breaks teeth</td></tr>
+  <tr><td>Printed-part friendly</td><td>Good (with bought pulleys)</td><td>Very good</td><td>OK (printed sprockets, light loads)</td><td>Very good</td><td>Good</td></tr>
+</table>
+<p>Rule of thumb: <strong>precise ratio and linear motion → timing belt; light, quiet or slip-protected drive → friction belt; heavy load or outdoor → chain; remote actuation, small spaces, tendon-type motion → cable.</strong></p>
+
+<h2>8.2 Timing belts</h2>
+<p>A timing belt is a reinforced rubber belt with teeth that engage grooves in a pulley. It cannot slip, so the speed ratio is the tooth ratio. The belt's strength is in its embedded <strong>fibre cords</strong> (glass, aramid or steel), which is why a thin belt can pull so hard without stretching.</p>
+<table>
+  <tr><th>Profile</th><th>Pitch</th><th>Where you meet it</th></tr>
+  <tr><td>GT2</td><td>2 mm</td><td>3D printers, small CNC, camera sliders; the hobby standard (belts 6 mm and 9 mm wide)</td></tr>
+  <tr><td>GT3 / HTD 3M</td><td>3 mm</td><td>Small robots, more torque than GT2</td></tr>
+  <tr><td>HTD 5M / GT5</td><td>5 mm</td><td>Heavier machines; large enough that printed pulleys are practical</td></tr>
+  <tr><td>T2.5, T5, XL, MXL</td><td>2.5, 5, 5.08, 2.032 mm</td><td>Older profiles, inch series (XL, MXL)</td></tr>
+</table>
+<p><strong>Always match belt and pulley profile</strong> (a GT2 belt on an MXL pulley fits sloppily and wears out). Belt length is quoted as a <strong>tooth count</strong> (GT2-300 = 150 teeth × 2 mm = 300 mm). Pulleys have a bore (5 mm or 8 mm), a tooth count (16–20 is common), and often flanges to keep the belt on.</p>
+
+<h3>The geometry you need</h3>
+<div class="eq">Pitch diameter  d = z · p / π            (p = tooth pitch, z = teeth)<br>
+Ratio           i = z₂ / z₁<br>
+Belt length     L ≈ 2C + π(D + d)/2 + (D − d)² / (4C)<br>
+Wrap angle      θ = π − 2·asin((D − d)/(2C))     (small pulley)<br>
+Teeth in mesh   z₁ · θ / 2π     (want ≥ 6 for a loaded small pulley)</div>
+<p>A small pulley means the belt bends tightly (shorter belt life) and has fewer teeth engaged (more risk of skipping). For GT2, use <strong>16–20 teeth or more</strong> for the driving pulley.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Belt drive layout</h4>
+  <p class="desc">Choose the pulleys and the centre distance you want. The calculator finds the nearest standard belt length, the true centre distance with that belt, and how much adjustment you must build into the mounting.</p>
+  <canvas id="bl-canvas"></canvas>
+  <div class="row"><label>Profile <select id="bl-pitch"><option value="2">GT2 (2 mm)</option><option value="3">HTD 3M (3 mm)</option><option value="5">HTD 5M (5 mm)</option></select></label><button id="bl-run" class="on">Pause</button></div>
+  <div class="controls" id="bl-ctl"></div>
+  <div class="readout" id="bl-out"></div>
+</div>
+
+<h3>Tension: tight enough, not tighter</h3>
+<ul>
+  <li>A timing belt needs <strong>pre-tension</strong> so the slack side doesn't go slack under load and the teeth stay seated. Too loose: tooth skipping, backlash, flapping. Too tight: belt wear, bearing wear, noise, and printed parts bending.</li>
+  <li><strong>Always provide a way to tension</strong>: a slotted motor mount, an eccentric or a spring-loaded idler, a tension screw, a tensioner plate. Never design a fixed centre distance and hope the belt length matches.</li>
+  <li><strong>Measuring:</strong> pluck the free span like a guitar string. Natural frequency <code>f = (1/2L)·√(T/m′)</code> (L = span length, T = tension, m′ = belt mass per unit length from the datasheet), so you can set tension by ear or with a phone frequency app.</li>
+  <li><strong>Idlers</strong> on the toothed side should be toothed (or at least as big as the minimum pulley); a smooth idler on the back of the belt can be small but should still have diameter &gt; ~20 mm for GT2.</li>
+</ul>
+
+<h2>8.3 Making belts work with printed parts</h2>
+<ul>
+  <li><strong>Buy the pulleys</strong> for GT2: metal 16/20T pulleys with grub screws are cheap and precise. Printed GT2 teeth are 0.75 mm features: unreliable. For HTD 5M and larger, printed pulleys work, and so do V-grooves and flat crowned pulleys.</li>
+  <li><strong>Belt clamps</strong>: to attach a belt to a carriage, print a clamp with a toothed bed matching the belt (a GT2 clamp is printable at 0.1 mm layers with a fine nozzle setting), clamp the two ends overlapping teeth-to-teeth, or loop both ends with a printed block and screw.</li>
+  <li><strong>Alignment</strong>: pulleys must be in the same plane (to within about 1 mm) and shafts parallel. Misalignment makes the belt climb flanges and walk off. Print the shaft supports in a single part when you can (chapter 4).</li>
+  <li><strong>Route belt runs parallel to the motion axis</strong> on linear drives, and keep both runs of the belt at the same height, or the carriage will twist.</li>
+  <li><strong>Flat belts</strong> (and round belts or rubber bands): crown the pulley, i.e. make its face slightly convex (a 1–2° taper from the centre), and the belt self-centres. Flanges on both sides fight the belt instead.</li>
+  <li><strong>Stiff frame</strong>: belt tension is a continuous force on your printed parts. A 6 mm GT2 belt at printer tension pulls with tens of newtons on each pulley; a thin PLA bracket will bow over a few weeks (creep, chapter 2). Use thick walls, ribs and PETG or nylon.</li>
+</ul>
+
+<h2>8.4 Linear belt drives</h2>
+<p>A belt over a pair of pulleys, clamped to a carriage, turns motor rotation into long travel. The key numbers:</p>
+<div class="eq">Travel per revolution = z · p            (e.g. 20 teeth × 2 mm = 40 mm)<br>
+Steps per mm = (steps_per_rev × microsteps) / (z · p)<br>
+Belt force F = T · η / r_pitch</div>
+<p>Compared with a leadscrew (chapter 9), a belt is <strong>fast, long-travelling, cheap and low in backlash</strong>, but <strong>not self-locking</strong> (it can be pushed back), and <strong>stretchy</strong> over very long spans or under heavy accelerating loads. It also cannot hold a vertical load without power: use a brake, a counterweight or a leadscrew for Z axes.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · Linear belt drive calculator</h4>
+  <p class="desc">A stepper motor (200 steps/rev) with a pulley moves a carriage. Set the pulley, the microstepping, the motor's usable torque and the moving mass.</p>
+  <div class="controls" id="ld-ctl"></div>
+  <div class="readout" id="ld-out"></div>
+</div>
+
+<h2>8.5 Chains and sprockets</h2>
+<p>A roller chain (the bicycle kind) carries far more load than a belt of the same width, tolerates dirt and heat, and does not slip. It needs lubrication, has a bit of slack, and makes noise. Basic formulas:</p>
+<div class="eq">Sprocket pitch diameter  D = p / sin(180° / z)<br>
+Chain length (links)     L ≈ 2C/p + (z₁ + z₂)/2 + ((z₂ − z₁) / 2π)² · p/C<br>
+(use an even number of links to avoid an offset link)</div>
+<p><strong>Chordal action:</strong> a chain wraps a sprocket as a polygon, not a circle, so the chain's speed pulsates with every tooth. The speed variation is about <code>1 − cos(π/z)</code> (7.6% at 8 teeth, 1.7% at 17, 0.8% at 25). Use 17+ teeth for smooth drives; small sprockets run rough and wear fast.</p>
+
+<div class="sim">
+  <h4>Simulation 3 · Chordal action</h4>
+  <p class="desc">The sprocket is a polygon of z sides (the pitch points), inside its pitch circle. The chain lifts and drops as each link seats, so its speed varies at the rate shown.</p>
+  <canvas id="ch-canvas"></canvas>
+  <div class="controls" id="ch-ctl"></div>
+  <div class="readout" id="ch-out"></div>
+</div>
+
+<p><strong>Printed chains.</strong> A print-in-place chain (links with 0.3–0.5 mm clearance, chapter 4) works for light loads, toys, and demonstration models, with printed sprockets. For real loads, buy a small metric or bicycle chain and print the mounts; printed links wear and stretch quickly.</p>
+
+<h2>8.6 Cables, capstans and tendons</h2>
+<p>A cable can only pull, never push, but it is light, flexible, and can route around corners through pulleys or a Bowden sleeve. Used for camera sliders, cable-driven robots, mechanical hands (tendons), winches, and curtain/blind mechanisms.</p>
+<ul>
+  <li><strong>Fixed-drum drive:</strong> the cable is anchored to a drum and wound around it in a groove. Positive, no slip, precise: one turn of the drum moves the cable by the circumference. The cable has to be wound on and off in the same groove: use a helical groove for multi-turn travel.</li>
+  <li><strong>Capstan (friction) drive:</strong> the cable wraps a smooth drum a few turns and is pulled by friction, with no anchor. The held tension and the pulling tension are related by <code>T_load = T_hold · e^(μθ)</code> (θ in radians), so a small hold force controls a large load, which is why a sailor can hold a boat with a few turns on a cleat.</li>
+  <li><strong>Return:</strong> a cable can't push back, so use a second cable on an opposing drum (antagonistic pair), a spring, or a loop (a closed cable loop around two pulleys).</li>
+  <li><strong>Stretch and creep:</strong> use low-stretch line (braided Dyneema/UHMWPE, steel wire) for precision; avoid nylon or cotton for precise drives. Drum and pulley diameters should be large: &gt; 10–20× the cable diameter for fibre, much more for steel wire.</li>
+  <li><strong>Anchor:</strong> cables slip out of knots in smooth plastic. Pass the cable through a hole, tie a knot larger than the hole, or use a crimp or a clamp plate. Chamfer the exit edge to stop it fraying.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 4 · Capstan</h4>
+  <p class="desc">How much load can a few turns of rope hold? Hold the rope at 20 N, set the friction and the number of wraps. The curves show the multiplication for three friction levels.</p>
+  <canvas id="cp-canvas"></canvas>
+  <div class="controls" id="cp-ctl"></div>
+  <div class="readout" id="cp-out"></div>
+</div>
+
+<h2>8.7 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Belt skips teeth under load</td><td>Too loose; too few teeth engaged; wrong profile; overload</td><td>Tension; larger small pulley; ≥ 6 teeth in mesh; wider belt</td></tr>
+  <tr><td>Belt walks off the pulley</td><td>Pulleys misaligned or not parallel; no flange; crown wrong</td><td>Align in one plane; add flanges (toothed belts) or crown (flat belts)</td></tr>
+  <tr><td>Noise or whining</td><td>Belt too tight; pulley rub; misaligned</td><td>Reduce tension; check flange clearance</td></tr>
+  <tr><td>Ripples or "ghosting" in motion</td><td>Belt vibration at its natural frequency; loose idler</td><td>Shorten free span; adjust tension; stiffen idler mounts</td></tr>
+  <tr><td>Pulley slips on the shaft</td><td>No flat or set screw on the shaft; round fit</td><td>D-flat shaft with grub screw on the flat</td></tr>
+  <tr><td>Backlash in a linear axis</td><td>Belt stretch or loose clamp</td><td>Preload, shorter span, steel-cord belt, firm clamp</td></tr>
+  <tr><td>Frame bows and the belt loosens over weeks</td><td>Creep in a thin printed bracket</td><td>Thicker walls, ribs, stiffer material or a metal bar</td></tr>
+  <tr><td>Chain rattles or jumps</td><td>Slack; worn sprocket; too few teeth</td><td>Adjust tension; ≥ 17 teeth; replace sprockets</td></tr>
+  <tr><td>Cable slips on the capstan</td><td>Too few wraps or too smooth a drum</td><td>Add turns (the grip grows exponentially); rougher drum surface</td></tr>
+</table>
+
+<h2>8.8 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Profile and pitch of belt and pulleys match.</li>
+  <li>☐ Small pulley ≥ 16 teeth (GT2) and ≥ 6 teeth in mesh.</li>
+  <li>☐ A tensioning method is built in; belt runs aligned and parallel.</li>
+  <li>☐ Frame stiff enough for the belt's pull (ribs, PETG/nylon).</li>
+  <li>☐ Pulleys fixed to shafts with a flat and grub screw.</li>
+  <li>☐ For cables: low-stretch line, large pulleys, anchored securely, return path planned.</li>
+  <li>☐ Chains: ≥ 17 teeth, even link count, lubricated.</li>
+</ul>
+<ul>
+  <li>Designing the exact centre distance for a belt length, with no adjustment.</li>
+  <li>Relying on a belt to hold a vertical load.</li>
+  <li>Using a printed GT2 pulley with 0.2 mm resolution teeth and wondering why it skips.</li>
+  <li>Cranking belt tension to cure slop; it only wrecks bearings and brackets.</li>
+</ul>
+
+<h2>8.9 Check yourself</h2>
+<details class="quiz"><summary>A 20-tooth GT2 pulley drives a 60-tooth GT2 pulley. What are the ratio, the pitch diameters, and travel per motor revolution if the belt were instead clamped to a carriage on the 20T pulley?</summary>
+<p>Ratio 3:1. Pitch diameters: 20·2/π = 12.7 mm and 60·2/π = 38.2 mm. Travel per revolution of the 20T pulley = 20 × 2 mm = <strong>40 mm</strong>.</p></details>
+<details class="quiz"><summary>A rope with μ = 0.3 is wrapped 2 turns around a post and you hold it with 20 N. What load can it hold?</summary>
+<p>θ = 2 × 2π = 12.57 rad. e^(0.3 × 12.57) = e^3.77 ≈ 43. Load ≈ 20 × 43 ≈ <strong>860 N</strong>. Each extra turn multiplies it by e^(0.3·2π) ≈ 6.6.</p></details>
+<details class="quiz"><summary>Why does a 9-tooth sprocket run rougher than a 25-tooth one?</summary>
+<p>Chordal action: the chain's effective radius varies by 1 − cos(π/z), which is ~6% at 9 teeth but only ~0.8% at 25. Fewer teeth means a rougher, noisier, faster-wearing drive.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2;
+
+/* ---------- Sim 1: belt layout ---------- */
+(function () {
+  const S = { z1: 20, z2: 40, C: 120, p: 2, ph: 0 };
+  const pitchSel = document.getElementById('bl-pitch');
+  // pitch length of an open belt for pitch radii r (small) and R (large) at centre distance C
+  const lenOf = (r, R, C) => { const g = Math.asin((R - r) / C); return 2 * C * Math.cos(g) + (Math.PI + 2 * g) * R + (Math.PI - 2 * g) * r; };
+  const solveC = (r, R, L) => { let lo = R - r + 0.01, hi = L; if (L < lenOf(r, R, lo)) return null; for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; lenOf(r, R, mid) < L ? lo = mid : hi = mid; } return (lo + hi) / 2; };
+  const calc = () => {
+    const r = S.z1 * S.p / TAU, R = S.z2 * S.p / TAU, Lideal = lenOf(Math.min(r, R), Math.max(r, R), S.C), Nb = Math.round(Lideal / S.p), L = Nb * S.p;
+    const Cact = solveC(Math.min(r, R), Math.max(r, R), L), ra = Math.min(r, R), Ra = Math.max(r, R);
+    const wrap = Cact ? Math.PI - 2 * Math.asin((Ra - ra) / Cact) : 0;
+    return { r, R, Nb, L, Cact, wrap, mesh: Math.min(S.z1, S.z2) * wrap / TAU, dC: Cact ? Cact - S.C : 0 };
+  };
+  const canvas = document.getElementById('bl-canvas'), out = document.getElementById('bl-out');
+  const view = Sim.make(canvas, 0.45, (c, w, h, col) => {
+    const k = calc(); if (!k.Cact) return;
+    const small = Math.min(k.r, k.R), big = Math.max(k.r, k.R), sc = Math.min((w - 40) / (k.Cact + small + big), (h - 30) / (2 * big)), cx = 20 + small * sc + (w - 40 - (k.Cact + small + big) * sc) / 2, cy = h / 2;
+    const x1 = cx, x2 = cx + k.Cact * sc, rs = small * sc, rb = big * sc, g = Math.asin((big - small) / k.Cact);
+    c.strokeStyle = col.accent2; c.lineWidth = 4;
+    c.beginPath(); c.arc(x1, cy, rs, Math.PI / 2 + g, 3 * Math.PI / 2 - g, false);
+    c.lineTo(x2 + rb * Math.cos(-(Math.PI / 2 - g)), cy + rb * Math.sin(-(Math.PI / 2 - g)));
+    c.arc(x2, cy, rb, -(Math.PI / 2 - g), Math.PI / 2 - g, false);
+    c.closePath(); c.stroke();
+    const teeth = (x, rr, z, dir) => { for (let t = 0; t < z; t++) { const a = S.ph * dir + t * TAU / z; c.strokeStyle = col.muted; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x + Math.cos(a) * (rr - 5), cy + Math.sin(a) * (rr - 5)); c.lineTo(x + Math.cos(a) * (rr - 1), cy + Math.sin(a) * (rr - 1)); c.stroke(); } };
+    const zs = k.r <= k.R ? S.z1 : S.z2, zb = k.r <= k.R ? S.z2 : S.z1;
+    c.fillStyle = col.accent + '33'; [[x1, rs], [x2, rb]].forEach(q => { c.beginPath(); c.arc(q[0], cy, q[1] - 2, 0, TAU); c.fill(); });
+    teeth(x1, rs, zs, 1); teeth(x2, rb, zb, -zs / zb);
+    Sim.dot(c, x1, cy, 3, col.ink); Sim.dot(c, x2, cy, 3, col.ink);
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText('C = ' + k.Cact.toFixed(1) + ' mm', (x1 + x2) / 2, cy + big * sc + 14 > h - 4 ? h - 4 : cy + 4);
+  });
+  function info() {
+    const k = calc(), i = S.z2 / S.z1, warn = [];
+    if (!k.Cact) { out.innerHTML = '<strong style="color:var(--warn)">The pulleys would touch or overlap at this centre distance: increase it.</strong>'; return; }
+    if (Math.min(S.z1, S.z2) < (S.p === 2 ? 16 : 14)) warn.push('small pulley below the recommended minimum teeth: tight bend, short belt life');
+    if (k.mesh < 6) warn.push('only ' + k.mesh.toFixed(1) + ' teeth in mesh on the small pulley (want ≥ 6); the belt may skip');
+    if (k.R + k.r > k.Cact * 0.98) warn.push('pulleys nearly touching');
+    out.innerHTML = 'Ratio <strong>' + i.toFixed(2) + ':1</strong> · pitch Ø ' + (2 * k.r).toFixed(1) + ' / ' + (2 * k.R).toFixed(1) + ' mm · ideal belt ' + (S.p === 2 ? 'GT2' : S.p === 3 ? '3M' : '5M') + '-' + (k.Nb * S.p) + ' (<strong>' + k.Nb + ' teeth</strong>) → real centre distance <strong>' + k.Cact.toFixed(1) + ' mm</strong> (' + (k.dC >= 0 ? '+' : '') + k.dC.toFixed(1) + ' mm vs target). ' +
+      'Build in at least <strong>±' + Math.max(2, Math.abs(k.dC) + S.p).toFixed(0) + ' mm</strong> of adjustment. Small-pulley wrap ' + (k.wrap * 180 / Math.PI).toFixed(0) + '°, ' + k.mesh.toFixed(1) + ' teeth in mesh.' + (warn.length ? '<br><strong style="color:var(--warn)">Check: ' + warn.join('; ') + '.</strong>' : '');
+  }
+  const refresh = () => { view.redraw(); info(); };
+  const hs = document.getElementById('bl-ctl');
+  Sim.slider(hs, { label: 'Pulley 1 teeth', min: 10, max: 60, value: S.z1, onInput: v => { S.z1 = v; refresh(); } });
+  Sim.slider(hs, { label: 'Pulley 2 teeth', min: 10, max: 100, value: S.z2, onInput: v => { S.z2 = v; refresh(); } });
+  Sim.slider(hs, { label: 'Target centre', min: 30, max: 400, value: S.C, unit: ' mm', onInput: v => { S.C = v; refresh(); } });
+  pitchSel.onchange = () => { S.p = +pitchSel.value; refresh(); };
+  const loop = Sim.loop(dt => { S.ph += dt * 1.5; view.redraw(); });
+  document.getElementById('bl-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('bl-run'));
+  info();
+})();
+
+/* ---------- Sim 2: linear drive calculator ---------- */
+(function () {
+  const S = { z: 20, p: 2, micro: 16, T: 0.3, m: 1.5, rpm: 600 };
+  const out = document.getElementById('ld-out');
+  function refresh() {
+    const trav = S.z * S.p, spmm = 200 * S.micro / trav, r = trav / TAU / 1000, F = S.T * 0.9 / r, v = S.rpm / 60 * trav / 1000, aMax = F / 2 / S.m;
+    out.innerHTML = 'Travel per motor turn <strong>' + trav + ' mm</strong> · <strong>' + spmm.toFixed(1) + ' steps/mm</strong> (one microstep = <strong>' + (1000 / spmm).toFixed(1) + ' µm</strong>; one full step = ' + (trav / 200 * 1000).toFixed(0) + ' µm) · belt pull at the given torque <strong>' + F.toFixed(0) + ' N</strong> · speed at ' + S.rpm + ' rpm = <strong>' + v.toFixed(2) + ' m/s</strong> · acceleration limit with half the torque kept in reserve: <strong>' + aMax.toFixed(1) + ' m/s²</strong> (' + (aMax / 9.81).toFixed(1) + ' g).' +
+      '<br><span style="color:var(--muted)">Microstepping gives finer commanded steps; real positioning accuracy is limited by the motor, belt stretch and play, typically a few tenths of a millimetre, not the microstep size.</span>';
+  }
+  const hs = document.getElementById('ld-ctl');
+  [['z', 'Pulley teeth', 12, 60, 1, 0, ''], ['p', 'Belt pitch', 2, 5, 1, 0, ' mm'], ['micro', 'Microsteps', 1, 64, 1, 0, '×'], ['T', 'Usable torque', 0.05, 1.0, 0.05, 2, ' N·m'], ['m', 'Moving mass', 0.1, 10, 0.1, 1, ' kg'], ['rpm', 'Motor speed', 60, 1500, 30, 0, ' rpm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; refresh(); } }));
+  refresh();
+})();
+
+/* ---------- Sim 3: chordal action ---------- */
+(function () {
+  const S = { z: 9, ph: 0 };
+  const canvas = document.getElementById('ch-canvas'), out = document.getElementById('ch-out');
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const R = Math.min(h / 2 - 14, w * 0.22), cx = w * 0.27, cy = h / 2, z = S.z, rin = R * Math.cos(Math.PI / z);
+    c.strokeStyle = col.line; c.setLineDash([4, 4]); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = col.accent; c.lineWidth = 3; c.fillStyle = col.accent + '33'; c.beginPath();
+    for (let i = 0; i <= z; i++) { const a = S.ph + i * TAU / z; i ? c.lineTo(cx + R * Math.cos(a), cy - R * Math.sin(a)) : c.moveTo(cx + R * Math.cos(a), cy - R * Math.sin(a)); } c.fill(); c.stroke();
+    for (let i = 0; i < z; i++) { const a = S.ph + i * TAU / z; Sim.dot(c, cx + R * Math.cos(a), cy - R * Math.sin(a), 3.5, col.accent2); }
+    // the chain rides over the highest vertex, so its height pulses between R*cos(pi/z) and R
+    let hmax = -1e9; for (let i = 0; i < z; i++) hmax = Math.max(hmax, R * Math.sin(S.ph + i * TAU / z));
+    Sim.line(c, cx - R * 0.6, cy - hmax, cx + R * 1.5, cy - hmax, col.accent2, 2.5);
+    // speed ripple plot (right)
+    const l = w * 0.58, pw = w - l - 14, t = 14, b = h - 28, ph = b - t, ZX = zz => l + (zz - 6) / 34 * pw, rip = zz => (1 - Math.cos(Math.PI / zz)) * 100, YM = 8.5, YP = v => b - Math.min(v, YM) / YM * ph;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'right';
+    [0, 2, 4, 6, 8].forEach(v => { c.beginPath(); c.moveTo(l, YP(v)); c.lineTo(l + pw, YP(v)); c.stroke(); c.fillText(v + '%', l - 4, YP(v) + 4); });
+    c.textAlign = 'center'; [6, 17, 25, 40].forEach(zz => c.fillText(zz, ZX(zz), h - 10));
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath(); for (let zz = 6; zz <= 40; zz += 0.5) { zz === 6 ? c.moveTo(ZX(zz), YP(rip(zz))) : c.lineTo(ZX(zz), YP(rip(zz))); } c.stroke();
+    Sim.dot(c, ZX(S.z), YP(rip(S.z)), 6, col.accent2, col.surface);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('speed variation vs teeth', l + 4, t + 10);
+  });
+  function info() { const r = (1 - Math.cos(Math.PI / S.z)) * 100; out.innerHTML = '<strong>' + S.z + ' teeth</strong> → chain speed varies by about <strong style="color:var(--' + (r < 1.2 ? 'good' : r < 3 ? 'accent2' : 'warn') + ')">' + r.toFixed(1) + '%</strong> per tooth passing. ' + (S.z < 17 ? 'Below 17 teeth the drive gets noticeably rough.' : 'Smooth enough for most uses.'); }
+  Sim.slider(document.getElementById('ch-ctl'), { label: 'Sprocket teeth', min: 6, max: 40, value: S.z, onInput: v => { S.z = v; view.redraw(); info(); } });
+  const loop = Sim.loop(dt => { S.ph += dt * 0.8; view.redraw(); }); loop.toggle(); info();
+})();
+
+/* ---------- Sim 4: capstan ---------- */
+(function () {
+  const S = { mu: 0.3, turns: 2, Fh: 20 };
+  const canvas = document.getElementById('cp-canvas'), out = document.getElementById('cp-out');
+  const ratio = (mu, t) => Math.exp(mu * t * TAU);
+  const view = Sim.make(canvas, 0.6, (c, w, h, col) => {
+    const topH = h * 0.55, r = Math.min(topH / 2 - 20, 50), cx = w * 0.5, cy = topH / 2 + 4, th = S.turns * TAU;
+    c.fillStyle = col.accent + '33'; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.fill(); c.strokeStyle = col.accent; c.lineWidth = 2; c.stroke();
+    // rope: enters from the left along the bottom tangent, wraps CCW (screen) turns, leaves on its tangent
+    const R = ratio(S.mu, S.turns), thick = Math.min(10, 2 + Math.log10(R + 1) * 2.6);
+    Sim.line(c, 10, cy + r, cx, cy + r, col.warn, thick);
+    c.strokeStyle = col.accent2; c.lineWidth = 3; c.beginPath();
+    for (let t = 0; t <= th; t += 0.05) { const ph = Math.PI / 2 - t, rr = r + 2 + 2.5 * (t / TAU); const x = cx + rr * Math.cos(ph), y = cy + rr * Math.sin(ph); t === 0 ? c.moveTo(x, y) : c.lineTo(x, y); } c.stroke();
+    const pe = Math.PI / 2 - th, re = r + 2 + 2.5 * S.turns, ex = cx + re * Math.cos(pe), ey = cy + re * Math.sin(pe), dx = Math.sin(pe), dy = -Math.cos(pe);
+    Sim.line(c, ex, ey, ex + dx * 90, ey + dy * 90, col.good, 2.2);
+    c.fillStyle = col.warn; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('load ' + (S.Fh * R).toFixed(0) + ' N', 12, cy + r - 12);
+    c.fillStyle = col.good; c.fillText('hold ' + S.Fh + ' N', Math.min(w - 80, ex + dx * 90 + 4), ey + dy * 90 + 4);
+    // ratio plot
+    const l = 40, rr2 = 10, pt = topH + 22, pb = h - 22, pw = w - l - rr2, ph = pb - pt, XP = tt => l + tt / 5 * pw, YP = v => pb - Math.min(3.5, Math.log10(v)) / 3.5 * ph;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.textAlign = 'right';
+    [1, 10, 100, 1000].forEach(v => { c.beginPath(); c.moveTo(l, YP(v)); c.lineTo(l + pw, YP(v)); c.stroke(); c.fillText(v + '×', l - 4, YP(v) + 4); });
+    c.textAlign = 'center'; [0, 1, 2, 3, 4, 5].forEach(tt => c.fillText(tt, XP(tt), h - 6));
+    [0.1, 0.2, 0.4].forEach((mu, i) => { c.strokeStyle = col.muted + '88'; c.lineWidth = 1.5; c.beginPath(); for (let tt = 0; tt <= 5; tt += 0.1) { tt === 0 ? c.moveTo(XP(tt), YP(ratio(mu, tt))) : c.lineTo(XP(tt), YP(ratio(mu, tt))); } c.stroke(); c.fillStyle = col.muted; c.textAlign = 'left'; c.fillText('μ ' + mu, XP(5) - 36, YP(Math.min(900, ratio(mu, 4.9))) - 3 + i * 0); });
+    c.strokeStyle = col.accent; c.lineWidth = 3; c.beginPath(); for (let tt = 0; tt <= 5; tt += 0.1) { tt === 0 ? c.moveTo(XP(tt), YP(ratio(S.mu, tt))) : c.lineTo(XP(tt), YP(ratio(S.mu, tt))); } c.stroke();
+    Sim.dot(c, XP(S.turns), YP(R), 6, col.accent2, col.surface);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('force multiplication vs turns of wrap', l + 6, pt + 10);
+  });
+  function info() { const R = ratio(S.mu, S.turns); out.innerHTML = 'θ = ' + (S.turns * 360).toFixed(0) + '° = ' + (S.turns * TAU).toFixed(1) + ' rad → T<sub>load</sub> / T<sub>hold</sub> = e<sup>μθ</sup> = <strong>' + R.toFixed(1) + '</strong>: holding <strong>' + S.Fh + ' N</strong> controls up to <strong>' + (S.Fh * R).toFixed(0) + ' N</strong>.'; }
+  const hs = document.getElementById('cp-ctl'), up = () => { view.redraw(); info(); };
+  Sim.slider(hs, { label: 'Friction μ', min: 0.05, max: 0.6, step: 0.01, dec: 2, value: S.mu, onInput: v => { S.mu = v; up(); } });
+  Sim.slider(hs, { label: 'Turns of wrap', min: 0, max: 5, step: 0.25, dec: 2, value: S.turns, onInput: v => { S.turns = v; up(); } });
+  Sim.slider(hs, { label: 'Hold force', min: 1, max: 100, value: S.Fh, unit: ' N', onInput: v => { S.Fh = v; up(); } });
+  info();
+})();
+</script>
+</body>
+</html>

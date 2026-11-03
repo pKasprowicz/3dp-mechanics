@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 7 · Gears</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="7">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 7</p>
+<h1>Gears</h1>
+<p class="lead">Gears are the most widely used printed mechanism and the one with the most ways to go wrong. A well-made gear pair transmits motion with a fixed ratio, silently, forever. A badly made pair clicks, binds, skips or wears to dust in a week. The difference is a few concepts (module, pressure angle, backlash, centre distance) and a handful of printing rules.</p>
+
+<h2>7.1 What gears do</h2>
+<p>A gear pair transmits rotation with a <strong>fixed speed ratio</strong>, and trades speed for torque (or the reverse), reverses direction, shifts an axis sideways or turns it through an angle. Unlike a belt or a friction wheel, teeth cannot slip, so the ratio is exact; that is why clocks, printers, robot joints and gearboxes use them.</p>
+<p>The magic is the tooth shape. If the teeth are cut to the <strong>involute</strong> profile (the curve traced by the end of a string unwinding from a circle), the pair keeps a <em>perfectly constant</em> speed ratio even if the centre distance is slightly off. That tolerance to small centre-distance errors is exactly what makes involute gears the right choice for a 3D printer, where nothing is exactly where the CAD says it is.</p>
+
+<h2>7.2 The vocabulary you need</h2>
+<table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td><strong>Number of teeth, z</strong></td><td>Teeth on the gear.</td></tr>
+  <tr><td><strong>Module, m (mm)</strong></td><td>The size of the teeth: pitch diameter ÷ teeth, <code>m = d / z</code>. Bigger module, bigger and stronger teeth. Two gears mesh only if they have the <em>same module</em> and pressure angle. (Imperial equivalent: diametral pitch, <code>DP = z / d in inches</code>.)</td></tr>
+  <tr><td><strong>Pitch circle / diameter</strong></td><td>The imaginary circles of the two gears that roll on each other. <code>d = m·z</code>.</td></tr>
+  <tr><td><strong>Centre distance, a</strong></td><td><code>a = m·(z₁ + z₂) / 2</code>. This is the number you most need to get right.</td></tr>
+  <tr><td><strong>Ratio, i</strong></td><td><code>i = z₂ / z₁</code> (driven over driving). i &gt; 1 is a reduction: slower and stronger.</td></tr>
+  <tr><td><strong>Pressure angle, α</strong></td><td>The angle of the force direction between teeth. 20° is the modern standard (14.5° is old). Higher angle = stronger, thicker-rooted teeth, and fewer teeth possible without undercut.</td></tr>
+  <tr><td><strong>Addendum / dedendum</strong></td><td>Tooth height above and below the pitch circle: normally 1·m and 1.25·m.</td></tr>
+  <tr><td><strong>Backlash</strong></td><td>The deliberate gap between the non-driving flanks. Necessary so the teeth don't jam; it is the free rotation you feel when you reverse direction.</td></tr>
+  <tr><td><strong>Contact ratio, ε</strong></td><td>The average number of tooth pairs in contact. Needs to be above about 1.2 for smooth operation: at 1.0 the load transfers abruptly from one pair of teeth to the next.</td></tr>
+  <tr><td><strong>Undercut</strong></td><td>On a gear with too few teeth, the root below the base circle is cut away, weakening the tooth. At 20° pressure angle this starts below about <strong>17 teeth</strong>.</td></tr>
+  <tr><td><strong>Face width, b</strong></td><td>The thickness of the gear (along its axis). Strength is proportional to it.</td></tr>
+</table>
+
+<div class="sim">
+  <h4>Simulation 1 · Spur gear pair</h4>
+  <p class="desc">Real involute teeth, meshing. Change the module, the tooth counts, pressure angle and backlash. The readout reports the ratio, centre distance, contact ratio, undercut and a rough torque capacity for a printed pair. You can download either gear's outline as an SVG for your CAD.</p>
+  <canvas id="sp-canvas"></canvas>
+  <div class="row">
+    <label>Pressure angle <select id="sp-alpha"><option value="14.5">14.5°</option><option value="20" selected>20°</option><option value="25">25°</option></select></label>
+    <label>Material <select id="sp-mat"></select></label>
+    <button id="sp-run" class="on">Pause</button>
+    <button id="sp-svg1">SVG gear 1</button><button id="sp-svg2">SVG gear 2</button>
+  </div>
+  <div class="controls" id="sp-ctl"></div>
+  <div class="readout" id="sp-out"></div>
+</div>
+<p>Things to try: drop z₁ to 10 and see the undercut warning and the pointed, weakened teeth. Raise the backlash to 0.5 mm and see the visible gap; drop it to zero and see the teeth touching on both sides (it would bind in real life). Note that the centre distance is fixed at <code>m(z₁+z₂)/2</code>: any placement error in your print has to be absorbed by the backlash.</p>
+
+<h2>7.3 A catalog of gear types</h2>
+<table>
+  <tr><th>Type</th><th>What it does</th><th>Printing notes</th></tr>
+  <tr><td><strong>Spur</strong></td><td>Straight teeth, parallel shafts. Simplest, most efficient (~95%+).</td><td>Prints flat, perfectly. Slightly noisy. The default choice.</td></tr>
+  <tr><td><strong>Helical</strong></td><td>Teeth at an angle (helix, 15–30°). Smoother, quieter, stronger; creates axial thrust.</td><td>Prints well without supports in most cases. <strong>Herringbone (double helical)</strong> cancels thrust and is a favourite for printed gearboxes.</td></tr>
+  <tr><td><strong>Rack and pinion</strong></td><td>Rotation ↔ straight line: travel per turn = π·m·z.</td><td>Easy to print; long racks warp, so print in segments.</td></tr>
+  <tr><td><strong>Internal (ring) gear</strong></td><td>Teeth on the inside; the pinion runs inside. Same rotation direction, compact.</td><td>Needs more precise centre distance. The basis of planetary drives.</td></tr>
+  <tr><td><strong>Bevel</strong></td><td>Changes the shaft axis, usually by 90°.</td><td>The apex of both cones must coincide: tricky to print and mount. Often better bought. Straight bevel works with careful orientation or supports.</td></tr>
+  <tr><td><strong>Worm and wheel</strong></td><td>Very high ratio in one stage (e.g. 30:1), axes at 90°, can self-lock.</td><td>Low efficiency (30–60%), heat, and strong axial thrust. Best: a steel or brass worm with a nylon printed wheel.</td></tr>
+  <tr><td><strong>Cycloidal drive</strong></td><td>Eccentric + lobed disc + pins: 10–50:1 in one compact stage.</td><td>Popular in printed robotics; needs bearings on the eccentric and pins, and good tolerance.</td></tr>
+  <tr><td><strong>Strain-wave (harmonic)</strong></td><td>A flexing cup meshes with a ring: zero-backlash high reduction.</td><td>Very hard to print durably; mention only.</td></tr>
+</table>
+
+<h2>7.4 Ratios, torque, speed, and gear trains</h2>
+<p>For an ideal single stage with <code>i = z₂/z₁</code>: output speed = input speed ÷ i, output torque = input torque × i × η, where η is efficiency (assume ~0.9–0.95 per spur mesh for printed gears). Power in = power out (minus losses): <code>P = T·ω</code>.</p>
+<ul>
+  <li>An <strong>idler gear</strong> between two gears reverses the rotation direction but leaves the ratio unchanged.</li>
+  <li>A <strong>compound train</strong> puts two gears on one shaft: stage ratios multiply. 3:1 × 4:1 = 12:1.</li>
+  <li>Keep each printed stage to about <strong>1:5 or 1:6</strong>. Bigger ratios need a tiny pinion (undercut, weak) or a huge wheel. For more, add a stage.</li>
+  <li>Place the <strong>strongest, widest gears at the output</strong> end of the train, because torque grows by the ratio at each stage, and the final gears carry it.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 2 · Gear train builder</h4>
+  <p class="desc">Enter pinion and gear tooth counts for up to four stages (set a pinion to 0 to skip a stage). Compound gears share a shaft. Efficiency is assumed at 92% per mesh.</p>
+  <canvas id="gt-canvas"></canvas>
+  <div class="row" id="gt-presets"></div>
+  <div class="controls" id="gt-ctl"></div>
+  <div class="row"><label>Motor <input type="number" id="gt-rpm" value="3000" min="1"> rpm</label><label>Motor torque <input type="number" id="gt-tq" value="0.05" min="0" step="0.01"> N·m</label></div>
+  <div class="readout" id="gt-out"></div>
+</div>
+
+<h2>7.5 Planetary gears</h2>
+<p>A planetary (epicyclic) set puts a <strong>sun</strong> gear in the middle, several <strong>planets</strong> orbiting it on a <strong>carrier</strong>, and an internal <strong>ring</strong> gear around the outside. It is compact, coaxial (input and output on the same axis), and shares the load between planets, so a small printed set can carry a lot of torque.</p>
+<p>Ratios depend on which member you hold still. With teeth <code>Z_r = Z_s + 2·Z_p</code> (ring = sun + two planets), the common setups are:</p>
+<table>
+  <tr><th>Fixed</th><th>Input → output</th><th>Ratio</th></tr>
+  <tr><td>Ring</td><td>Sun → carrier</td><td><strong>1 + Z_r / Z_s</strong> (reduction, e.g. 4:1 to 10:1) — the usual gearbox</td></tr>
+  <tr><td>Sun</td><td>Ring → carrier</td><td>1 + Z_s / Z_r (small reduction)</td></tr>
+  <tr><td>Carrier</td><td>Sun → ring</td><td>−Z_r / Z_s (reverses direction)</td></tr>
+</table>
+<p><strong>Assembly condition:</strong> for N equally spaced planets to mesh simultaneously, <code>(Z_s + Z_r) / N</code> must be a whole number. Otherwise the planets cannot all be fitted without different tooth phasing.</p>
+
+<div class="sim">
+  <h4>Simulation 3 · Planetary gearset</h4>
+  <p class="desc">Real tooth profiles. Pick the fixed member, set the teeth and number of planets. The readout gives the ratio and checks the assembly condition. Try 12 / 12 / 3 planets (ring = 36).</p>
+  <canvas id="pl-canvas"></canvas>
+  <div class="row"><label>Setup <select id="pl-mode"><option value="rf">Ring fixed: sun in, carrier out</option><option value="sf">Sun fixed: ring in, carrier out</option><option value="cf">Carrier fixed: sun in, ring out</option></select></label>
+    <label>Planets <select id="pl-n"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label><button id="pl-run" class="on">Pause</button></div>
+  <div class="controls" id="pl-ctl"></div>
+  <div class="readout" id="pl-out"></div>
+</div>
+
+<h2>7.6 How strong is a printed gear?</h2>
+<p>A tooth is a small cantilever beam (chapter 2). The classic estimate, the <strong>Lewis equation</strong>, treats it as such: the tangential force a tooth can carry is</p>
+<div class="eq">F_t ≈ σ_allow · b · m · Y         Y ≈ π·(0.154 − 0.912 / z)   (20° teeth)<br>T = F_t · (d / 2)</div>
+<p>Hence: <strong>strength grows linearly with face width b</strong> and <strong>with module</strong> (more precisely, with m²·z, since torque = F·r). A bigger module is the most effective way to get a stronger gear, then face width, then more teeth. The values of σ<sub>allow</sub> in Simulation 1 are deliberately conservative figures for sustained use of printed plastic (bending fatigue, creep, layer anisotropy): treat the resulting torque as a <em>working</em> limit, not a failure load.</p>
+<p>Besides tooth bending, a gear can fail by <strong>wear</strong> (contact stress on the flanks: printed teeth wear into a polished groove, then to dust), by <strong>heat</strong> (the plastic softens at the contact, especially at high speed), and by <strong>shear of the hub or keyway</strong>, which is often the weakest link. Good pairings: nylon on steel pinion (a metal motor pinion on a nylon wheel); nylon on nylon with a lubricant; PETG on PETG for light duty; avoid PLA on PLA under load.</p>
+
+<h2>7.7 Printing gears: the rules that matter</h2>
+<ul>
+  <li><strong>Module ≥ 1.0 for a 0.4 mm nozzle.</strong> A tooth at module 1 is 1.57 mm thick at the pitch circle: only about 3–4 extrusion lines. Module 1.5–2 is the sweet spot for printed gears; below 1 the teeth are mostly noise.</li>
+  <li><strong>Use fewer, larger teeth</strong> (z ≥ 12–20) rather than many small ones, and avoid undercut: pinions below 17 teeth (20° pressure angle) are weak unless profile-shifted.</li>
+  <li><strong>Print gears flat</strong> (teeth profile in the XY plane): the teeth are cut in the most accurate plane, and layers run along the tooth, which is the strong direction. Use <strong>3–4+ walls</strong> and at least ~30% infill, or 100% for small gears. Use <strong>0.12–0.2 mm layers</strong>.</li>
+  <li><strong>Chamfer the bottom edge</strong> of the gear (0.3–0.5 mm) so the elephant foot does not close the root of the first layers and bind.</li>
+  <li><strong>Design in backlash</strong>: 0.1–0.2 mm at the pitch circle for module 1–1.5; up to 0.3–0.4 at module 2+ printed in warping materials. Tune with a test print. Better a little loose than binding.</li>
+  <li><strong>Centre distance is critical.</strong> It must be <code>m(z₁+z₂)/2</code> within roughly ±0.1 mm. Mount shafts in a <em>single printed part</em> (a gearbox frame) or use slotted holes to adjust, not two separately aligned brackets. Shaft holes should be reamed or sized by coupon test (chapter 4).</li>
+  <li><strong>Shafts and hubs.</strong> Support each shaft at both ends, ideally with bearings. Fix the gear on its shaft with a D-flat, grub screw, or a metal hub: a plain round press fit will slip (chapter 10).</li>
+  <li><strong>Thin rims break.</strong> Keep ≥ 2·m of material under the tooth roots and spoke wide wheels instead of one thin web.</li>
+  <li><strong>Material.</strong> Nylon or PETG over PLA for moving gears (chapter 3); lubricate with a little PTFE or lithium-free grease suitable for plastics.</li>
+</ul>
+
+<h2>7.8 Fault finding</h2>
+<table>
+  <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+  <tr><td>Whining or buzzing</td><td>Too little backlash; misalignment; low contact ratio; module too small</td><td>More backlash, rigid frame, helical teeth, larger module</td></tr>
+  <tr><td>Clicking once per turn</td><td>Eccentric hub; print seam bump; bent shaft</td><td>Ream bore, relocate seam, sand, check runout</td></tr>
+  <tr><td>Binds or tight spots</td><td>Centre distance too small; elephant foot; warped gear</td><td>Add 0.1–0.2 mm to centre distance; chamfer; fix warp</td></tr>
+  <tr><td>Skipping teeth under load</td><td>Centre distance too large; teeth too thin; loose hub</td><td>Reduce centre distance; bigger module or width; fix hub</td></tr>
+  <tr><td>Teeth wear to dust quickly</td><td>Soft material, sliding contact, misalignment, no lubricant</td><td>Nylon; lubricant; align shafts; smaller pitch-line speed</td></tr>
+  <tr><td>Whole gear wobbles</td><td>Loose shaft clearance; one-sided support</td><td>Support at both ends; bearings; tighter clearance fit</td></tr>
+  <tr><td>Heats up, softens</td><td>High speed, friction, sustained load, PLA</td><td>Slower; nylon; larger gears; light lubrication</td></tr>
+</table>
+
+<h2>7.9 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Same module and pressure angle on both gears.</li>
+  <li>☐ z ≥ 17 for pinions at 20° (or a deliberate profile shift).</li>
+  <li>☐ Contact ratio ≥ 1.2.</li>
+  <li>☐ Backlash 0.1–0.3 mm designed in; centre distance exact to ±0.1.</li>
+  <li>☐ Torque capacity estimated with a conservative σ, at module ≥ 1.5 and a sensible face width.</li>
+  <li>☐ Shafts supported at both ends; the gear is fixed positively on its shaft.</li>
+  <li>☐ Gears printed flat with 3+ walls; bottom chamfer applied.</li>
+</ul>
+<ul>
+  <li>Using a downloaded gear off the internet with unknown module and then matching it by eye.</li>
+  <li>Mounting two gears on separately printed brackets with no way to adjust the spacing.</li>
+  <li>Building a 1:20 single-stage reduction with a 7-tooth pinion.</li>
+  <li>Using PLA for a gear that's under constant load or warm.</li>
+</ul>
+
+<h2>7.10 Check yourself</h2>
+<details class="quiz"><summary>A 12-tooth pinion drives a 36-tooth gear at module 2. What are the ratio and centre distance?</summary>
+<p>Ratio = 36/12 = 3:1. Centre distance a = m(z₁ + z₂)/2 = 2·(12 + 36)/2 = <strong>48 mm</strong>. (Also: the 12-tooth pinion is below the 17-tooth undercut threshold; consider profile shift or a 17-tooth pinion with a 51-tooth wheel.)</p></details>
+<details class="quiz"><summary>A planetary gearbox has the ring fixed, a 12-tooth sun and three 12-tooth planets. What is the ratio, and can three planets be assembled?</summary>
+<p>Z_r = 12 + 2·12 = 36. Ratio = 1 + 36/12 = <strong>4:1</strong>. Assembly: (Z_s + Z_r)/N = 48/3 = 16, an integer, so yes. With 5 planets 48/5 is not an integer: no.</p></details>
+<details class="quiz"><summary>You need twice the torque from a printed pinion, same ratio and size constraints as far as possible. What's the most effective change?</summary>
+<p>Increase the face width (linear with torque) and, if you can, the module. Switching to nylon or adding a second helix (herringbone) also helps. Adding teeth at the same module increases the diameter, which also raises the torque.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script src="../assets/gears.js"></script>
+<script>
+const TAU = Math.PI * 2, D2R = Math.PI / 180;
+// Draw a polygon (points in gear frame) rotated by rot (rad, CCW) about (cx, cy) in screen px; y is flipped.
+function polyPath(c, pts, cx, cy, rot, sc) {
+  const ca = Math.cos(rot), sa = Math.sin(rot);
+  c.beginPath(); pts.forEach((p, i) => { const x = cx + (p[0] * ca - p[1] * sa) * sc, y = cy - (p[0] * sa + p[1] * ca) * sc; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath();
+}
+
+/* ---------- Sim 1: spur pair ---------- */
+(function () {
+  const MAT = { 'PETG': 8, 'PA (nylon)': 12, 'PA-CF': 15, 'PLA': 10, 'ABS / ASA': 8 };
+  const S = { m: 1.5, z1: 18, z2: 36, alpha: 20, bl: 0.15, b: 10, th: 0, mat: 'PETG' };
+  const matSel = document.getElementById('sp-mat'), alSel = document.getElementById('sp-alpha');
+  Object.keys(MAT).forEach(k => matSel.add(new Option(k + ' (' + MAT[k] + ' MPa)', k)));
+  let p1, p2;
+  const build = () => { const a = S.alpha * D2R; p1 = Gears.poly(S.z1, S.m, a, S.bl, false); p2 = Gears.poly(S.z2, S.m, a, S.bl, false); };
+  build();
+  const canvas = document.getElementById('sp-canvas'), out = document.getElementById('sp-out');
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const al = S.alpha * D2R, d1 = Gears.dims(S.z1, S.m, al), d2 = Gears.dims(S.z2, S.m, al), a = S.m * (S.z1 + S.z2) / 2;
+    const bw = d1.ra + a + d2.ra, bh = 2 * Math.max(d1.ra, d2.ra), sc = Math.min((w - 20) / bw, (h - 20) / bh);
+    const x1 = (w - bw * sc) / 2 + d1.ra * sc, y1 = h / 2, x2 = x1 + a * sc;
+    const r2 = Math.PI - Math.PI / S.z2 - S.th * S.z1 / S.z2;
+    polyPath(c, p1, x1, y1, S.th, sc); c.fillStyle = col.accent + '66'; c.fill(); c.strokeStyle = col.accent; c.lineWidth = 1.5; c.stroke();
+    polyPath(c, p2, x2, y1, r2, sc); c.fillStyle = col.accent2 + '66'; c.fill(); c.strokeStyle = col.accent2; c.stroke();
+    c.setLineDash([4, 4]); c.lineWidth = 1; c.strokeStyle = col.muted;
+    [[x1, d1.r], [x2, d2.r]].forEach(q => { c.beginPath(); c.arc(q[0], y1, q[1] * sc, 0, TAU); c.stroke(); });
+    c.strokeStyle = col.good; const px = x1 + d1.r * sc; c.beginPath(); c.moveTo(px - Math.sin(al) * 14 * sc * 1.5, y1 - Math.cos(al) * 14 * sc * 1.5); c.lineTo(px + Math.sin(al) * 14 * sc * 1.5, y1 + Math.cos(al) * 14 * sc * 1.5); c.stroke(); c.setLineDash([]);
+    Sim.dot(c, x1, y1, 3, col.ink); Sim.dot(c, x2, y1, 3, col.ink);
+  });
+  function info() {
+    const al = S.alpha * D2R, a = S.m * (S.z1 + S.z2) / 2, eps = Gears.contactRatio(S.z1, S.z2, S.m, al), zmin = Gears.minTeeth(al), i = S.z2 / S.z1;
+    const d1 = Gears.dims(S.z1, S.m, al), Ft = MAT[S.mat] * S.b * S.m * Gears.lewisY(Math.min(S.z1, S.z2)), T1 = Ft * d1.r / 1000;
+    const warns = [];
+    if (Math.min(S.z1, S.z2) < Math.floor(zmin)) warns.push('Undercut: fewer than ' + Math.floor(zmin) + ' teeth at ' + S.alpha + '° weakens the root.');
+    if (eps < 1.2) warns.push('Contact ratio ' + eps.toFixed(2) + ' is below 1.2: rough, noisy running.');
+    if (S.m < 1) warns.push('Module below 1: teeth only ~' + (Math.PI * S.m / 2).toFixed(1) + ' mm thick, too fine for a 0.4 mm nozzle.');
+    out.innerHTML = 'Ratio <strong>' + i.toFixed(2) + ':1</strong> · centre distance <strong>' + a.toFixed(2) + ' mm</strong> · pitch Ø ' + (S.m * S.z1).toFixed(1) + ' / ' + (S.m * S.z2).toFixed(1) + ' mm · contact ratio <strong>' + eps.toFixed(2) + '</strong><br>' +
+      'Working torque limit of the weaker gear (' + S.mat + ', face ' + S.b + ' mm): about <strong>' + (T1 * (S.z1 <= S.z2 ? 1 : 1)).toFixed(2) + ' N·m</strong> on gear 1 (tangential force ≈ ' + Ft.toFixed(0) + ' N), ' + (T1 * i).toFixed(2) + ' N·m on gear 2 (ideal).' +
+      (warns.length ? '<br><strong style="color:var(--warn)">' + warns.join(' ') + '</strong>' : '');
+  }
+  const refresh = () => { build(); view.redraw(); info(); };
+  const hs = document.getElementById('sp-ctl');
+  [['m', 'Module', 0.5, 4, 0.25, 2, ' mm'], ['z1', 'Teeth gear 1', 6, 40, 1, 0, ''], ['z2', 'Teeth gear 2', 8, 80, 1, 0, ''], ['bl', 'Backlash', 0, 0.6, 0.05, 2, ' mm'], ['b', 'Face width', 3, 30, 1, 0, ' mm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; refresh(); } }));
+  matSel.onchange = () => { S.mat = matSel.value; info(); }; alSel.onchange = () => { S.alpha = +alSel.value; refresh(); };
+  const loop = Sim.loop(dt => { S.th += dt * 1.0; view.redraw(); });
+  document.getElementById('sp-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('sp-run'));
+  document.getElementById('sp-svg1').onclick = () => Gears.download('gear1_m' + S.m + '_z' + S.z1 + '.svg', Gears.svg(p1, 5, 'Spur gear z=' + S.z1 + ', module ' + S.m + ', pressure angle ' + S.alpha + ', backlash ' + S.bl + ' mm. Tooth 0 points along +x.'));
+  document.getElementById('sp-svg2').onclick = () => Gears.download('gear2_m' + S.m + '_z' + S.z2 + '.svg', Gears.svg(p2, 5, 'Spur gear z=' + S.z2 + ', module ' + S.m + ', pressure angle ' + S.alpha + ', backlash ' + S.bl + ' mm. Tooth 0 points along +x.'));
+  refresh();
+})();
+
+/* ---------- Sim 2: gear train ---------- */
+(function () {
+  const PRE = { 'Single 1:5': [[12, 60], [0, 0], [0, 0], [0, 0]], '2-stage 1:12': [[15, 45], [15, 60], [0, 0], [0, 0]], '3-stage 1:64': [[15, 60], [15, 60], [15, 60], [0, 0]], '4-stage 1:300': [[15, 60], [15, 60], [15, 60], [15, 60]] };
+  const ST = PRE['2-stage 1:12'].map(r => r.slice()), inputs = [];
+  const host = document.getElementById('gt-ctl');
+  ST.forEach((r, i) => {
+    const d = document.createElement('div'); d.className = 'row'; d.style.margin = '2px 0';
+    d.innerHTML = '<span style="min-width:60px">Stage ' + (i + 1) + '</span><label>pinion <input type="number" min="0" max="120"></label><label>gear <input type="number" min="0" max="200"></label>'; host.append(d);
+    const ii = d.querySelectorAll('input'); inputs.push(ii); ii.forEach((e, k) => e.oninput = () => { ST[i][k] = +e.value; refresh(); });
+  });
+  const set = p => { p.forEach((r, i) => { ST[i] = r.slice(); inputs[i][0].value = r[0]; inputs[i][1].value = r[1]; }); refresh(); };
+  const rpmIn = document.getElementById('gt-rpm'), tqIn = document.getElementById('gt-tq'), out = document.getElementById('gt-out'); let ph = 0;
+  const active = () => { const a = []; for (const r of ST) { if (r[0] >= 6 && r[1] >= 6) a.push(r); else break; } return a; };
+  const canvas = document.getElementById('gt-canvas');
+  const view = Sim.make(canvas, 0.4, (c, w, h, col) => {
+    const A = active(); if (!A.length) return;
+    let span = 0; A.forEach(r => span += r[0] + r[1]); const k = Math.min((w - 20) / (span + A[0][0] + A[A.length - 1][1]) , (h / 2 - 8) / Math.max(...A.map(r => r[1])));
+    // shafts: shaft 0 = pinion 1; shaft i+1 carries gear i and pinion i+1
+    let x = 10 + A[0][0] * k, speed = 1; const cy = h / 2, items = [];
+    items.push({ x, z: A[0][0], sp: 1, color: col.accent });
+    A.forEach((r, i) => {
+      const nx = x + (r[0] + r[1]) * k / 2 * 1.0; speed = -speed * r[0] / r[1];
+      items.push({ x: nx, z: r[1], sp: speed, color: i === A.length - 1 ? col.good : col.accent2, big: true });
+      if (A[i + 1]) items.push({ x: nx, z: A[i + 1][0], sp: speed, color: col.accent });
+      x = nx;
+    });
+    items.sort((a, b) => b.z - a.z).forEach(g => {
+      const rad = g.z * k / 2, ang = ph * g.sp;
+      c.beginPath(); c.arc(g.x, cy, rad, 0, TAU); c.fillStyle = g.color + '55'; c.fill(); c.strokeStyle = g.color; c.lineWidth = 2; c.stroke();
+      const ticks = Math.min(g.z, 60); c.lineWidth = 1; for (let t = 0; t < ticks; t++) { const a = ang + t * TAU / ticks; c.beginPath(); c.moveTo(g.x + Math.cos(a) * rad, cy - Math.sin(a) * rad); c.lineTo(g.x + Math.cos(a) * (rad + 3), cy - Math.sin(a) * (rad + 3)); c.stroke(); }
+      Sim.line(c, g.x, cy, g.x + Math.cos(ang) * rad * 0.9, cy - Math.sin(ang) * rad * 0.9, g.color, 2);
+      c.fillStyle = col.ink; c.font = '11px system-ui'; c.textAlign = 'center'; c.fillText(g.z + 'T', g.x, cy + 4 + (g.big ? 0 : 12));
+    });
+  });
+  function refresh() {
+    const A = active(); if (!A.length) { out.textContent = 'Enter at least one stage (both tooth counts ≥ 6).'; view.redraw(); return; }
+    const total = A.reduce((p, r) => p * r[1] / r[0], 1), eta = Math.pow(0.92, A.length), rpm = +rpmIn.value, T = +tqIn.value;
+    const bad = A.map((r, i) => r[0] < 12 ? 'stage ' + (i + 1) + ' pinion has under 12 teeth (weak, undercut)' : r[1] / r[0] > 6 ? 'stage ' + (i + 1) + ' ratio ' + (r[1] / r[0]).toFixed(1) + ':1 is high for one printed stage' : '').filter(Boolean);
+    out.innerHTML = 'Ratio per stage: ' + A.map(r => (r[1] / r[0]).toFixed(2)).join(' × ') + ' = <strong>' + total.toFixed(1) + ':1</strong> (direction ' + (A.length % 2 ? 'reversed' : 'same') + '). ' +
+      'Output <strong>' + (rpm / total).toFixed(1) + ' rpm</strong>, torque <strong>' + (T * total * eta).toFixed(2) + ' N·m</strong> (ideal ' + (T * total).toFixed(2) + ' N·m; efficiency ' + (eta * 100).toFixed(0) + '%).' +
+      (bad.length ? '<br><strong style="color:var(--warn)">Check: ' + bad.join('; ') + '.</strong>' : '');
+    view.redraw();
+  }
+  Object.keys(PRE).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.onclick = () => set(PRE[k]); document.getElementById('gt-presets').append(b); });
+  rpmIn.oninput = tqIn.oninput = refresh;
+  const loop = Sim.loop(dt => { ph += dt * 1.2; view.redraw(); });
+  set(PRE['2-stage 1:12']); loop.toggle();
+})();
+
+/* ---------- Sim 3: planetary ---------- */
+(function () {
+  const S = { Zs: 12, Zp: 12, N: 3, mode: 'rf', phi: 0, m: 1.5, bl: 0.1 };
+  const cache = {}, shape = (z, int) => cache[z + (int ? 'i' : 'e')] || (cache[z + (int ? 'i' : 'e')] = Gears.poly(z, S.m, 20 * D2R, S.bl, int));
+  const canvas = document.getElementById('pl-canvas'), out = document.getElementById('pl-out');
+  const kin = () => { const Zr = S.Zs + 2 * S.Zp; if (S.mode === 'rf') return { ws: 1, wr: 0, wc: S.Zs / (S.Zs + Zr), Zr, ratio: 1 + Zr / S.Zs }; if (S.mode === 'sf') return { ws: 0, wr: 1, wc: Zr / (S.Zs + Zr), Zr, ratio: (S.Zs + Zr) / Zr }; return { ws: 1, wr: -S.Zs / Zr, wc: 0, Zr, ratio: -Zr / S.Zs }; };
+  const view = Sim.make(canvas, 0.8, (c, w, h, col) => {
+    const k = kin(), Zr = k.Zr, rr = S.m * Zr / 2, ro = rr + 1.25 * S.m + 3, sc = Math.min(w, h) / 2 / (ro + 2), cx = w / 2, cy = h / 2, a = S.m * (S.Zs + S.Zp) / 2;
+    const ph = S.phi, ths = k.ws * ph, thc = k.wc * ph, thr = Math.PI * (S.Zp - 2) / Zr + k.wr * ph;
+    // ring: outer circle + tooth cavity, even-odd fill
+    c.beginPath(); c.arc(cx, cy, ro * sc, 0, TAU); const pts = shape(Zr, true), ca = Math.cos(thr), sa = Math.sin(thr);
+    pts.forEach((p, i) => { const x = cx + (p[0] * ca - p[1] * sa) * sc, y = cy - (p[0] * sa + p[1] * ca) * sc; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath();
+    c.fillStyle = col.muted + '55'; c.fill('evenodd'); c.strokeStyle = col.muted; c.lineWidth = 1.5; c.stroke();
+    // carrier arms and planets
+    const pl = [];
+    for (let j = 0; j < S.N; j++) { const nu = TAU * j / S.N + thc, thp = nu + Math.PI - Math.PI / S.Zp + S.Zs / S.Zp * (nu - ths); pl.push([nu, thp]); }
+    pl.forEach(q => Sim.line(c, cx, cy, cx + Math.cos(q[0]) * a * sc, cy - Math.sin(q[0]) * a * sc, col.line, 3));
+    pl.forEach(q => { polyPath(c, shape(S.Zp, false), cx + Math.cos(q[0]) * a * sc, cy - Math.sin(q[0]) * a * sc, q[1], sc); c.fillStyle = col.accent2 + '66'; c.fill(); c.strokeStyle = col.accent2; c.stroke(); Sim.dot(c, cx + Math.cos(q[0]) * a * sc, cy - Math.sin(q[0]) * a * sc, 2.5, col.ink); });
+    polyPath(c, shape(S.Zs, false), cx, cy, ths, sc); c.fillStyle = col.accent + '66'; c.fill(); c.strokeStyle = col.accent; c.stroke(); Sim.dot(c, cx, cy, 3, col.ink);
+  });
+  function refresh() {
+    const k = kin(), Zr = k.Zr, ok = (S.Zs + Zr) % S.N === 0, allowed = [2, 3, 4, 5, 6].filter(n => (S.Zs + Zr) % n === 0);
+    const fmt = v => (v >= 0 ? '+' : '') + v.toFixed(2);
+    out.innerHTML = 'Teeth: sun ' + S.Zs + ', planet ' + S.Zp + ', ring <strong>' + Zr + '</strong>. Ratio input:output = <strong>' + k.ratio.toFixed(2) + ':1</strong>. Speeds relative to the input: sun ' + fmt(k.ws) + ', carrier ' + fmt(k.wc) + ', ring ' + fmt(k.wr) + '.<br>' +
+      'Assembly: (Z<sub>s</sub> + Z<sub>r</sub>)/N = ' + (S.Zs + Zr) + '/' + S.N + ' = ' + ((S.Zs + Zr) / S.N).toFixed(2) + ' → ' + (ok ? '<strong style="color:var(--good)">planets assemble evenly.</strong>' : '<strong style="color:var(--warn)">not an integer: the planets cannot all mesh (the picture will show overlap). Planet counts that work: ' + (allowed.join(', ') || 'none') + '.</strong>');
+    view.redraw();
+  }
+  const hs = document.getElementById('pl-ctl');
+  Sim.slider(hs, { label: 'Sun teeth', min: 8, max: 30, value: S.Zs, onInput: v => { S.Zs = v; refresh(); } });
+  Sim.slider(hs, { label: 'Planet teeth', min: 8, max: 30, value: S.Zp, onInput: v => { S.Zp = v; refresh(); } });
+  document.getElementById('pl-mode').onchange = e => { S.mode = e.target.value; refresh(); };
+  document.getElementById('pl-n').onchange = e => { S.N = +e.target.value; refresh(); };
+  const loop = Sim.loop(dt => { S.phi += dt * 1.2; view.redraw(); });
+  document.getElementById('pl-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('pl-run'));
+  refresh();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 3 · Materials and printing technologies</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="3">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part A · Foundations · Chapter 3</p>
+<h1>Materials and printing technologies</h1>
+<p class="lead">For a mechanism the material is not a colour choice. It decides whether a hinge lasts a thousand cycles or a million, whether a gear whines, and whether a part still holds its shape in a warm car. This chapter maps the technologies, the materials that matter for moving parts, and what your Bambu Lab X2D can and cannot print.</p>
+
+<h2>3.1 Printing technologies compared</h2>
+<table>
+  <tr><th></th><th>FDM (your X2D)</th><th>Resin (SLA / MSLA)</th><th>Powder (SLS / MJF nylon)</th></tr>
+  <tr><td>How</td><td>Melted filament laid in lines, layer by layer</td><td>UV light cures liquid resin layer by layer</td><td>Laser/heat fuses nylon powder; unfused powder supports the part</td></tr>
+  <tr><td>Accuracy</td><td>Good: ±0.2 mm typical, ±0.1 mm with tuning</td><td>Excellent: ±0.05 mm, fine detail</td><td>Very good: ±0.2–0.3 mm</td></tr>
+  <tr><td>Strength isotropy</td><td><strong>Strongly anisotropic</strong>: weak between layers</td><td>Fairly isotropic, but brittle</td><td><strong>Nearly isotropic</strong></td></tr>
+  <tr><td>Mechanical character</td><td>Wide choice from flexible to carbon-filled</td><td>Stiff, often brittle; some "tough" resins; UV and creep issues</td><td>Tough, wear-resistant nylon; good for moving parts</td></tr>
+  <tr><td>Supports</td><td>Needed for overhangs; leave marks</td><td>Needed; fiddly to remove</td><td><strong>None needed</strong>: enables print-in-place and complex assemblies</td></tr>
+  <tr><td>Surface</td><td>Visible layer lines</td><td>Smooth</td><td>Slightly grainy</td></tr>
+  <tr><td>Access</td><td>Own printer; cheap per part</td><td>Own printer; messy, needs washing and curing</td><td>Service bureau only (online order); cost scales with part volume</td></tr>
+  <tr><td>Best for mechanisms</td><td>Almost everything: housings, linkages, gears (with care), compliant parts</td><td>Tiny precise gears and mechanisms, master patterns</td><td>Dense multi-part assemblies, print-in-place hinges and gears</td></tr>
+</table>
+<p>FDM is where this book lives, because you own one and it is the most flexible. Keep SLS in mind as an <strong>order-it-out</strong> option for the one part that will not behave in FDM (a high-load gear, a complex enclosed mechanism).</p>
+
+<h2>3.2 Your printer: Bambu Lab X2D + AMS 2 Pro</h2>
+<div class="callout warn">
+  <span class="tag">Verify before you rely on this</span>
+  The figures below come from retailer listings and community discussions (sources at the bottom). I could not reach the official Bambu Lab specification page, and the sources disagree in places. Check the Bambu Lab Wiki and your own machine's material profiles before choosing a material for something important.
+</div>
+<ul>
+  <li><strong>Enclosed CoreXY with active chamber heating</strong>, reported up to about 65 °C, and a bed up to about 120 °C. A warm chamber helps warp-prone materials (ABS, ASA, nylon, PC) and generally improves layer adhesion, meaning stronger parts.</li>
+  <li><strong>Maximum nozzle temperature reported as 300 °C.</strong> That covers PLA, PETG, ABS/ASA, most nylons and many carbon-filled grades. It is a limit for the highest-temperature materials (PPS-CF, some high-temperature PA-CF, PEEK/PEI-class), which need a 350 °C nozzle. Those are out of scope for this book anyway.</li>
+  <li><strong>Dual-nozzle system</strong> ("D"): the second nozzle can run a different material without constant purging, such as a soluble or breakaway support, or a second structural material. Practical reading: print a tough part with an interface layer that releases cleanly, which is very useful for print-in-place joints. Your build volume is reported around 256 × 256 × 260 mm on the main nozzle and somewhat less on the second; check the wiki.</li>
+  <li><strong>AMS 2 Pro</strong> feeds four spools and has <strong>built-in drying</strong> (reported around 65 °C). Good for PLA, PETG, TPU and most others. Nylon and some PC ideally want a hotter, longer drying cycle, so keep a dedicated filament dryer around for those.</li>
+  <li><strong>Abrasive filaments</strong> (carbon fibre, glass fibre) wear brass nozzles quickly. Use a hardened-steel (or equivalent) nozzle for them and check which nozzles came with your machine.</li>
+</ul>
+
+<h2>3.3 Materials that matter for moving parts</h2>
+<p>Typical settings and behaviour. Use the filament vendor's profile in Bambu Studio for real settings. Numbers are ballpark.</p>
+<table>
+  <tr><th>Material</th><th>Nozzle / bed (°C)</th><th>Warp</th><th>Character for mechanisms</th></tr>
+  <tr><td><strong>PLA</strong> (and PLA+)</td><td>190–230 / 35–60</td><td>low</td><td>Stiff, precise, easiest. Brittle, <strong>creeps</strong>, softens ~55 °C, wears quickly when sliding on itself. Best for prototypes, jigs and static or light-duty parts.</td></tr>
+  <tr><td><strong>PETG</strong></td><td>230–260 / 70–85</td><td>low–med</td><td>The all-round functional workhorse: tougher than PLA, creeps less, chemically resistant. Slightly flexible, stringy. Layers bond well. Good for snap-fits and brackets; decent wear.</td></tr>
+  <tr><td><strong>ABS</strong></td><td>240–270 / 90–110</td><td>high</td><td>Tough, heat-tolerant, machinable and glueable (acetone). Needs the enclosure. Fumes: ventilate.</td></tr>
+  <tr><td><strong>ASA</strong></td><td>240–270 / 90–110</td><td>high</td><td>ABS with UV and weather resistance. Preferred over ABS for anything outdoors or sun-exposed.</td></tr>
+  <tr><td><strong>PC</strong> (polycarbonate)</td><td>260–300 / 100–120</td><td>high</td><td>Tough, stiff, heat-resistant; demanding to print and moisture-sensitive.</td></tr>
+  <tr><td><strong>PA6 / PA12</strong> (nylon)</td><td>250–290 / 80–100</td><td>high</td><td><strong>Best low-friction, wear-resistant and fatigue-tolerant unfilled FDM material</strong>, great for gears, bushings, hinges and snap-fits. Absorbs water (changes size and stiffness), must be dried, warps.</td></tr>
+  <tr><td><strong>PA-CF / PET-CF</strong></td><td>270–300 / 80–110</td><td>med</td><td>Much stiffer and creeps far less than plain nylon or PETG; dimensionally stable; matte finish. Brittle-ish, abrasive, anisotropic. Best for rigid structural and precision parts.</td></tr>
+  <tr><td><strong>PLA-CF / PETG-CF</strong></td><td>like the base</td><td>low</td><td>Stiffer and matte, easier than PA-CF, but brittle.</td></tr>
+  <tr><td><strong>TPU</strong> (95A etc.)</td><td>210–240 / 30–60</td><td>low</td><td>Rubber-like: feet, bumpers, belts, seals, gripper pads, living hinges with large travel. Slow to print.</td></tr>
+  <tr><td><strong>PVA / HIPS / breakaway</strong></td><td>varies</td><td></td><td>Support materials for the second nozzle: dissolvable or easy-release interfaces.</td></tr>
+  <tr><td>Low-friction engineering filaments</td><td>per vendor</td><td></td><td>Wear-optimised grades exist from some bearing suppliers (for example igus's iglidur filaments). Consider them for printed bearings and sliders.</td></tr>
+</table>
+
+<h3>Fillers: carbon fibre, glass fibre</h3>
+<p>Short chopped fibre in the base polymer makes it <strong>stiffer</strong>, <strong>more dimensionally stable</strong> and <strong>less prone to creep</strong>, but more brittle, more anisotropic (fibres line up with the extrusion), and it <strong>abrades nozzles</strong>. Carbon-fibre parts are also electrically conductive, so keep chips and dust away from electronics.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Material matchmaker</h4>
+  <p class="desc">Tell it what matters for your part (0 = don't care, 5 = critical). It ranks the materials by weighted score. The scores are my qualitative ratings from 1 (poor) to 5 (excellent), good for narrowing down, not for engineering calculations.</p>
+  <div class="row" id="mm-presets"></div>
+  <div class="controls" id="mm-ctl"></div>
+  <div id="mm-out" style="margin-top:12px"></div>
+</div>
+
+<h2>3.4 Anisotropy: the most important printed-part fact</h2>
+<p>An FDM part is a stack of welded lines. Along a line the polymer chains are continuous and strong. Between layers the bond is a weld, which is weaker, and it is weakest at sharp corners and under tension. Rule of thumb: <strong>Z-direction tensile strength is roughly 30–70% of in-layer strength</strong>, depending on material, temperature (a hot chamber helps) and layer height. Good prints with a warm chamber and well-dried filament sit at the top of that range; poor ones fall below it.</p>
+<p>This is a design decision before it is a material decision: <strong>orient every part so the dominant tension or bending stress runs along the layers.</strong> A tab printed standing up has the loads pulling layers apart. The same tab printed lying flat is several times stronger.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · Strength vs load direction</h4>
+  <p class="desc">A printed block with its layer lines, pulled at an angle. At 0° the pull runs along the layers (strongest). At 90° it tries to peel layers apart (weakest). Pick a process to compare. Values are illustrative.</p>
+  <canvas id="an-canvas"></canvas>
+  <div class="row"><label>Process / material <select id="an-mat"></select></label></div>
+  <div class="controls" id="an-ctl"></div>
+  <div class="readout" id="an-out"></div>
+</div>
+
+<h2>3.5 Heat: when does it stop being a mechanism?</h2>
+<p>Plastics soften gradually well below their melting point, losing stiffness fast near the <strong>glass transition</strong> (Tg). A part under load creeps and warps long before it melts. Check the worst temperature the part will see: sun on a window, a hot car, near a motor, a stepper driver or a heater, and the heat it makes itself (friction in a bearing or gear).</p>
+<div class="sim">
+  <h4>Simulation 3 · Will it survive the heat?</h4>
+  <p class="desc">Practical maximum temperature of each material <em>under load</em> (approximate and conservative). Move the slider or tap a situation: bars turn orange near the limit and red past it.</p>
+  <canvas id="ht-canvas"></canvas>
+  <div class="row" id="ht-presets"></div>
+  <div class="controls" id="ht-ctl"></div>
+</div>
+
+<h2>3.6 Moisture and drying</h2>
+<ul>
+  <li>Many filaments absorb moisture from the air, notably <strong>nylon, PC, PVA and TPU</strong>, and to a lesser degree PETG and PLA. Wet filament pops and bubbles, prints rough and, importantly for mechanisms, <strong>prints weak</strong>, with poor layer bonding.</li>
+  <li>Typical drying (check your spool's label): PLA ≈ 45–55 °C, PETG ≈ 65 °C, ABS/ASA ≈ 80 °C, nylon ≈ 80+ °C for many hours. The built-in AMS 2 Pro dryer reportedly tops out near 65 °C, so nylon deserves a dedicated dryer, and printing it straight from the dry box.</li>
+  <li><strong>Printed nylon parts absorb water</strong> after printing too: they swell slightly and get tougher but less stiff. Design clearances for the conditioned state, not the dry-off-the-printer state.</li>
+</ul>
+
+<h2>3.7 Choosing a material, quickly</h2>
+<table>
+  <tr><th>You need</th><th>Reach for</th></tr>
+  <tr><td>Fit check, prototype, jig, static bracket</td><td>PLA</td></tr>
+  <tr><td>General functional part, snap-fit, brackets, moderate loads</td><td>PETG</td></tr>
+  <tr><td>Outdoors, sun, heat</td><td>ASA (or PETG for mild conditions)</td></tr>
+  <tr><td>Gears, bushings, sliders, living hinges, anything that rubs or flexes repeatedly</td><td>Nylon (PA), or PETG for lighter duty</td></tr>
+  <tr><td>Stiff, precise, low creep: frames, arms, gear carriers</td><td>PA-CF / PET-CF</td></tr>
+  <tr><td>Rubbery: grip pads, bumpers, seals, flexible couplings</td><td>TPU</td></tr>
+  <tr><td>Complex enclosed mechanism, many moving parts, high load</td><td>SLS nylon (ordered from a service)</td></tr>
+</table>
+<p>Do not forget the option of <strong>not printing</strong> a part: bearings, rods, springs, gears for high torque and fasteners are better bought. Chapter 15 is all about the print-plus-buy split.</p>
+
+<h2>3.8 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ What is the worst temperature, and is it above 80% of the material's practical limit?</li>
+  <li>☐ Is the load sustained (creep) or cyclic (fatigue)? Pick PLA only if neither.</li>
+  <li>☐ Does anything slide on printed plastic? Choose pairs: nylon on steel, or different polymers against each other.</li>
+  <li>☐ Is the filament dry? Particularly nylon, PC, PVA, TPU.</li>
+  <li>☐ Abrasive filament loaded: is the nozzle hardened?</li>
+</ul>
+<ul>
+  <li>Printing a functional hinge, clip or gear in PLA "because it printed so nicely", then watching it crack or creep.</li>
+  <li>Assuming datasheet strength applies to your part. Datasheets quote moulded samples or best-case in-layer prints.</li>
+  <li>Using wet nylon or PETG and blaming the design for weak layers.</li>
+  <li>Leaving PLA parts in a sunlit car.</li>
+</ul>
+
+<h2>3.9 Check yourself</h2>
+<details class="quiz"><summary>A latch clip must hold a constant spring preload for years in a warm workshop. PLA or PETG?</summary>
+<p>PETG (or better, nylon or ASA). A constant load is the worst case for PLA's creep, and a warm workshop is closer to PLA's softening range than you'd think.</p></details>
+<details class="quiz"><summary>Why is a printed Z-direction tab at a corner such a bad idea?</summary>
+<p>The load pulls layers apart (weak direction) and the corner concentrates stress (chapter 2): two weaknesses stacked. Orient flat and add a fillet.</p></details>
+<details class="quiz"><summary>You switch a gear from PETG to PA-CF and it starts to cut the mating nylon gear's teeth. Why?</summary>
+<p>Carbon fibre makes the surface hard and abrasive. Pair a CF gear with a metal gear or pick unfilled nylon for both. Filler gives stiffness, not smooth sliding.</p></details>
+
+<p style="margin-top:2em;font-size:14px;color:var(--muted)">Sources for the X2D figures (retailer listings and community discussions, not official): <a href="https://www.matterhackers.com/store/l/bambu-lab-x2d-3d-printer/">MatterHackers</a>, <a href="https://www.makerpoint.nl/en-gb/3d-printing/3d-printers/bambu-lab-all/bambu-lab-x2d-210000008188">Makerpoint</a>, <a href="https://core-electronics.com.au/bambu-lab-x2d-3d-printer-ams-combo.html.plain.md">Core Electronics</a>, <a href="https://shop3duniverse.com/products/bambu-lab-x2d">Shop3D Universe</a>, <a href="https://forum.bambulab.com/t/300-nozzle-limitation/249155">Bambu forum thread on the 300 °C limit</a>, <a href="https://bambuhub.net/articles/active-vs-passive-chamber">BambuHub chamber guide</a>.</p>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+/* ---------- Sim 1: matchmaker ---------- */
+(function () {
+  const CRIT = ['Stiffness', 'Strength', 'Toughness (impact)', 'Heat resistance', 'Creep resistance', 'Wear / sliding', 'Easy to print', 'Outdoor / UV / chemical'];
+  // scores 1-5 in CRIT order
+  const MAT = [
+    { n: 'PLA', s: [5, 4, 1, 1, 1, 2, 5, 1], note: 'Cheap and precise. Prototypes and static parts only.' },
+    { n: 'PLA-CF', s: [5, 3, 1, 1, 2, 2, 4, 1], note: 'Stiff and matte, but brittle. Needs hardened nozzle.' },
+    { n: 'PETG', s: [3, 3, 3, 2, 3, 2, 4, 3], note: 'The sensible default for functional parts.' },
+    { n: 'ABS', s: [3, 3, 3, 3, 3, 2, 2, 2], note: 'Tough and heat-tolerant; warps; fumes.' },
+    { n: 'ASA', s: [3, 3, 3, 3, 3, 2, 3, 5], note: 'ABS that survives sunlight.' },
+    { n: 'PC', s: [4, 4, 4, 4, 4, 2, 2, 3], note: 'Strong and heat-resistant; needs dry filament and care.' },
+    { n: 'PA (nylon)', s: [2, 3, 5, 3, 3, 5, 2, 3], note: 'Best for gears, bushings and hinges; keep it dry.' },
+    { n: 'PA-CF', s: [5, 4, 3, 4, 4, 4, 2, 3], note: 'Rigid and stable structural material; abrasive.' },
+    { n: 'PET-CF', s: [5, 4, 2, 3, 4, 3, 3, 3], note: 'Stiff, easier than PA-CF, low moisture trouble.' },
+    { n: 'TPU 95A', s: [1, 2, 5, 2, 3, 4, 3, 3], note: 'Flexible; pads, seals, bumpers, flexible joints.' }
+  ];
+  const PRE = {
+    'Gear / bushing': [2, 2, 3, 2, 3, 5, 2, 1], 'Structural arm': [5, 4, 2, 2, 4, 0, 3, 1],
+    'Outdoor housing': [2, 2, 3, 3, 2, 0, 3, 5], 'Quick prototype': [3, 2, 0, 0, 0, 0, 5, 0], 'Snap-fit clip': [1, 2, 5, 1, 4, 1, 3, 1]
+  };
+  const w = CRIT.map(() => 2), sl = [];
+  const host = document.getElementById('mm-ctl'), out = document.getElementById('mm-out');
+  function refresh() {
+    const tot = w.reduce((a, b) => a + b, 0) || 1;
+    const rows = MAT.map(m => ({ m, sc: m.s.reduce((a, v, i) => a + v * w[i], 0) / tot })).sort((a, b) => b.sc - a.sc);
+    out.innerHTML = rows.map((r, i) => '<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><strong>' + (i + 1) + '. ' + r.m.n + '</strong><span style="color:var(--muted)">' + r.sc.toFixed(2) + ' / 5</span></div>' +
+      '<div style="height:10px;border-radius:5px;background:var(--code-bg)"><div style="height:10px;border-radius:5px;width:' + (r.sc / 5 * 100) + '%;background:' + (i === 0 ? 'var(--good)' : 'var(--accent)') + '"></div></div>' +
+      (i < 3 ? '<div style="font-size:13px;color:var(--muted)">' + r.m.note + '</div>' : '') + '</div>').join('');
+  }
+  CRIT.forEach((c, i) => sl.push(Sim.slider(host, { label: c, min: 0, max: 5, value: w[i], onInput: v => { w[i] = v; refresh(); } })));
+  Object.keys(PRE).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.onclick = () => { PRE[k].forEach((v, i) => { w[i] = v; sl[i].set(v); }); refresh(); }; document.getElementById('mm-presets').append(b); });
+  refresh();
+})();
+
+/* ---------- Sim 2: anisotropy ---------- */
+(function () {
+  const MAT = { 'FDM PLA': 0.5, 'FDM PETG': 0.6, 'FDM ASA / ABS': 0.55, 'FDM PA-CF': 0.4, 'FDM nylon (warm chamber, dry)': 0.7, 'SLS nylon (service)': 0.9, 'Resin (tough, post-cured)': 0.9 };
+  const sel = document.getElementById('an-mat'); Object.keys(MAT).forEach(k => sel.add(new Option(k, k)));
+  const S = { a: 90 };
+  const frac = a => { const r = a * Math.PI / 180, kz = MAT[sel.value]; return 1 / Math.sqrt(Math.cos(r) ** 2 + Math.sin(r) ** 2 / (kz * kz)); };
+  const canvas = document.getElementById('an-canvas'), out = document.getElementById('an-out');
+  const view = Sim.make(canvas, 0.45, (c, w, h, col) => {
+    const bw = Math.min(w * 0.45, 260), bh = bw * 0.5, x0 = w * 0.08, y0 = (h - bh) / 2;
+    c.fillStyle = col.accent + '33'; c.fillRect(x0, y0, bw, bh); c.strokeStyle = col.accent; c.lineWidth = 2; c.strokeRect(x0, y0, bw, bh);
+    c.lineWidth = 1; c.strokeStyle = col.accent + 'aa';
+    for (let y = y0 + 6; y < y0 + bh; y += 6) { c.beginPath(); c.moveTo(x0, y); c.lineTo(x0 + bw, y); c.stroke(); }
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText('layers', x0 + bw / 2, y0 + bh + 16);
+    const r = S.a * Math.PI / 180, cx = x0 + bw / 2, cy = y0 + bh / 2, L = bw * 0.62, dx = Math.cos(r) * L, dy = -Math.sin(r) * L;
+    [1, -1].forEach(sg => { // equal-and-opposite pull arrows
+      const ex = cx + sg * dx, ey = cy + sg * dy, a = Math.atan2(sg * dy, sg * dx);
+      Sim.line(c, cx, cy, ex, ey, col.warn, 4); c.fillStyle = col.warn; c.beginPath(); c.moveTo(ex + 10 * Math.cos(a), ey + 10 * Math.sin(a));
+      c.lineTo(ex + 10 * Math.cos(a + 2.5), ey + 10 * Math.sin(a + 2.5)); c.lineTo(ex + 10 * Math.cos(a - 2.5), ey + 10 * Math.sin(a - 2.5)); c.fill();
+    });
+    // strength gauge
+    const gx = x0 + bw + w * 0.12, gw = w - gx - w * 0.06, f = frac(S.a);
+    c.fillStyle = col.line; c.fillRect(gx, h * 0.4, gw, 22); c.fillStyle = f > 0.75 ? col.good : f > 0.5 ? col.accent2 : col.warn; c.fillRect(gx, h * 0.4, gw * f, 22);
+    c.fillStyle = col.ink; c.textAlign = 'left'; c.font = '13px system-ui'; c.fillText('usable strength: ' + Math.round(f * 100) + '% of in-layer', gx, h * 0.4 - 8);
+  });
+  function refresh() { const f = frac(S.a); out.innerHTML = 'Pull direction <strong>' + S.a + '°</strong> from the layer plane → <strong>' + Math.round(f * 100) + '%</strong> of in-layer strength. ' + (f < 0.6 ? 'Reorient the part or add margin.' : 'Acceptable.'); view.redraw(); }
+  Sim.slider(document.getElementById('an-ctl'), { label: 'Pull angle', min: 0, max: 90, value: S.a, unit: '°', onInput: v => { S.a = v; refresh(); } });
+  sel.onchange = refresh; refresh();
+})();
+
+/* ---------- Sim 3: heat ---------- */
+(function () {
+  const M = [['PLA', 50], ['PLA-CF', 55], ['PETG', 65], ['ABS', 80], ['ASA', 80], ['PC', 100], ['PA (nylon)', 85], ['PA-CF', 110], ['TPU 95A', 60]];
+  const S = { t: 40 };
+  const PRE = { 'Room 22 °C': 22, 'Sunny window 45 °C': 45, 'Hot car 70 °C': 70, 'Beside a motor 85 °C': 85 };
+  const canvas = document.getElementById('ht-canvas');
+  const view = Sim.make(canvas, 0.55, (c, w, h, col) => {
+    const l = 84, r = 16, t = 12, b = 26, pw = w - l - r, rh = (h - t - b) / M.length, X = v => l + v / 130 * pw;
+    c.font = '13px system-ui'; c.textBaseline = 'middle';
+    M.forEach((m, i) => {
+      const y = t + i * rh + rh / 2, over = S.t > m[1], near = S.t > m[1] * 0.8;
+      c.fillStyle = col.ink; c.textAlign = 'right'; c.fillText(m[0], l - 8, y);
+      c.fillStyle = col.line; c.fillRect(l, y - rh * 0.3, pw, rh * 0.6);
+      c.fillStyle = over ? col.warn : near ? col.accent2 : col.good; c.fillRect(l, y - rh * 0.3, X(m[1]) - l, rh * 0.6);
+      c.fillStyle = col.surface; c.textAlign = 'left'; c.fillText(m[1] + ' °C', l + 6, y);
+    });
+    c.textBaseline = 'alphabetic';
+    c.strokeStyle = col.ink; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(X(S.t), t); c.lineTo(X(S.t), h - b); c.stroke(); c.setLineDash([]);
+    c.fillStyle = col.ink; c.textAlign = 'center'; c.fillText(S.t + ' °C', X(S.t), h - 8);
+  });
+  const slider = Sim.slider(document.getElementById('ht-ctl'), { label: 'Temperature', min: 15, max: 130, value: S.t, unit: ' °C', onInput: v => { S.t = v; view.redraw(); } });
+  Object.keys(PRE).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.onclick = () => { S.t = PRE[k]; slider.set(S.t); view.redraw(); }; document.getElementById('ht-presets').append(b); });
+})();
+</script>
+</body>
+</html>

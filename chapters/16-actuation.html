@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 16 · Actuation basics</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="16">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part C · Putting it together · Chapter 16</p>
+<h1>Actuation basics</h1>
+<p class="lead">A mechanism is only a way of shaping force and motion. Something still has to supply it: a hand, a motor, a spring, a solenoid. Choosing the actuator and matching it to the load is where most beginners either overbuild (a huge motor for a tiny lid) or under-build (a servo that stalls and cooks). This chapter gives you the types, the numbers that matter, and three calculators for sizing.</p>
+
+<h2>16.1 The actuator menu</h2>
+<table>
+  <tr><th>Actuator</th><th>Strength</th><th>Weakness</th><th>Typical use</th></tr>
+  <tr><td><strong>Hand (crank, lever, knob)</strong></td><td>Free, simple, safe, adaptable</td><td>Needs a person</td><td>Adjusters, hand cranks, toys, tools</td></tr>
+  <tr><td><strong>Brushed DC motor</strong></td><td>Cheap, simple, high speed</td><td>Low torque unless geared; brushes wear; no position feedback</td><td>Small gearmotors, fans, pumps, wheels</td></tr>
+  <tr><td><strong>Brushless DC (BLDC)</strong></td><td>Efficient, long life, high power density</td><td>Needs an electronic controller</td><td>Drones, fans, direct-drive, robotics</td></tr>
+  <tr><td><strong>Stepper motor</strong></td><td>Open-loop position, holds torque, no feedback needed</td><td>Torque falls with speed; always at full current (hot); can lose steps</td><td>3D printers, CNC, camera sliders, indexers</td></tr>
+  <tr><td><strong>Hobby servo (RC)</strong></td><td>Position control in a box; cheap</td><td>Limited angle (180°), plastic gears, jitter</td><td>Grippers, robot joints, flaps, steering</td></tr>
+  <tr><td><strong>Smart / bus servo</strong></td><td>Closed-loop, torque and position feedback</td><td>Cost</td><td>Robot arms and legs</td></tr>
+  <tr><td><strong>Solenoid</strong></td><td>Fast push/pull, simple on/off</td><td>Short stroke, force falls with stroke, heats if held</td><td>Latches, valves, pushers</td></tr>
+  <tr><td><strong>Linear actuator (screw)</strong></td><td>Long stroke, high force, self-locking</td><td>Slow, bulky</td><td>Lifts, hatches, adjustable stands</td></tr>
+  <tr><td><strong>Pneumatic / hydraulic</strong></td><td>High force, simple, soft touch</td><td>Compressor/pump, leaks</td><td>Grippers, presses, soft robots</td></tr>
+  <tr><td>Springs, rubber bands, weights, gravity</td><td>No power at all</td><td>Fixed force; need release/reset</td><td>Latches, return motions, clocks</td></tr>
+  <tr><td>SMA wire, wax motors, thermal</td><td>Silent, compact</td><td>Slow, inefficient, small force</td><td>Small latches, thermostats</td></tr>
+</table>
+<p>Rules of thumb: <strong>steppers for precise positioning without feedback</strong>, <strong>servos for angles</strong>, <strong>geared DC motors for continuous rotation</strong>, <strong>solenoids for brief taps</strong>, <strong>hands for everything that doesn't have to be automatic</strong>.</p>
+
+<h2>16.2 Torque, speed and power</h2>
+<p>Every rotating actuator trades speed for torque. Power is the product (<code>P = T·ω</code>, with ω in rad/s = rpm × 2π/60), and a motor has a limited amount of it. A gearbox changes the balance but not the power (minus losses). To pick an actuator you need the <strong>torque at the output</strong> and the <strong>speed at the output</strong> for the real motion.</p>
+<ul>
+  <li><strong>Holding torque</strong>: the torque needed to keep the load still (gravity on an arm, a spring preload).</li>
+  <li><strong>Running torque</strong>: friction, cutting, pushing a load at constant speed.</li>
+  <li><strong>Acceleration torque</strong>: <code>T = J·α</code> (inertia × angular acceleration). Often the largest term for fast moves, and the one beginners forget.</li>
+  <li>Add them, then add a <strong>safety margin of 1.5–2×</strong> (motors rarely deliver the datasheet maximum, and friction in printed mechanisms is higher than you think).</li>
+</ul>
+
+<h2>16.3 DC motors and gearmotors</h2>
+<p>A brushed DC motor has a nearly straight torque–speed line: <strong>maximum speed at zero torque (no-load speed)</strong> and <strong>maximum torque at zero speed (stall)</strong>. Current is proportional to torque, so stall draws a large current and heats the windings. The motor is happy at about <strong>20–30% of stall torque</strong> continuously; above that it runs hot, and at stall for more than a few seconds it can burn out.</p>
+<p>A gearmotor puts a gearbox in front: output torque ≈ motor torque × ratio × efficiency, output speed ≈ motor speed ÷ ratio. Small gearmotors (N20, TT, 37D) have plastic or metal gears and a ratio from 10:1 to 1000:1; <strong>pick the ratio from the speed you need</strong>, then check the torque.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · DC gearmotor operating point</h4>
+  <p class="desc">The sloping line is what the motor and gearbox can deliver at the output shaft. Your load torque is the vertical line; where they cross is the actual speed. The shaded green region (up to ~25% of stall) is where the motor can run continuously.</p>
+  <canvas id="dc-canvas"></canvas>
+  <div class="controls" id="dc-ctl"></div>
+  <div class="readout" id="dc-out"></div>
+</div>
+
+<h2>16.4 Stepper motors</h2>
+<p>A stepper moves in fixed increments (typically 1.8° = 200 steps per revolution); a driver sequences the coils. Microstepping (÷ 16, ÷ 32...) smooths the motion and gives finer commanded steps. Features and traps:</p>
+<ul>
+  <li><strong>Open loop</strong>: no feedback. If the load torque exceeds the motor torque, it silently <em>loses steps</em> and your position is wrong.</li>
+  <li><strong>Torque falls with speed.</strong> At low speed the motor delivers its holding torque, but the coils' inductance stops the current from rising fast enough at high step rates, so the pull-out torque drops. Higher supply voltage and lower inductance raise the usable speed. The curve is on the motor datasheet.</li>
+  <li><strong>Always powered</strong>: at standstill a stepper draws its set current and gets warm. Reduce current at rest; a stepper at 60–80 °C is normal.</li>
+  <li><strong>Resonance</strong> at certain speeds (a rumble or a skip). Fixes: microstepping, a damper, a different speed, an interesting mass on the shaft, stealth modes on modern drivers.</li>
+  <li><strong>Drivers</strong>: A4988/DRV8825 (basic), TMC2209-class (quiet, current-sensing, stall detection). Set the current to the motor's rated value or lower, and cool the driver.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 2 · Stepper torque vs speed</h4>
+  <p class="desc">An illustrative pull-out curve built from the supply voltage, coil inductance and current (the real curve is on your motor's datasheet and varies by driver). Set your load; the readout gives the fastest speed that still leaves a 2× torque margin.</p>
+  <canvas id="st-canvas"></canvas>
+  <div class="controls" id="st-ctl"></div>
+  <div class="readout" id="st-out"></div>
+</div>
+
+<h2>16.5 Servos</h2>
+<p>A hobby servo contains a DC motor, a gearbox, a potentiometer and a control board. You send a pulse (1–2 ms every 20 ms) and it goes to the corresponding angle (usually 0–180°) and holds. Cheap, compact and perfect for small arms, grippers and flaps, with traps:</p>
+<ul>
+  <li><strong>The stall torque in the specification is not usable torque.</strong> Derate to <strong>50%</strong> for continuous holding; the gears are small and the motor heats.</li>
+  <li>Torque is quoted in <strong>kg·cm</strong>: the weight in kilograms that the servo can hold on a horn of 1 cm (convert: 1 kg·cm = 0.098 N·m).</li>
+  <li>Plastic gear trains strip under shock. Don't hit the servo's end of travel against a stop; use <strong>metal gears</strong> or a <strong>slip clutch</strong> if the load can shock it.</li>
+  <li>A servo holding against a load draws power continuously and can buzz; add mechanical advantage or a counterbalance so it isn't holding at its limit.</li>
+  <li>Power the servo from a separate supply capable of the stall current (0.5–2 A for a standard servo), with shared ground.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 3 · Servo arm torque check</h4>
+  <p class="desc">An arm of length L carries a mass at its tip. The torque needed grows with the cosine of the arm's angle from vertical. Servos are compared at 50% of their stall torque.</p>
+  <canvas id="sv-canvas"></canvas>
+  <div class="controls" id="sv-ctl"></div>
+  <div class="readout" id="sv-out"></div>
+</div>
+
+<h2>16.6 Solenoids, linear actuators and others</h2>
+<ul>
+  <li><strong>Solenoid</strong>: force falls rapidly with stroke (inversely with the square of the gap). Use it at its short end, with a return spring. Duty cycle matters: a solenoid rated for 25% duty burns out if held on. A "hold" current lower than the pull-in current (via PWM) reduces heat.</li>
+  <li><strong>Linear actuator</strong>: motor + leadscrew (chapter 9): force = 2πηT/lead; self-locking at low lead. Check the speed.</li>
+  <li><strong>Pneumatics</strong>: force = pressure × area (1 bar on a 10 mm piston = 8 N). Gentle, simple and light; a small compressor or a syringe pushes a soft gripper.</li>
+  <li><strong>Muscle by hand</strong>: for hand-operated parts design for a comfortable force: a finger push of 5–15 N, a hand crank of 10–20 N at ~150 mm radius (1.5–3 N·m).</li>
+</ul>
+
+<h2>16.7 Controls and electronics in one page</h2>
+<ul>
+  <li><strong>Driver / H-bridge</strong> between the microcontroller and any motor; never power a motor directly from a pin. Add a flyback diode on solenoids and relays.</li>
+  <li><strong>Limit switches or hall sensors</strong> at the ends of travel, for homing and for safety; <strong>encoders</strong> if you need position feedback from a DC motor.</li>
+  <li><strong>Supply</strong>: size it for the peak current, with a bulk capacitor near the driver; keep motor wiring away from sensor wiring.</li>
+  <li><strong>Soft limits and slip clutches</strong> in the mechanism protect the printed parts from a controller mistake (chapter 14).</li>
+  <li><strong>Thermal check</strong>: after a long run, touch the motor and driver. If they are too hot to hold, reduce current or duty cycle.</li>
+</ul>
+
+<h2>16.8 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Motor stalls or can't start the load</td><td>Torque too low at the output (ratio too small or load underestimated)</td><td>Higher gear ratio; bigger motor; reduce friction (bearings)</td></tr>
+  <tr><td>Stepper skips steps or stalls at speed</td><td>Pull-out torque exceeded; too fast acceleration; resonance</td><td>Slower acceleration; higher voltage; a bigger motor; reduce speed</td></tr>
+  <tr><td>Stepper or driver overheats</td><td>Current too high; no cooling; always on</td><td>Reduce current; heatsink/fan; sleep at idle</td></tr>
+  <tr><td>Servo jitters or buzzes</td><td>Load at its limit; weak supply; noise</td><td>Add leverage or a counterweight; separate supply; capacitor</td></tr>
+  <tr><td>Servo gears strip</td><td>Shock load, driven past a stop</td><td>Metal-gear servo; slip clutch; soft stops</td></tr>
+  <tr><td>DC motor too fast or too slow</td><td>Wrong ratio; voltage; load</td><td>Choose the gear ratio from the target speed; PWM for fine control</td></tr>
+  <tr><td>Printed gears or mounts flex under motor torque</td><td>Reaction torque on a thin mount</td><td>Stiff mount, ribs, a metal plate, symmetrical mounting</td></tr>
+  <tr><td>Solenoid weak or hot</td><td>Stroke too long; held on</td><td>Shorter stroke; PWM hold current; limit duty</td></tr>
+</table>
+
+<h2>16.9 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Load torque estimated: holding + running + acceleration, with a 1.5–2× margin.</li>
+  <li>☐ Speed at the output specified; gear ratio chosen from it.</li>
+  <li>☐ Motor within its continuous range (≤ 25% stall for brushed DC, ≤ 50% rated for servos).</li>
+  <li>☐ Supply sized for peak current; heat checked.</li>
+  <li>☐ Stops and a torque limiter protect the printed mechanism.</li>
+  <li>☐ Reaction torque path (mounting) is stiff.</li>
+</ul>
+<ul>
+  <li>Sizing a motor from its stall torque instead of its continuous torque.</li>
+  <li>Forgetting that stepper torque drops with speed.</li>
+  <li>Holding an arm with a servo at full extension all day.</li>
+  <li>Driving a motor straight from a microcontroller pin.</li>
+</ul>
+
+<h2>16.10 Check yourself</h2>
+<details class="quiz"><summary>A servo is rated 5 kg·cm. What mass can it hold continuously at the end of a 10 cm arm held horizontal?</summary>
+<p>Derate to 50%: 2.5 kg·cm. Mass = 2.5 kg·cm / 10 cm = <strong>0.25 kg</strong> at the tip, less the weight of the arm itself.</p></details>
+<details class="quiz"><summary>A brushed motor has stall torque 20 mN·m and no-load speed 10 000 rpm. You gear it 50:1 at 60% efficiency. What are the output stall torque and the no-load output speed?</summary>
+<p>Output stall = 0.02 × 50 × 0.6 = <strong>0.6 N·m</strong>. No-load output speed = 10 000 / 50 = <strong>200 rpm</strong>. Continuous use at ~25% of stall means about 0.15 N·m at ~150 rpm.</p></details>
+<details class="quiz"><summary>Why does a stepper that works fine at 100 rpm skip steps at 600 rpm with the same load?</summary>
+<p>Its pull-out torque falls with speed (coil inductance limits the current rise per step), so at 600 rpm it may deliver less torque than the load needs. Fix: higher supply voltage, a motor with lower inductance, lighter load, or gentler acceleration.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2;
+
+/* ---------- Sim 1: DC gearmotor ---------- */
+(function () {
+  const S = { n0: 10000, ts: 20, i: 50, eta: 0.6, TL: 0.15 };
+  const canvas = document.getElementById('dc-canvas'), out = document.getElementById('dc-out');
+  const calc = () => { const Tstall = S.ts / 1000 * S.i * S.eta, nOut0 = S.n0 / S.i, Tm = S.TL / (S.i * S.eta), frac = Tm / (S.ts / 1000), n = frac >= 1 ? 0 : nOut0 * (1 - frac); return { Tstall, nOut0, frac, n, P: S.TL * n * TAU / 60 }; };
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const k = calc(), l = 44, r = 14, t = 14, b = h - 28, pw = w - l - r, ph = b - t, X = T => l + T / (k.Tstall * 1.1) * pw, Y = n => b - n / (k.nOut0 * 1.1) * ph;
+    c.fillStyle = col.good + '2a'; c.fillRect(l, t, X(0.25 * k.Tstall) - l, ph);
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'right';
+    [0, 0.5, 1].forEach(f => { c.beginPath(); c.moveTo(l, Y(f * k.nOut0)); c.lineTo(l + pw, Y(f * k.nOut0)); c.stroke(); c.fillText((f * k.nOut0).toFixed(0), l - 4, Y(f * k.nOut0) + 4); });
+    c.textAlign = 'center'; [0, 0.5, 1].forEach(f => c.fillText((f * k.Tstall).toFixed(2), X(f * k.Tstall), h - 10));
+    c.strokeStyle = col.accent; c.lineWidth = 3; c.beginPath(); c.moveTo(X(0), Y(k.nOut0)); c.lineTo(X(k.Tstall), Y(0)); c.stroke();
+    c.strokeStyle = col.warn; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(X(Math.min(S.TL, k.Tstall * 1.09)), t); c.lineTo(X(Math.min(S.TL, k.Tstall * 1.09)), b); c.stroke(); c.setLineDash([]);
+    Sim.dot(c, X(Math.min(S.TL, k.Tstall)), Y(k.n), 6, k.frac > 0.25 ? col.warn : col.good, col.surface);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('output speed (rpm) vs output torque (N·m)', l + 6, t + 12); c.fillStyle = col.good; c.fillText('continuous region', l + 6, t + 28);
+  });
+  function info() {
+    const k = calc(), v = k.frac >= 1 ? ['warn', 'STALLED: the load exceeds the motor\'s stall torque'] : k.frac > 0.25 ? ['accent2', 'above ~25% of stall: it will run hot; use a bigger motor or higher ratio'] : ['good', 'comfortable continuous load'];
+    out.innerHTML = 'Output stall torque <strong>' + k.Tstall.toFixed(2) + ' N·m</strong> (' + (k.Tstall * 10.2).toFixed(1) + ' kgf·cm), no-load speed <strong>' + k.nOut0.toFixed(0) + ' rpm</strong>. With a ' + S.TL + ' N·m load: motor at <strong>' + (k.frac * 100).toFixed(0) + '%</strong> of stall → <strong style="color:var(--' + v[0] + ')">' + v[1] + '</strong>; speed ≈ <strong>' + k.n.toFixed(0) + ' rpm</strong>, output power ≈ ' + k.P.toFixed(2) + ' W.';
+    view.redraw();
+  }
+  const hs = document.getElementById('dc-ctl');
+  [['n0', 'Motor no-load', 1000, 20000, 100, 0, ' rpm'], ['ts', 'Motor stall torque', 2, 200, 1, 0, ' mN·m'], ['i', 'Gear ratio', 1, 300, 1, 0, ':1'], ['eta', 'Gear efficiency', 0.3, 0.95, 0.01, 2, ''], ['TL', 'Load torque', 0.01, 3, 0.01, 2, ' N·m']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
+})();
+
+/* ---------- Sim 2: stepper ---------- */
+(function () {
+  const S = { Th: 0.45, V: 24, L: 3, I: 1.5, TL: 0.12 };
+  const canvas = document.getElementById('st-canvas'), out = document.getElementById('st-out');
+  const fc = () => S.V / (4 * S.L / 1000 * S.I); // corner step rate, steps/s (illustrative)
+  const T = rpm => S.Th / (1 + (rpm * 200 / 60) / fc());
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const l = 44, r = 14, t = 14, b = h - 28, pw = w - l - r, ph = b - t, nmax = 1500, X = n => l + n / nmax * pw, Y = tq => b - tq / (S.Th * 1.1) * ph, req = S.TL * 2;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'right';
+    [0, 0.5, 1].forEach(f => { const v = f * S.Th; c.beginPath(); c.moveTo(l, Y(v)); c.lineTo(l + pw, Y(v)); c.stroke(); c.fillText(v.toFixed(2), l - 4, Y(v) + 4); });
+    c.textAlign = 'center'; [0, 500, 1000, 1500].forEach(n => c.fillText(n, X(n), h - 10));
+    c.strokeStyle = col.accent; c.lineWidth = 3; c.beginPath(); for (let n = 0; n <= nmax; n += 10) { n ? c.lineTo(X(n), Y(T(n))) : c.moveTo(X(n), Y(T(n))); } c.stroke();
+    c.strokeStyle = col.warn; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(l, Y(req)); c.lineTo(l + pw, Y(req)); c.stroke(); c.setLineDash([]);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('pull-out torque (N·m) vs speed (rpm); dashed = load × 2 margin', l + 6, t + 12);
+  });
+  function info() {
+    const req = S.TL * 2; let nmax = 0; for (let n = 0; n <= 3000; n += 5) if (T(n) >= req) nmax = n;
+    const ok = T(0) >= req;
+    out.innerHTML = 'Corner speed ≈ <strong>' + (fc() * 60 / 200).toFixed(0) + ' rpm</strong> (' + fc().toFixed(0) + ' steps/s). ' + (ok ? 'With 2× margin on a ' + S.TL + ' N·m load the fastest reliable speed is about <strong>' + nmax + ' rpm</strong> (' + (nmax * 200 / 60).toFixed(0) + ' full steps/s; with a 20-tooth GT2 pulley = ' + (nmax / 60 * 40).toFixed(0) + ' mm/s).' : '<strong style="color:var(--warn)">The motor can\'t deliver 2× the load even at standstill: choose a bigger motor or reduce the load.</strong>') + ' Higher voltage and lower inductance raise the whole curve.';
+    view.redraw();
+  }
+  const hs = document.getElementById('st-ctl');
+  [['Th', 'Holding torque', 0.1, 2, 0.05, 2, ' N·m'], ['V', 'Supply voltage', 12, 48, 1, 0, ' V'], ['L', 'Coil inductance', 1, 12, 0.5, 1, ' mH'], ['I', 'Coil current', 0.5, 3, 0.1, 1, ' A'], ['TL', 'Load torque', 0.01, 1, 0.01, 2, ' N·m']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
+})();
+
+/* ---------- Sim 3: servo ---------- */
+(function () {
+  const SV = [['SG90 micro', 1.8], ['MG90S metal micro', 2.2], ['Standard 6 kg·cm', 6], ['MG996R', 9.4], ['High-torque 20 kg·cm', 20]];
+  const S = { L: 12, m: 100, ma: 30, ang: 0 };
+  const canvas = document.getElementById('sv-canvas'), out = document.getElementById('sv-out');
+  const need = () => (S.m * S.L + S.ma * S.L / 2) / 1000 * Math.cos(S.ang * Math.PI / 180);
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const k = need(), mx = Math.max(25, k * 1.2), l = 150, pw = w - l - 14, rh = (h - 24) / (SV.length + 1), X = v => l + v / mx * pw;
+    c.font = '12px system-ui'; c.textBaseline = 'middle'; c.textAlign = 'right'; c.fillStyle = col.ink;
+    SV.forEach((s, i) => { const y = 12 + i * rh + rh / 2, cap = s[1] * 0.5, col2 = k <= cap * 0.8 ? col.good : k <= cap ? col.accent2 : col.warn; c.fillStyle = col.ink; c.fillText(s[0], l - 8, y); c.fillStyle = col.line; c.fillRect(l, y - 7, X(s[1]) - l, 14); c.fillStyle = col2; c.fillRect(l, y - 7, X(cap) - l, 14); });
+    c.strokeStyle = col.ink; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(X(k), 6); c.lineTo(X(k), h - 24); c.stroke(); c.setLineDash([]);
+    c.fillStyle = col.muted; c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('needed ' + k.toFixed(2) + ' kg·cm; coloured bar = usable 50%, grey = stall rating', l, h - 6);
+  });
+  function info() {
+    const k = need(), ok = SV.filter(s => k <= s[1] * 0.5 * 0.8).map(s => s[0]);
+    out.innerHTML = 'Torque needed at the horn ≈ <strong>' + k.toFixed(2) + ' kg·cm</strong> (' + (k * 0.098).toFixed(3) + ' N·m) at ' + S.ang + '° from horizontal. ' + (ok.length ? 'Comfortable choices (≤ 40% of rated): <strong style="color:var(--good)">' + ok.join(', ') + '</strong>.' : '<strong style="color:var(--warn)">Beyond these servos: shorten the arm, lighten the load, add a counterweight or spring, or gear it down.</strong>');
+    view.redraw();
+  }
+  const hs = document.getElementById('sv-ctl');
+  [['L', 'Arm length', 2, 30, 1, 0, ' cm'], ['m', 'Tip mass', 5, 1000, 5, 0, ' g'], ['ma', 'Arm mass', 0, 300, 5, 0, ' g'], ['ang', 'Angle from horizontal', 0, 90, 1, 0, '°']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
+})();
+</script>
+</body>
+</html>

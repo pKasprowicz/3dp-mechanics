@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 1 · How to think about mechanisms</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="1">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part A · Foundations · Chapter 1</p>
+<h1>How to think about mechanisms</h1>
+<p class="lead">Before gears, cams and linkages comes a smaller set of ideas: what a joint takes away, how many ways a thing can still move, and what happens when you constrain it twice. This vocabulary is the difference between a design that works on paper and one that binds, rattles or breaks on the printer bed.</p>
+
+<h2>1.1 Structure, mechanism, machine</h2>
+<ul>
+  <li><strong>Structure</strong>: parts arranged so they do <em>not</em> move relative to each other (a bracket, a frame). Its job is to carry load.</li>
+  <li><strong>Mechanism</strong>: parts arranged so motion at one place is transformed into a <em>specific, controlled</em> motion at another (a door hinge, a crank, a gear train). Its job is to move and guide.</li>
+  <li><strong>Machine</strong>: one or more mechanisms plus an energy source, doing useful work (a printer, a drill, a sewing machine).</li>
+</ul>
+<p>Almost every printed project is a mix: rigid structure to hold things, plus a few mechanisms. Designing well starts with knowing which part of the model is which, because they want opposite things. Structure wants stiffness and no play. Mechanism wants controlled freedom and low friction.</p>
+
+<h2>1.2 Links and joints</h2>
+<p>Kinematics (the geometry of motion) reduces any mechanism to two ingredients:</p>
+<ul>
+  <li><strong>Links</strong>: rigid bodies. A link keeps the distance between any two of its points fixed. The frame/base is a link too, the <em>ground link</em>, which by definition does not move.</li>
+  <li><strong>Joints</strong> (kinematic pairs): connections between two links that allow some relative motions and forbid the rest.</li>
+</ul>
+<p>A free rigid body in 3D has <strong>6 degrees of freedom</strong> (3 translations + 3 rotations). In a plane it has <strong>3</strong> (two translations + one rotation). A joint is best understood by what it <em>takes away</em>.</p>
+
+<table>
+  <tr><th>Joint</th><th>Symbol</th><th>Allows</th><th>DOF left</th><th>How you build it in print</th></tr>
+  <tr><td>Revolute (hinge, pin)</td><td>R</td><td>rotation about 1 axis</td><td>1</td><td>Pin through a hole, bearing, bolt + bushing, print-in-place pin, living hinge (approximate)</td></tr>
+  <tr><td>Prismatic (slider)</td><td>P</td><td>translation along 1 axis</td><td>1</td><td>Rod in bushing, linear bearing, T-slot/dovetail, rail + carriage</td></tr>
+  <tr><td>Helical (screw)</td><td>H</td><td>rotation coupled to translation</td><td>1</td><td>Printed thread, leadscrew + nut, bolt in heat-set insert</td></tr>
+  <tr><td>Cylindrical</td><td>C</td><td>rotation + translation along the same axis</td><td>2</td><td>Shaft sliding and turning in a bore</td></tr>
+  <tr><td>Spherical (ball)</td><td>S</td><td>rotation about all 3 axes</td><td>3</td><td>Ball-and-socket, print-in-place ball joint, rod end</td></tr>
+  <tr><td>Planar</td><td>E</td><td>slide in a plane + spin about its normal</td><td>3</td><td>A flat part sliding on a flat table</td></tr>
+  <tr><td>Higher pair (line/point contact)</td><td>-</td><td>rolling + sliding at a contact line or point</td><td>varies</td><td>Cam on follower, gear tooth on gear tooth, wheel on rail</td></tr>
+</table>
+
+<p><strong>Lower pairs</strong> (R, P, H, C, S, E) have surface contact: large contact area, good load capacity, and they print well. <strong>Higher pairs</strong> have line or point contact: concentrated stress, wear fast in soft plastic, and are mostly where gears and cams live. We deal with that in the chapters on those mechanisms.</p>
+
+<div class="callout tip">
+  <span class="tag">3D printing</span>
+  The two joints you will use 90% of the time are revolute and prismatic. Both are <em>fits</em>: a clearance between a shaft and a hole, or a slider and a guide. Too tight and it binds, too loose and it wobbles. Chapter 4 gives you a calibration coupon to find the right clearance for your X2D and material, since it depends on printer, nozzle, material and orientation.
+</div>
+
+<h2>1.3 Counting degrees of freedom: the Grübler–Kutzbach criterion</h2>
+<p>The <strong>mobility</strong> <em>M</em> of a mechanism is the number of independent inputs you need to fix its position completely. You can count it before building anything.</p>
+<p>Start with each moving link free (3 DOF each in a plane), then subtract what each joint removes:</p>
+<div class="eq">Planar:   M = 3(n − 1) − 2·j₁ − j₂<br>
+n  = number of links <em>including</em> the ground link<br>
+j₁ = joints with 1 DOF (revolute, prismatic): each removes 2<br>
+j₂ = joints with 2 DOF (cam/gear contact, pin-in-slot): each removes 1</div>
+<div class="eq">Spatial: M = 6(n − 1) − 5·j₁ − 4·j₂ − 3·j₃ − 2·j₄ − j₅<br>
+(jₖ = joints leaving k degrees of freedom)</div>
+
+<p><strong>Reading the result:</strong></p>
+<ul>
+  <li><strong>M = 1</strong>: a classic single-input mechanism. One motor, one crank, one defined output motion.</li>
+  <li><strong>M ≥ 2</strong>: you need that many inputs (two motors) or the mechanism is floppy. Robot arms and plotters live here on purpose.</li>
+  <li><strong>M = 0</strong>: a structure (a truss). It will not move.</li>
+  <li><strong>M &lt; 0</strong>: over-constrained. The formula says it should not even assemble. In real life it either binds or relies on flex and clearance to move. Hold that thought for section 1.6.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 1 · Mobility counter</h4>
+  <p class="desc">Pick a mechanism. The panel counts links and joints and applies the formula. You can also type your own numbers.</p>
+  <canvas id="gr-canvas"></canvas>
+  <div class="row" id="gr-presets"></div>
+  <div class="row">
+    <label>n (links incl. ground) <input type="number" id="gr-n" min="1" max="12"></label>
+    <label>j₁ <input type="number" id="gr-j1" min="0" max="20"></label>
+    <label>j₂ <input type="number" id="gr-j2" min="0" max="10"></label>
+  </div>
+  <div class="readout" id="gr-out"></div>
+</div>
+
+<h2>1.4 When the formula lies</h2>
+<p>Grübler's count only looks at <em>how many</em> links and joints there are, not at their <em>dimensions</em>. Two things break it:</p>
+<ol>
+  <li><strong>Special geometry.</strong> The last preset in the simulation above has three equal parallel cranks. The formula says M = 0 (locked), yet it moves. The third crank is mathematically redundant: it duplicates a constraint the other two already enforce, but only if the dimensions are <em>exactly</em> equal. Change any length by a hair and the formula becomes right: it jams.</li>
+  <li><strong>Passive (idle) degrees of freedom.</strong> A roller on a cam follower can spin about its own axis. That adds a DOF the formula counts but that does nothing useful. Likewise, a link that can rotate freely about its own axis without affecting the output.</li>
+</ol>
+<div class="callout">
+  <span class="tag">Takeaway</span>
+  The formula is a <em>first check</em>, not a proof. If M disagrees with what you see in a real mechanism, look for redundant links in special geometry or for an idle DOF, and find out which it is before trusting either.
+</div>
+
+<h2>1.5 The archetype: the four-bar linkage</h2>
+<p>Four links, four revolute joints: n = 4, j₁ = 4, so M = 3·3 − 2·4 = <strong>1</strong>. It is the simplest closed-loop mechanism, and an enormous number of real mechanisms are four-bars in disguise (windscreen wipers, folding chairs, bike suspension, hood hinges, pliers). We will study linkages properly in chapter 5. Here it is a lab for the vocabulary:</p>
+<ul>
+  <li><strong>Ground link</strong> (frame), <strong>input link / crank</strong>, <strong>coupler</strong> (the floating link), <strong>output link / rocker</strong>.</li>
+  <li>Whether the input can spin all the way around is decided by the lengths alone: the <strong>Grashof condition</strong>. With the shortest link <em>s</em>, longest <em>l</em> and the other two <em>p</em>, <em>q</em>: if <strong>s + l ≤ p + q</strong>, at least one link can fully rotate.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 2 · Four-bar linkage lab</h4>
+  <p class="desc">Drag the blue handle on the crank (or press Run). The orange curve is the path of a point attached to the coupler. Change link lengths and watch the classification change.</p>
+  <canvas id="fb-canvas"></canvas>
+  <div class="controls" id="fb-ctl"></div>
+  <div class="row"><button id="fb-run">Run</button><button id="fb-reset">Reset lengths</button></div>
+  <div class="readout" id="fb-out"></div>
+</div>
+
+<p>Try these experiments:</p>
+<ol>
+  <li>Make the crank the shortest link (default). The output rocks back and forth: <strong>crank-rocker</strong>, e.g. a windscreen wiper.</li>
+  <li>Make the ground link the shortest (e.g. ground 30, crank 60, coupler 60, output 60). Both side links spin fully: <strong>double-crank</strong> (drag-link).</li>
+  <li>Break the Grashof condition (make one link much longer than the rest). No link can turn fully; the handle jams after some angle: <strong>double-rocker</strong> or triple-rocker.</li>
+  <li>Make ground = coupler and crank = output (e.g. 80 / 30 / 80 / 30). This is a <strong>parallelogram</strong>: the coupler stays parallel to ground. Keep it in mind for the next section.</li>
+</ol>
+
+<h3>Kinematic inversion</h3>
+<p>Pick a different link as the "ground" in the same chain of links and joints and you get a different mechanism with the same relative motions. Slider-crank: fix the frame and you get a piston engine or a press; fix the crank and you get a Whitworth quick-return; fix the connecting rod and you get a swinging-cylinder engine; fix the slider and you get a hand water pump. For a designer this is a free source of ideas: <em>when a mechanism almost does what you want, invert it.</em></p>
+
+<h2>1.6 Exact constraint, under-constraint and over-constraint</h2>
+<p>This is the single most useful idea for printed mechanisms, because printed parts are never dimensionally perfect.</p>
+<ul>
+  <li><strong>Under-constrained</strong>: more freedom than you wanted. The part wobbles or rattles in a direction you didn't plan for.</li>
+  <li><strong>Exactly constrained</strong>: every DOF you don't want is removed exactly once. The part is positioned deterministically, and small dimensional errors change nothing but a tiny position shift. No forces build up.</li>
+  <li><strong>Over-constrained</strong>: some DOF is removed <em>more than once</em>. If the dimensions don't agree to within clearance, the parts fight each other, which means binding, high friction, stress and warping, or only one constraint actually carrying load.</li>
+</ul>
+<p>The classic case: two rails to guide one carriage. Each rail alone is enough to fix the carriage's position and its tilt. Two rails have to be parallel to a tolerance finer than the carriage's clearance, otherwise the carriage jams. That's why printers use one rail + one smooth-guide, or put one side on a floating mount.</p>
+
+<div class="sim">
+  <h4>Simulation 3 · Redundant crank vs printing tolerance</h4>
+  <p class="desc">Section 1.4's parallelogram with three equal cranks. The third crank is redundant, so it only works if everything agrees to within the joint clearance. Set a pivot-spacing error and a crank-length error (what your printer actually produces) and see where in the rotation the mechanism binds.</p>
+  <figure style="margin:8px 0">
+  <svg class="fig" viewBox="0 0 520 150" role="img" aria-label="Parallelogram linkage with three parallel equal cranks">
+    <line class="gnd" x1="30" y1="130" x2="490" y2="130"/>
+    <line class="bar" x1="80" y1="130" x2="150" y2="50"/><line class="bar" x1="240" y1="130" x2="310" y2="50"/><line class="bar" x1="400" y1="130" x2="470" y2="50"/>
+    <line class="bar" x1="150" y1="50" x2="470" y2="50" style="stroke:var(--accent2)"/>
+    <circle class="pin" cx="80" cy="130" r="6"/><circle class="pin" cx="240" cy="130" r="6"/><circle class="pin" cx="400" cy="130" r="6"/>
+    <circle class="pin" cx="150" cy="50" r="6"/><circle class="pin" cx="310" cy="50" r="6"/><circle class="pin" cx="470" cy="50" r="6"/>
+    <text x="95" y="146">crank 1</text><text x="255" y="146">crank 2</text><text x="415" y="146">crank 3 (redundant)</text>
+    <text x="260" y="38">coupler</text>
+  </svg>
+  <figcaption>Cranks 1 and 2 already force the coupler to translate on a circle. Crank 3 can only agree with them if its geometry is perfect.</figcaption>
+  </figure>
+  <canvas id="oc-canvas"></canvas>
+  <div class="controls" id="oc-ctl"></div>
+  <div class="readout" id="oc-out"></div>
+</div>
+
+<p>What the plot shows: the misfit is how far crank 3 "wants" the coupler to be, compared with where cranks 1 and 2 put it, as the mechanism rotates. Misfit oscillates once per revolution when the pivot spacing is off, and shifts up or down when the crank length is off. Wherever it leaves the clearance band, the printed pins are being squeezed, so you feel it as a tight spot in the rotation.</p>
+
+<h3>Practical rules for printed mechanisms</h3>
+<ol>
+  <li><strong>Count the constraints on purpose.</strong> For each part ask: "Which DOF does this joint remove? Does anything else remove the same one?"</li>
+  <li><strong>Prefer exact constraint.</strong> One rail + one flat, three points rather than four, a pin in a round hole + a pin in a slot (instead of two round holes).</li>
+  <li><strong>If you must over-constrain, add compliance.</strong> A flexure, a floating bushing, an oversized slot, a thin printed spring tab, or a rubber washer lets the redundant constraint adjust instead of fight.</li>
+  <li><strong>If you must over-constrain rigidly</strong> (e.g. two bearings supporting a long shaft), design the mounting so a precision step is done in one print or one machined part, and put relief where tolerances can't be held.</li>
+  <li><strong>Over-constraint is worse the larger the part is.</strong> Printer error scales with size: 0.2 mm error on a 20 mm part is a rounding error, on a 300 mm frame it can bind a rail.</li>
+</ol>
+
+<h2>1.7 Kinematics, statics, dynamics: which question are you asking?</h2>
+<table>
+  <tr><th>Branch</th><th>Question</th><th>Typical use in printed designs</th></tr>
+  <tr><td><strong>Kinematics</strong></td><td>Where do the parts go, and how fast, ignoring forces?</td><td>Does the lid clear? Does the linkage hit its end stops? Stroke, angle, ratio.</td></tr>
+  <tr><td><strong>Statics</strong></td><td>What forces and torques does each part and joint carry when held still?</td><td>Will the arm bend or the pin shear at full load? How big a motor to hold position?</td></tr>
+  <tr><td><strong>Dynamics</strong></td><td>How do inertia, acceleration and vibration affect it?</td><td>Fast mechanisms, shaking, resonance, impact in latches.</td></tr>
+</table>
+<p>Do it in that order. Most small printed mechanisms are fully answered by <strong>kinematics + statics</strong>. Dynamics starts to matter when parts move fast, are heavy, or stop abruptly. Chapter 2 builds the statics toolkit.</p>
+
+<h2>1.8 A design checklist from this chapter</h2>
+<ul>
+  <li>☐ Write down the required motion first: input type, output type, stroke/angle, ratio.</li>
+  <li>☐ Sketch the mechanism as a stick diagram (links as lines, joints as circles) before opening CAD.</li>
+  <li>☐ Count M with the formula. Does it match the number of inputs you plan to have?</li>
+  <li>☐ Mark joints that are lower pairs (surface contact) vs higher pairs (line contact: wear).</li>
+  <li>☐ Check for any DOF removed twice. If found, decide: remove one constraint, or add compliance.</li>
+  <li>☐ Check which positions are toggle points, dead centres or limits, and whether something stops the motion there.</li>
+  <li>☐ Mark the ground link: what is it physically (the frame, a table, a bolted bracket)?</li>
+</ul>
+
+<h2>1.9 Common mistakes</h2>
+<ul>
+  <li>Designing a smooth-looking assembly with <strong>no stick diagram</strong>, then finding it's over-constrained at the print.</li>
+  <li>Assuming "four bars, four pins" works at any lengths. Check Grashof and the range of motion before you model it.</li>
+  <li>Trusting Grübler on a parallelogram or other special-geometry linkage: it moves only if everything is perfect.</li>
+  <li>Using two long, rigid, parallel guides on a printed part and expecting it to slide.</li>
+  <li>Forgetting the <strong>ground link</strong> is also flexible when it is a printed frame: a whole frame can be the "extra" compliance, or the cause of misalignment.</li>
+</ul>
+
+<h2>1.10 Check yourself</h2>
+<details class="quiz"><summary>A six-bar linkage (Watt type) has 6 links including ground and 7 revolute joints. What is its mobility?</summary>
+<p>n = 6, j₁ = 7, j₂ = 0. M = 3(6 − 1) − 2·7 = 15 − 14 = <strong>1</strong>. One input drives it, which is why six-bars are used when a four-bar cannot produce the output motion you need.</p></details>
+<details class="quiz"><summary>You want a lid that opens on two hinges 100 mm apart, both printed in place. Which constraints are redundant?</summary>
+<p>Each hinge removes 5 DOF in 3D, so the pair removes 10, though only 5 are needed to leave one rotation. If the two hinge axes aren't collinear to within the pin clearance, the lid binds. Fix: give one hinge slop along the axis (a slot or extra end-clearance) or use a single long hinge pin.</p></details>
+<details class="quiz"><summary>Why is a single-DOF mechanism (M = 1) usually preferred for a hand-driven gadget?</summary>
+<p>One input fully defines the motion, so the user's single action (crank, lever, push) has a deterministic result and no extra part is needed to "hold" the other DOF.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+/* ---------- Simulation 1: Grübler counter ---------- */
+(function () {
+  // Screen-style coordinates, 100 wide x 60 tall (y down).
+  const P = [
+    { name: 'Triangle truss', n: 3, j1: 3, j2: 0, actual: 0, note: 'Three bars pinned in a loop: a structure. Triangles are rigid, which is why trusses use them.',
+      ground: [[20, 44], [80, 44]], bars: [[20, 44, 50, 10], [80, 44, 50, 10]], pins: [[20, 44], [80, 44], [50, 10]], gbar: [[20, 44, 80, 44]] },
+    { name: 'Four-bar', n: 4, j1: 4, j2: 0, actual: 1, note: 'The archetypal single-input mechanism.',
+      ground: [[20, 48], [80, 48]], bars: [[20, 48, 32, 18], [32, 18, 74, 24], [80, 48, 74, 24]], pins: [[20, 48], [80, 48], [32, 18], [74, 24]], gbar: [[20, 48, 80, 48]] },
+    { name: 'Five-bar', n: 5, j1: 5, j2: 0, actual: 2, note: 'Two inputs needed. Used in plotters and delta-style positioners where the output point is steered in 2D.',
+      ground: [[15, 50], [85, 50]], bars: [[15, 50, 28, 22], [28, 22, 56, 10], [56, 10, 72, 24], [85, 50, 72, 24]], pins: [[15, 50], [85, 50], [28, 22], [56, 10], [72, 24]], gbar: [[15, 50, 85, 50]] },
+    { name: 'Slider-crank', n: 4, j1: 4, j2: 0, actual: 1, note: 'Three revolute joints + one prismatic. Piston engines, presses, pumps.',
+      ground: [[20, 45]], bars: [[20, 45, 36, 28], [36, 28, 68, 45]], pins: [[20, 45], [36, 28], [68, 45]], track: [[40, 45, 95, 45]], slider: [68, 45] },
+    { name: 'Cam + follower', n: 3, j1: 2, j2: 1, actual: 1, note: 'The cam-follower contact is a higher pair (j₂). Ground, cam and follower are three links; a pivot and a guide are the two j₁ joints.',
+      ground: [[50, 42]], circles: [[50, 42, 14, 5]], bars: [[50, 6, 50, 24]], pins: [[50, 42]], guides: [[44, 4, 44, 20], [56, 4, 56, 20]] },
+    { name: '3 parallel cranks', n: 5, j1: 6, j2: 0, actual: 1, note: 'Formula says M = 0, reality is M = 1. Redundant constraint through special geometry: works only if every length is exactly equal.',
+      ground: [[15, 50], [45, 50], [75, 50]], bars: [[15, 50, 30, 20], [45, 50, 60, 20], [75, 50, 90, 20], [30, 20, 90, 20]], pins: [[15, 50], [45, 50], [75, 50], [30, 20], [60, 20], [90, 20]], gbar: [[10, 50, 80, 50]] }
+  ];
+  let cur = 1;
+  const canvas = document.getElementById('gr-canvas');
+  const nIn = document.getElementById('gr-n'), j1In = document.getElementById('gr-j1'), j2In = document.getElementById('gr-j2');
+  const out = document.getElementById('gr-out');
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const p = P[cur], s = Math.min(w / 100, h / 60), ox = (w - 100 * s) / 2, oy = (h - 60 * s) / 2;
+    const X = x => ox + x * s, Y = y => oy + y * s;
+    (p.gbar || []).forEach(b => Sim.line(c, X(b[0]), Y(b[1] + 4), X(b[2]), Y(b[3] + 4), col.muted, 3));
+    (p.track || []).forEach(b => Sim.line(c, X(b[0]), Y(b[1] + 3), X(b[2]), Y(b[3] + 3), col.muted, 3));
+    (p.guides || []).forEach(b => Sim.line(c, X(b[0]), Y(b[1]), X(b[2]), Y(b[3]), col.muted, 3));
+    (p.circles || []).forEach(k => { // eccentric cam: circle with pivot off-centre
+      c.beginPath(); c.arc(X(k[0]), Y(k[1] - k[3]), k[2] * s, 0, 6.2832); c.fillStyle = col.surface; c.fill();
+      c.strokeStyle = col.accent; c.lineWidth = 3; c.stroke();
+    });
+    p.bars.forEach(b => Sim.line(c, X(b[0]), Y(b[1]), X(b[2]), Y(b[3]), col.accent, 5));
+    if (p.slider) { c.fillStyle = col.accent2; c.fillRect(X(p.slider[0]) - 7 * s / 1.6, Y(p.slider[1]) - 4, 14 * s / 1.6, 8); }
+    p.ground.forEach(g => Sim.ground(c, X(g[0]), Y(g[1]), col.muted, 8));
+    p.pins.forEach(q => Sim.dot(c, X(q[0]), Y(q[1]), 5, col.surface, col.ink));
+  });
+  function readout() {
+    const n = +nIn.value, j1 = +j1In.value, j2 = +j2In.value, M = 3 * (n - 1) - 2 * j1 - j2;
+    const p = P[cur], same = n === p.n && j1 === p.j1 && j2 === p.j2;
+    let kind = M === 1 ? 'one input drives it completely' : M >= 2 ? M + ' inputs are needed to fix its position' : M === 0 ? 'structure (no motion)' : 'over-constrained (formula says it cannot assemble)';
+    out.innerHTML = '<strong>M = 3(' + n + ' − 1) − 2·' + j1 + ' − ' + j2 + ' = ' + M + '</strong> · ' + kind +
+      (same ? '<br>' + p.note + (p.actual !== M ? ' <strong style="color:var(--warn)">Actual mobility is ' + p.actual + '.</strong>' : '') : '<br><em>Custom values.</em>');
+  }
+  function load(i) {
+    cur = i; const p = P[i]; nIn.value = p.n; j1In.value = p.j1; j2In.value = p.j2;
+    [...document.querySelectorAll('#gr-presets button')].forEach((b, k) => b.classList.toggle('on', k === i));
+    view.redraw(); readout();
+  }
+  P.forEach((p, i) => { const b = document.createElement('button'); b.textContent = p.name; b.onclick = () => load(i); document.getElementById('gr-presets').append(b); });
+  [nIn, j1In, j2In].forEach(e => e.addEventListener('input', readout));
+  load(1);
+})();
+
+/* ---------- Simulation 2: four-bar lab ---------- */
+(function () {
+  const DEF = { d: 100, r2: 30, r3: 90, r4: 70 };
+  const S = Object.assign({}, DEF, { th: 0.9, run: false, dir: 1 });
+  const U = 0.5, V = 0.45; // coupler point: along the coupler and offset sideways (fractions of coupler)
+
+  function solve(th) {
+    const A = [S.r2 * Math.cos(th), S.r2 * Math.sin(th)];
+    const dx = S.d - A[0], dy = -A[1], D = Math.hypot(dx, dy);
+    if (D > S.r3 + S.r4 || D < Math.abs(S.r3 - S.r4) || D === 0) return null;
+    const a = (S.r3 * S.r3 - S.r4 * S.r4 + D * D) / (2 * D), hh = Math.sqrt(Math.max(0, S.r3 * S.r3 - a * a));
+    const xm = A[0] + a * dx / D, ym = A[1] + a * dy / D;
+    const B = [xm - hh * dy / D, ym + hh * dx / D];
+    const vx = B[0] - A[0], vy = B[1] - A[1];
+    return { A, B, P: [A[0] + U * vx - V * vy, A[1] + U * vy + V * vx] };
+  }
+  function sweep(n) {
+    const r = []; let valid = 0;
+    for (let i = 0; i < n; i++) { const s = solve(i / n * 6.2832); r.push(s); if (s) valid++; }
+    return { r, valid };
+  }
+  function ensureValid() {
+    if (solve(S.th)) return true;
+    for (let t = 0; t < 6.2832; t += 0.01) if (solve(t)) { S.th = t; return true; }
+    return false;
+  }
+
+  let frame = null, scale = 1, ox = 0, oy = 0;
+  const canvas = document.getElementById('fb-canvas'), out = document.getElementById('fb-out');
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const ok = ensureValid();
+    if (!ok) { c.fillStyle = col.warn; c.font = '16px system-ui'; c.fillText('Cannot assemble: these lengths cannot form a closed four-bar.', 16, 30); frame = null; return; }
+    const sw = sweep(360).r.filter(Boolean);
+    let x0 = 0, x1 = S.d, y0 = 0, y1 = 0;
+    sw.forEach(s => [s.A, s.B, s.P].forEach(p => { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }));
+    y0 = Math.min(y0, -5); y1 = Math.max(y1, 5);
+    const m = 44; scale = Math.min((w - 2 * m) / (x1 - x0), (h - 2 * m) / (y1 - y0));
+    ox = (w - (x1 - x0) * scale) / 2 - x0 * scale; oy = (h + (y1 - y0) * scale) / 2 + y0 * scale;
+    const X = x => ox + x * scale, Y = y => oy - y * scale;
+    // coupler-point trace (broken where the crank can't reach)
+    c.strokeStyle = col.accent2; c.lineWidth = 2; c.setLineDash([]); c.beginPath();
+    let pen = false;
+    sweep(360).r.forEach(s => { if (!s) { pen = false; return; } if (pen) c.lineTo(X(s.P[0]), Y(s.P[1])); else c.moveTo(X(s.P[0]), Y(s.P[1])); pen = true; });
+    c.stroke();
+    // crank circle
+    c.strokeStyle = col.line; c.setLineDash([4, 4]); c.beginPath(); c.arc(X(0), Y(0), S.r2 * scale, 0, 6.2832); c.stroke(); c.setLineDash([]);
+    const s = solve(S.th); frame = s;
+    Sim.line(c, X(0), Y(0), X(S.d), Y(0), col.muted, 2);
+    c.beginPath(); c.moveTo(X(s.A[0]), Y(s.A[1])); c.lineTo(X(s.B[0]), Y(s.B[1])); c.lineTo(X(s.P[0]), Y(s.P[1])); c.closePath();
+    c.fillStyle = col.accent2 + '33'; c.fill();
+    Sim.line(c, X(0), Y(0), X(s.A[0]), Y(s.A[1]), col.accent, 6);
+    Sim.line(c, X(s.A[0]), Y(s.A[1]), X(s.B[0]), Y(s.B[1]), col.ink, 4);
+    Sim.line(c, X(S.d), Y(0), X(s.B[0]), Y(s.B[1]), col.accent, 6);
+    Sim.ground(c, X(0), Y(0), col.muted, 9); Sim.ground(c, X(S.d), Y(0), col.muted, 9);
+    [[0, 0], [S.d, 0], s.B].forEach(p => Sim.dot(c, X(p[0]), Y(p[1]), 5, col.surface, col.ink));
+    Sim.dot(c, X(s.P[0]), Y(s.P[1]), 5, col.accent2);
+    Sim.dot(c, X(s.A[0]), Y(s.A[1]), 9, col.accent, col.surface); // drag handle
+  });
+
+  function info() {
+    const L = [['ground', S.d], ['input', S.r2], ['coupler', S.r3], ['output', S.r4]].sort((a, b) => a[1] - b[1]);
+    const sh = L[0], lo = L[3], gr = sh[1] + lo[1] <= L[1][1] + L[2][1];
+    const sw = sweep(720);
+    let t;
+    if (sw.valid === 0) t = 'These lengths cannot be assembled.';
+    else if (gr) {
+      const k = { input: 'crank-rocker: the input spins fully, the output rocks', output: 'rocker-crank: the output spins fully, the input rocks', ground: 'double-crank (drag-link): both side links spin fully', coupler: 'double-rocker: neither side link spins fully (but the coupler does)' }[sh[0]];
+      t = 'Grashof (s + l ≤ p + q: ' + (sh[1] + lo[1]) + ' ≤ ' + (L[1][1] + L[2][1]) + '). Shortest link is the <strong>' + sh[0] + '</strong> → ' + k + '.';
+    } else t = 'Not Grashof (s + l > p + q: ' + (sh[1] + lo[1]) + ' > ' + (L[1][1] + L[2][1]) + '). <strong>No link can rotate fully</strong> (triple-rocker).';
+    const full = sw.valid === 720;
+    out.innerHTML = t + '<br>Input crank travel: ' + (full ? '<strong>full 360°</strong>' : '<strong>about ' + Math.round(sw.valid / 2) + '° of 360°</strong> (it hits a lock-up limit)') + '.';
+  }
+  function refresh() { view.redraw(); info(); }
+
+  const host = document.getElementById('fb-ctl'), sl = {};
+  [['d', 'Ground link', 40, 160], ['r2', 'Input (crank)', 15, 100], ['r3', 'Coupler', 30, 140], ['r4', 'Output', 20, 140]].forEach(([k, l, mn, mx]) => {
+    sl[k] = Sim.slider(host, { label: l, min: mn, max: mx, value: S[k], unit: ' mm', onInput: v => { S[k] = v; refresh(); } });
+  });
+  document.getElementById('fb-reset').onclick = () => { Object.keys(DEF).forEach(k => { S[k] = DEF[k]; sl[k].set(DEF[k]); }); refresh(); };
+
+  Sim.pointer(canvas, {
+    hover: (x, y) => frame && Math.hypot(x - (ox + frame.A[0] * scale), y - (oy - frame.A[1] * scale)) < 16,
+    down: (x, y) => frame && Math.hypot(x - (ox + frame.A[0] * scale), y - (oy - frame.A[1] * scale)) < 16,
+    move: (x, y) => { const t = Math.atan2(-(y - oy), x - ox); if (solve(t)) { S.th = t; view.redraw(); } }
+  });
+
+  const runBtn = document.getElementById('fb-run'); let last = 0;
+  function tick(t) {
+    if (!S.run) return;
+    const dt = Math.min(0.05, (t - last) / 1000); last = t;
+    const next = S.th + S.dir * dt * 1.6;
+    if (solve(next)) S.th = (next + 6.2832) % 6.2832; else S.dir *= -1;
+    view.redraw(); requestAnimationFrame(tick);
+  }
+  runBtn.onclick = () => { S.run = !S.run; runBtn.classList.toggle('on', S.run); runBtn.textContent = S.run ? 'Pause' : 'Run'; if (S.run) { last = performance.now(); requestAnimationFrame(tick); } };
+  info();
+})();
+
+/* ---------- Simulation 3: redundant crank vs tolerance ---------- */
+(function () {
+  const L = 50, Y = 1.2; // crank length (mm), plot half-range (mm)
+  const st = { e: 0.3, s: 0.2, c: 0.15 };
+  const misfit = th => Math.sqrt(L * L + 2 * L * st.s * Math.cos(th) + st.s * st.s) - (L + st.e);
+  const canvas = document.getElementById('oc-canvas'), out = document.getElementById('oc-out');
+  const view = Sim.make(canvas, 0.42, (c, w, h, col) => {
+    const l = 46, r = 14, t = 12, b = 30, pw = w - l - r, ph = h - t - b;
+    const X = deg => l + deg / 360 * pw, YY = v => t + ph / 2 - v / Y * ph / 2;
+    c.fillStyle = col.good + '2a'; c.fillRect(l, YY(st.c), pw, YY(-st.c) - YY(st.c));
+    c.strokeStyle = col.line; c.lineWidth = 1; c.font = '12px system-ui'; c.fillStyle = col.muted;
+    [-1, 0, 1].forEach(v => { c.beginPath(); c.moveTo(l, YY(v)); c.lineTo(l + pw, YY(v)); c.stroke(); c.textAlign = 'right'; c.fillText(v + ' mm', l - 6, YY(v) + 4); });
+    [0, 90, 180, 270, 360].forEach(d => { c.textAlign = 'center'; c.fillText(d + '°', X(d), h - 10); });
+    c.textAlign = 'left'; c.fillText('crank angle →', l + 4, t + 10);
+    c.lineWidth = 2.5;
+    for (let d = 0; d < 360; d++) {
+      const a = misfit(d * Math.PI / 180), b2 = misfit((d + 1) * Math.PI / 180);
+      c.strokeStyle = Math.abs(a) <= st.c && Math.abs(b2) <= st.c ? col.good : col.warn;
+      c.beginPath(); c.moveTo(X(d), YY(Math.max(-Y, Math.min(Y, a)))); c.lineTo(X(d + 1), YY(Math.max(-Y, Math.min(Y, b2)))); c.stroke();
+    }
+  });
+  function refresh() {
+    let free = 0; for (let d = 0; d < 360; d++) if (Math.abs(misfit(d * Math.PI / 180)) <= st.c) free++;
+    const pct = Math.round(free / 3.6);
+    out.innerHTML = '<strong>' + pct + '%</strong> of the rotation is free (curve inside the green clearance band). ' +
+      (pct === 100 ? 'It turns freely everywhere.' : pct === 0 ? 'It is locked at every angle: the printed pins would have to deform.' : 'It binds in the red parts of the cycle: you feel tight spots, and the pins and holes wear or crack there.');
+    view.redraw();
+  }
+  const host = document.getElementById('oc-ctl');
+  Sim.slider(host, { label: 'Pivot spacing error', min: -1, max: 1, step: 0.05, dec: 2, value: st.s, unit: ' mm', onInput: v => { st.s = v; refresh(); } });
+  Sim.slider(host, { label: 'Crank 3 length error', min: -1, max: 1, step: 0.05, dec: 2, value: st.e, unit: ' mm', onInput: v => { st.e = v; refresh(); } });
+  Sim.slider(host, { label: 'Joint clearance', min: 0, max: 0.6, step: 0.01, dec: 2, value: st.c, unit: ' mm', onInput: v => { st.c = v; refresh(); } });
+  refresh();
+})();
+</script>
+</body>
+</html>

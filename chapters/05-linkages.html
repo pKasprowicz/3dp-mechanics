@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 5 · Linkages</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="5">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 5</p>
+<h1>Linkages</h1>
+<p class="lead">Rigid bars joined by pins are the most forgiving mechanism for 3D printing: no teeth to mesh, no sliding surfaces except the pin, and they print flat. They turn rotation into rocking, rotation into straight-line pushing, short pulls into huge clamping forces, and they trace paths that no gear can. This chapter covers the main families, how to judge a linkage before you build it, and how to build one that doesn't wobble.</p>
+
+<h2>5.1 What linkages do</h2>
+<table>
+  <tr><th>Job</th><th>Family</th><th>Where you've seen it</th></tr>
+  <tr><td>Rotation → rocking</td><td>Crank-rocker four-bar</td><td>Windscreen wipers, sewing-machine treadles, toy animals</td></tr>
+  <tr><td>Rotation → straight-line push/pull</td><td>Slider-crank</td><td>Engines, compressors, punch presses, pumps</td></tr>
+  <tr><td>Huge force over a tiny stroke</td><td>Toggle / over-centre</td><td>Toggle clamps, vices, locking pliers, car-hood props</td></tr>
+  <tr><td>Straight line without a rail</td><td>Watt, Hoeken, Peaucellier</td><td>Walking mechanisms, steam-engine guides, plotters</td></tr>
+  <tr><td>Moving a platform parallel to itself</td><td>Parallelogram</td><td>Desk lamps, scissor lifts, drafting arms, robot-arm links</td></tr>
+  <tr><td>Scaling a motion</td><td>Pantograph</td><td>Copying and engraving rigs, tram pantographs, lazy tongs</td></tr>
+  <tr><td>Following a path (leg, gripper)</td><td>Four-bar coupler curves, six-bars</td><td>Walking robots, grippers, folding mechanisms</td></tr>
+</table>
+<p>Chapter 1 introduced the four-bar and the Grashof condition. Here we use it. "Does it turn fully?" is the first question; the next is "<strong>does it push well?</strong>"</p>
+
+<h2>5.2 Transmission angle and dead centres</h2>
+<p>In a four-bar, the input link pushes the coupler, and the coupler pushes the output link. The angle between the coupler and the output link at their joint is the <strong>transmission angle μ</strong>. At μ = 90° the coupler pushes the output link squarely; its whole force goes into turning the output. As μ approaches 0° or 180°, the coupler pushes almost along the output link, so most of the force squeezes the pins instead of turning anything. At exactly 0° or 180° the mechanism is at a <strong>dead centre</strong> (a toggle position): it can jam, or the output can flip either way.</p>
+<p>Practical rule: <strong>keep the transmission angle between about 40° and 140° over the working range</strong> (min(μ, 180°−μ) ≥ 40°). In 3D printing there's a second reason beyond efficiency: printed pins have friction and clearance, which at poor angles makes the mechanism <em>stall</em> or <em>rattle</em> at the dead-centre.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Transmission angle</h4>
+  <p class="desc">Drag the blue crank handle (or Run). The lower plot shows the transmission angle over the crank's rotation; the green band is the comfortable 40°–140° zone. Try the presets, then pull the slider lengths to improve a poor one.</p>
+  <canvas id="ta-canvas"></canvas>
+  <div class="row" id="ta-presets"></div>
+  <div class="controls" id="ta-ctl"></div>
+  <div class="row"><button id="ta-run">Run</button></div>
+  <div class="readout" id="ta-out"></div>
+</div>
+<p>Typical fixes for a poor transmission angle: <strong>lengthen the output link or shorten the crank</strong>, move the ground pivots, or use a different linkage altogether. And if a dead centre is something you <em>want</em> (to lock a position), see the toggle in section 5.5.</p>
+
+<h2>5.3 The slider-crank</h2>
+<p>Replace the output rocker with a slider and you get the engine linkage: a crank of radius <em>r</em>, a connecting rod of length <em>l</em>, and a slider on a straight guide. The slider position is</p>
+<div class="eq">x = r·cos θ + √( l² − (e − r·sin θ)² )     (e = offset of the guide from the crank axis)<br>
+Stroke ≈ 2r (exactly 2r when e = 0)</div>
+<p>Notes for design:</p>
+<ul>
+  <li>The slider moves almost sinusoidally; it is faster at mid-stroke and slows to zero at each end, which is useful for pumps (smooth flow) and presses (slow near the bottom).</li>
+  <li>A <strong>longer rod</strong> (<em>l/r</em> large, 3.5–5 is common) is smoother and puts less sideways load on the guide. The sideways force on the slider is what wears printed guides.</li>
+  <li><strong>Offsetting</strong> the guide from the crank axis makes the two strokes take unequal crank angles: a built-in <strong>quick-return</strong>, used in shapers and saws, where the working stroke is slow and the return is fast.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 2 · Slider-crank with offset</h4>
+  <p class="desc">Orange: slider position over one crank turn. Blue: slider velocity for unit crank speed. Increase the offset <em>e</em> and the strokes become unequal. Shorten the rod and the sideways thrust on the guide (shown as a bar) rises.</p>
+  <canvas id="sc-canvas"></canvas>
+  <div class="controls" id="sc-ctl"></div>
+  <div class="row"><button id="sc-run" class="on">Pause</button></div>
+  <div class="readout" id="sc-out"></div>
+</div>
+
+<h2>5.4 Straight lines and paths</h2>
+<p>A pin joint moves on a circle, so getting a <em>straight</em> line from pins alone is a classic problem. Linkages can solve it two ways:</p>
+<ul>
+  <li><strong>Approximate straight line</strong> with a 4-bar: the path of a coupler point has a nearly straight section. <strong>Watt's linkage</strong> (two equal rockers) draws a figure-8 with a straight crossing. <strong>Hoeken's linkage</strong> (a crank-rocker with a coupler point extended to twice the coupler length) draws a D-shaped curve with a long straight edge. It is one of the best choices for a printable walking leg or a pick-and-place that needs a flat stroke.</li>
+  <li><strong>Exact straight line</strong> with <strong>Peaucellier–Lipkin's</strong> seven-bar inversor: a clever rhombus of links that converts a circle into a perfect line. It needs 7 links and exact lengths; with printed slop the "perfect" line is lost, but it's a lovely illustration.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 3 · Straight-line gallery</h4>
+  <p class="desc">Each linkage runs automatically. The orange curve is the path of the marked point; the green part of it is its straightest stretch. The readout measures how straight that stretch really is.</p>
+  <canvas id="sl-canvas"></canvas>
+  <div class="row" id="sl-presets"></div>
+  <div class="row"><button id="sl-run" class="on">Pause</button></div>
+  <div class="readout" id="sl-out"></div>
+</div>
+
+<p>You can also design for a path other than a line. Coupler curves of a four-bar form a huge family (the <em>Hrones–Nelson atlas</em> catalogues them). In practice you don't synthesise by hand: you drag the joints in a linkage simulator or CAD motion study until the curve looks right, then check the transmission angle (5.2).</p>
+<div class="callout tip">
+  <span class="tag">Walkers</span>
+  Walking toys use linkages that trace a "D" or a bean path with a flat bottom: Hoeken, Klann (a six-bar spider-leg linkage) and Jansen (an eleven-bar leg). They look complicated, but each is a four-bar plus a few extra links, and each leg runs off one crank. They print well because everything lies in parallel planes.
+</div>
+
+<h2>5.5 Toggles and over-centre linkages</h2>
+<p>When two links approach a straight line (a knee about to lock), a small force at the knee creates a very large force along the links. For a symmetric toggle with half-angle α measured from the line between the end pins:</p>
+<div class="eq">F_out = F_in / (2·tan α)</div>
+<p>As α → 0, the ideal force goes to infinity. In reality it is limited by <strong>elastic stretch of the links and play in the pins</strong>, so printed toggles clamp by <em>flexing</em>, and the click you feel as it passes over centre is the elastic energy it stores. That click is a feature: <strong>an over-centre linkage locks itself</strong> because pushing it back requires passing through the dead centre again.</p>
+
+<div class="sim">
+  <h4>Simulation 4 · Toggle force multiplier</h4>
+  <p class="desc">Push the knee down with a fixed force and see how much the ends push. Compare α = 30° (about 0.9× the input force) with α = 5° (about 5.7×) and α = 1° (about 29×).</p>
+  <canvas id="tg-canvas"></canvas>
+  <div class="controls" id="tg-ctl"></div>
+  <div class="readout" id="tg-out"></div>
+</div>
+
+<div class="callout warn">
+  <span class="tag">Printed toggles</span>
+  A toggle clamp with printed links <em>will</em> stretch, creep and crack if you load it near dead centre for long. Design the clamping to go a little past centre (a hard stop) so it holds against a stop, not on the unstable knife-edge, and put the highest-stress links in a stronger material, or use metal links with printed brackets.
+</div>
+
+<h2>5.6 Parallelograms, pantographs and scissors</h2>
+<ul>
+  <li><strong>Parallelogram linkage</strong>: two equal cranks and two equal links in a parallelogram keep the coupler <em>parallel to the base</em> as it moves along an arc. It's how a desk lamp keeps the head level, a drawer organiser tilts, and a robotic arm holds a platform flat. It is exact only if all four pin-to-pin lengths are exactly equal, and this is the mild over-constraint case we met in chapter 1. A <em>double</em> parallelogram (extra parallel link) adds stiffness against twisting.</li>
+  <li><strong>Pantograph</strong>: a parallelogram with an extended arm, so a tracing point moves a similar shape scaled up or down by a fixed ratio. Used for scaling and for lifting: a <strong>scissor lift</strong> is a stack of crossed links, giving a large height range from a compact base.</li>
+  <li><strong>Scissor and lazy-tongs mechanisms</strong>: crossed links pinned at their middles give a large extension. Loads multiply: stress in the pins gets very high near the retracted position, and each stage amplifies slop, so printed scissors get wobbly if tall.</li>
+</ul>
+
+<h2>5.7 Designing a linkage: a practical workflow</h2>
+<ol>
+  <li><strong>State the motion</strong>: input type (crank, lever), output (angle, stroke, path), and the loads.</li>
+  <li><strong>Pick a family</strong> from the table at the top. A four-bar covers most rocking jobs; a slider-crank covers straight push/pull.</li>
+  <li><strong>Sketch the layout in 2D</strong> with a drag-and-simulate tool: a free web linkage simulator, your CAD's motion-study feature, or a quick script. Change one length at a time and watch the output.</li>
+  <li><strong>Check the quality numbers</strong>: transmission angle (&gt; 40°), dead centres (avoid, or put a stop), range of motion, and Grashof type.</li>
+  <li><strong>Check collisions</strong>: links in the same plane cross each other. Put links on <strong>different layers</strong> (offset planes with washers/spacers) so they pass by one another.</li>
+  <li><strong>Add stops</strong> at the ends of the motion so the mechanism can't be forced past a dead centre or locked.</li>
+  <li><strong>Print a cardboard or thin-PLA mock-up</strong> before the final: it takes ten minutes and reveals the interferences.</li>
+</ol>
+
+<h2>5.8 Building linkages from printed parts</h2>
+<h3>The pivot</h3>
+<p>The pivot is the part that matters. Options from quick to proper (detailed in chapters 10 and 13):</p>
+<ul>
+  <li><strong>Screw and nut</strong> (M3/M4) through the links with a washer or a printed spacer, tightened until the links just spin freely. Quick, but the thread can chew a soft hole: add a <strong>sleeve</strong> (a short length of brass tube, a printed bushing or a shoulder screw).</li>
+  <li><strong>Shoulder screw</strong> (a bolt with a smooth unthreaded shank): the smooth shoulder is a real bearing surface. The cleanest cheap pivot.</li>
+  <li><strong>Printed pin</strong> or <strong>print-in-place pin</strong>: works for light duty. Print the pin lying down for strength.</li>
+  <li><strong>Ball bearings</strong> (e.g. 623 or 608 sizes) pressed into the links for low friction and low play; best for long linkages and high loads.</li>
+</ul>
+<h3>Making links that don't flop</h3>
+<ul>
+  <li>A link in the plane of motion is a <strong>beam in bending or a strut in compression</strong>. Make links <strong>deeper than they are wide</strong> (in the plane): remember h³ stiffness (chapter 2). Add ribs, not thickness.</li>
+  <li>Long links in compression <strong>buckle</strong>. Where possible arrange the long links so they are in tension, or shorten them, or use a tubular/rod link.</li>
+  <li>Side loads twist a link about its length, which bends its pins out of plane. A <strong>clevis</strong> (a fork around a tongue, so the pin is loaded in double shear and the load is centred) is much stiffer than a single-lap joint that loads the pin at an offset.</li>
+  <li><strong>Print links flat on the bed</strong>, with pin holes vertical: the layers run along the link (strong in bending, as chapter 4 says), and the holes come out round.</li>
+</ul>
+<h3>Tolerances and play</h3>
+<ul>
+  <li>Pin-hole <strong>centre-to-centre distance</strong> is the critical dimension, not the hole size. A 0.2 mm error in a 30 mm crank changes the stroke by about 1%; the same error in a short coupler near a dead centre can <em>stop</em> the mechanism.</li>
+  <li>Play at each pivot adds up; at the output it is multiplied by the lever ratio. Keep pin clearance small (sliding fit from your coupon, chapter 4) and put a <strong>preload</strong> (a spring or elastic band) on the output if you need a precise position.</li>
+  <li>Use <strong>slotted holes</strong> or an adjustable link (a turnbuckle or two-part link with a clamp) at one pivot so you can tune the geometry after printing.</li>
+  <li>Use <strong>washers or spacers</strong> between rubbing links to avoid friction on the flat faces, and a dot of grease or silicone oil.</li>
+</ul>
+
+<h2>5.9 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Grashof checked: does the input link turn fully?</li>
+  <li>☐ Minimum transmission angle ≥ 40° over the working range.</li>
+  <li>☐ Dead centres either avoided or deliberately used with a stop.</li>
+  <li>☐ Links in different planes where they cross; spacers fitted.</li>
+  <li>☐ Long compression links checked for buckling.</li>
+  <li>☐ Pivots chosen on purpose (shoulder screw, bearing); clevis where the load is high.</li>
+  <li>☐ An end stop at each limit; links printed flat.</li>
+</ul>
+<ul>
+  <li>Placing a pivot just a few mm from the dead centre, then wondering why it jams.</li>
+  <li>Using a thin printed link as a long strut under compression.</li>
+  <li>Forgetting that links in the same plane collide.</li>
+  <li>Expecting a parallelogram or pantograph to hold geometry when every pin has 0.3 mm of play.</li>
+</ul>
+
+<h2>5.10 Check yourself</h2>
+<details class="quiz"><summary>A four-bar has a minimum transmission angle of 12° when run full circle. What are two ways to improve it?</summary>
+<p>Shorten the crank or lengthen the output link, so the coupler meets the output link nearer to 90°; or shift the ground pivots. Then check Grashof is still satisfied. Simulation 1's "Poor" preset is a good place to practise.</p></details>
+<details class="quiz"><summary>You need a clamp that holds its position without power. Which linkage idea gives that?</summary>
+<p>An over-centre toggle: go slightly past the dead centre so the load tries to push it <em>into</em> a stop, locking it. Release means passing back through dead centre.</p></details>
+<details class="quiz"><summary>A slider-crank has r = 20 mm and a 4 mm guide offset. What is the approximate stroke, and what changes compared to the zero-offset version?</summary>
+<p>The stroke stays almost exactly 2r = 40 mm (a 4 mm offset changes it by well under 1 mm), but the forward and return strokes take unequal crank angles: a quick-return effect.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script src="../assets/linkage.js"></script>
+<script>
+const TAU = Math.PI * 2;
+
+/* ---------- Sim 1: transmission angle ---------- */
+(function () {
+  const PRE = { 'Balanced': [100, 30, 90, 70], 'Marginal': [100, 35, 70, 70], 'Poor': [100, 50, 100, 60], 'Near toggle': [100, 30, 60, 60] };
+  const S = { G: 100, a: 30, c: 90, r: 70, th: 0.9, dir: 1 };
+  const fb = th => Linkage.fourBar({ G: S.G, a: S.a, c: S.c, r: S.r, sign: 1 }, th);
+  const mu = s => {
+    const u = [s.A[0] - s.B[0], s.A[1] - s.B[1]], w = [S.G - s.B[0], -s.B[1]];
+    return Math.acos(Math.max(-1, Math.min(1, (u[0] * w[0] + u[1] * w[1]) / (Math.hypot(u[0], u[1]) * Math.hypot(w[0], w[1]))))) * 180 / Math.PI;
+  };
+  const sweep = () => { const r = []; for (let i = 0; i < 360; i++) { const s = fb(i / 360 * TAU); r.push(s ? mu(s) : null); } return r; };
+  const valid = () => { if (fb(S.th)) return true; for (let t = 0; t < TAU; t += 0.01) if (fb(t)) { S.th = t; return true; } return false; };
+  let hx = 0, hy = 0, T = null;
+  const canvas = document.getElementById('ta-canvas'), out = document.getElementById('ta-out');
+  const view = Sim.make(canvas, 0.95, (c, w, h, col) => {
+    if (!valid()) { c.fillStyle = col.warn; c.fillText('Cannot assemble', 16, 30); return; }
+    const topH = h * 0.56, pts = [];
+    for (let i = 0; i < 360; i++) { const s = fb(i / 360 * TAU); if (s) pts.push(s.A, s.B); }
+    let x0 = 0, x1 = S.G, y0 = -5, y1 = 5; pts.forEach(p => { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+    const m = 30, sc = Math.min((w - 2 * m) / (x1 - x0), (topH - 2 * m) / (y1 - y0));
+    const ox = (w - (x1 - x0) * sc) / 2 - x0 * sc, oy = topH / 2 + (y1 + y0) / 2 * sc;
+    const X = x => ox + x * sc, Y = y => oy - y * sc, s = fb(S.th), m_ = mu(s), eff = Math.min(m_, 180 - m_);
+    c.strokeStyle = col.line; c.setLineDash([4, 4]); c.beginPath(); c.arc(X(0), Y(0), S.a * sc, 0, TAU); c.stroke(); c.setLineDash([]);
+    Sim.line(c, X(0), Y(0), X(S.G), Y(0), col.muted, 2);
+    Sim.line(c, X(0), Y(0), X(s.A[0]), Y(s.A[1]), col.accent, 6);
+    Sim.line(c, X(s.A[0]), Y(s.A[1]), X(s.B[0]), Y(s.B[1]), col.ink, 4);
+    Sim.line(c, X(S.G), Y(0), X(s.B[0]), Y(s.B[1]), eff >= 40 ? col.good : eff >= 25 ? col.accent2 : col.warn, 6);
+    Sim.ground(c, X(0), Y(0), col.muted, 8); Sim.ground(c, X(S.G), Y(0), col.muted, 8);
+    [[0, 0], [S.G, 0], s.B].forEach(p => Sim.dot(c, X(p[0]), Y(p[1]), 5, col.surface, col.ink));
+    hx = X(s.A[0]); hy = Y(s.A[1]); Sim.dot(c, hx, hy, 9, col.accent, col.surface);
+    // transmission-angle plot
+    T = { l: 40, r: 12, t: topH + 14, b: h - 26 }; T.w = w - T.l - T.r; T.h = T.b - T.t; T.ox = ox; T.oy = oy; T.sc = sc;
+    const PX = d => T.l + d / 360 * T.w, PY = a => T.b - a / 180 * T.h;
+    c.fillStyle = col.good + '26'; c.fillRect(T.l, PY(140), T.w, PY(40) - PY(140));
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'right';
+    [0, 90, 180].forEach(a => { c.beginPath(); c.moveTo(T.l, PY(a)); c.lineTo(T.l + T.w, PY(a)); c.stroke(); c.fillText(a + '°', T.l - 4, PY(a) + 4); });
+    c.textAlign = 'center'; [0, 90, 180, 270, 360].forEach(d => c.fillText(d + '°', PX(d), h - 8));
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath(); let pen = false;
+    sweep().forEach((v, i) => { if (v === null) { pen = false; return; } pen ? c.lineTo(PX(i), PY(v)) : c.moveTo(PX(i), PY(v)); pen = true; }); c.stroke();
+    const d = ((S.th % TAU) + TAU) % TAU * 180 / Math.PI; Sim.dot(c, PX(d), PY(m_), 5, col.accent2);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('transmission angle μ vs crank angle', T.l + 6, T.t + 12);
+  });
+  function info() {
+    const v = sweep().filter(x => x !== null), full = v.length === 360;
+    if (!v.length) { out.textContent = 'These lengths cannot be assembled.'; return; }
+    const mn = Math.min(...v.map(x => Math.min(x, 180 - x))), q = mn >= 40 ? ['good', 'good'] : mn >= 25 ? ['accent2', 'marginal'] : ['warn', 'poor'];
+    out.innerHTML = 'Worst transmission angle: <strong style="color:var(--' + q[0] + ')">' + mn.toFixed(0) + '° (' + q[1] + ')</strong>. ' + (full ? 'The crank turns fully.' : 'The crank cannot turn fully here: it rocks over about ' + v.length + '° and reaches a dead centre at each end.');
+  }
+  const refresh = () => { view.redraw(); info(); };
+  const hs = document.getElementById('ta-ctl'), sl = {};
+  [['G', 'Ground', 40, 160], ['a', 'Crank', 10, 80], ['c', 'Coupler', 30, 140], ['r', 'Output', 30, 140]].forEach(([k, l, mn, mx]) => { sl[k] = Sim.slider(hs, { label: l, min: mn, max: mx, value: S[k], unit: ' mm', onInput: v => { S[k] = v; refresh(); } }); });
+  Object.keys(PRE).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.onclick = () => { ['G', 'a', 'c', 'r'].forEach((q, i) => { S[q] = PRE[k][i]; sl[q].set(S[q]); }); refresh(); }; document.getElementById('ta-presets').append(b); });
+  Sim.pointer(canvas, { hover: (x, y) => Math.hypot(x - hx, y - hy) < 16, down: (x, y) => Math.hypot(x - hx, y - hy) < 16, move: (x, y) => { const t = Math.atan2(-(y - T.oy), x - T.ox); if (fb(t)) { S.th = t; view.redraw(); } } });
+  const loop = Sim.loop(dt => { const n = S.th + S.dir * dt * 1.2; if (fb(n)) S.th = (n + TAU) % TAU; else S.dir *= -1; view.redraw(); });
+  document.getElementById('ta-run').onclick = e => loop.toggle(e.target);
+  info();
+})();
+
+/* ---------- Sim 2: slider-crank ---------- */
+(function () {
+  const S = { r: 30, l: 90, e: 0, th: 0.8 };
+  const xs = th => S.r * Math.cos(th) + Math.sqrt(S.l * S.l - (S.e - S.r * Math.sin(th)) ** 2);
+  const canvas = document.getElementById('sc-canvas'), out = document.getElementById('sc-out');
+  const view = Sim.make(canvas, 0.9, (c, w, h, col) => {
+    const topH = h * 0.5, x0 = -S.r - 15, x1 = S.r + S.l + 30, y0 = -S.r - 14, y1 = Math.max(S.r, S.e) + 30;
+    const sc = Math.min((w - 20) / (x1 - x0), (topH - 10) / (y1 - y0)), ox = 10 - x0 * sc, oy = 6 + y1 * sc, X = x => ox + x * sc, Y = y => oy - y * sc;
+    const A = [S.r * Math.cos(S.th), S.r * Math.sin(S.th)], x = xs(S.th);
+    c.strokeStyle = col.muted; c.lineWidth = 3; c.beginPath(); c.moveTo(X(-S.r - 5), Y(S.e) + 12); c.lineTo(X(S.r + S.l + 20), Y(S.e) + 12); c.stroke();
+    c.beginPath(); c.moveTo(X(-S.r - 5), Y(S.e) - 12); c.lineTo(X(S.r + S.l + 20), Y(S.e) - 12); c.stroke();
+    c.strokeStyle = col.line; c.setLineDash([4, 4]); c.lineWidth = 1; c.beginPath(); c.arc(X(0), Y(0), S.r * sc, 0, TAU); c.stroke(); c.setLineDash([]);
+    c.fillStyle = col.accent2; c.fillRect(X(x) - 14, Y(S.e) - 9, 28, 18);
+    Sim.line(c, X(0), Y(0), X(A[0]), Y(A[1]), col.accent, 6); Sim.line(c, X(A[0]), Y(A[1]), X(x), Y(S.e), col.ink, 4);
+    Sim.ground(c, X(0), Y(0), col.muted, 8);
+    [[0, 0], A, [x, S.e]].forEach(p => Sim.dot(c, X(p[0]), Y(p[1]), 5, col.surface, col.ink));
+    // sideways thrust on the guide ~ tan(rod angle) (shown as a bar)
+    const rod = Math.atan2(S.e - A[1], x - A[0]), side = Math.abs(Math.tan(rod));
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('side thrust on guide', 12, topH - 18);
+    c.fillStyle = col.line; c.fillRect(12, topH - 12, 120, 8); c.fillStyle = side > 0.4 ? col.warn : col.good; c.fillRect(12, topH - 12, Math.min(120, side * 120 / 0.6), 8);
+    // plots
+    const l = 36, r = 10, t = topH + 24, b = h - 22, pw = w - l - r, ph = b - t, N = 360, xsArr = [], vArr = [];
+    for (let i = 0; i <= N; i++) { const th = i / N * TAU; xsArr.push(xs(th)); vArr.push((xs(th + 0.002) - xs(th - 0.002)) / 0.004); }
+    const xmin = Math.min(...xsArr), xmax = Math.max(...xsArr), vmax = Math.max(...vArr.map(Math.abs));
+    const PX = i => l + i / N * pw, mid = t + ph / 2;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.beginPath(); c.moveTo(l, mid); c.lineTo(l + pw, mid); c.stroke();
+    c.textAlign = 'center'; c.fillStyle = col.muted; [0, 90, 180, 270, 360].forEach(d => c.fillText(d + '°', l + d / 360 * pw, h - 6));
+    const line = (arr, scale, color) => { c.strokeStyle = color; c.lineWidth = 2.5; c.beginPath(); arr.forEach((v, i) => i ? c.lineTo(PX(i), mid - scale(v) * ph / 2 * 0.9) : c.moveTo(PX(i), mid - scale(v) * ph / 2 * 0.9)); c.stroke(); };
+    line(xsArr, v => (v - (xmin + xmax) / 2) / ((xmax - xmin) / 2), col.accent2); line(vArr, v => v / vmax, col.accent);
+    const cx = PX(((S.th % TAU) + TAU) % TAU / TAU * N); c.strokeStyle = col.ink; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(cx, t); c.lineTo(cx, b); c.stroke(); c.setLineDash([]);
+    c.textAlign = 'left'; c.fillStyle = col.accent2; c.fillText('position', l + 4, t + 10); c.fillStyle = col.accent; c.fillText('velocity', l + 64, t + 10);
+  });
+  function info() {
+    const N = 720, v = []; for (let i = 0; i < N; i++) v.push(xs(i / N * TAU));
+    const mx = Math.max(...v), mn = Math.min(...v), iM = v.indexOf(mx), im = v.indexOf(mn), p1 = ((im - iM) % N + N) % N, p2 = N - p1;
+    const a1 = p1 * 360 / N, a2 = p2 * 360 / N, ratio = Math.max(a1, a2) / Math.min(a1, a2);
+    out.innerHTML = 'Stroke <strong>' + (mx - mn).toFixed(1) + ' mm</strong> (2r = ' + (2 * S.r) + ' mm) · rod/crank ratio <strong>' + (S.l / S.r).toFixed(1) + '</strong> · one stroke takes <strong>' + a1.toFixed(0) + '°</strong>, the other <strong>' + a2.toFixed(0) + '°</strong> of crank turn → quick-return ratio <strong>' + ratio.toFixed(2) + '</strong>.';
+  }
+  const refresh = () => { view.redraw(); info(); };
+  const hs = document.getElementById('sc-ctl');
+  Sim.slider(hs, { label: 'Crank r', min: 10, max: 40, value: S.r, unit: ' mm', onInput: v => { S.r = v; if (S.l < S.r + Math.abs(S.e) + 5) { S.l = S.r + Math.abs(S.e) + 5; } refresh(); } });
+  Sim.slider(hs, { label: 'Rod l', min: 65, max: 150, value: S.l, unit: ' mm', onInput: v => { S.l = Math.max(v, S.r + Math.abs(S.e) + 5); refresh(); } });
+  Sim.slider(hs, { label: 'Offset e', min: -20, max: 20, value: S.e, unit: ' mm', onInput: v => { S.e = v; S.l = Math.max(S.l, S.r + Math.abs(S.e) + 5); refresh(); } });
+  const loop = Sim.loop(dt => { S.th = (S.th + dt * 1.5) % TAU; view.redraw(); });
+  document.getElementById('sc-run').onclick = e => loop.toggle(e.target);
+  loop.toggle(document.getElementById('sc-run')); // start running (button shows Pause)
+  info();
+})();
+
+/* ---------- Sim 3: straight-line gallery ---------- */
+(function () {
+  const peau = phi => {
+    const L = 100, s = 50, a = 60, Q = [a, 0], C = [a + a * Math.cos(phi), a * Math.sin(phi)];
+    const A = Linkage.circles([0, 0], L, C, s, 1), B = Linkage.circles([0, 0], L, C, s, -1); if (!A || !B) return null;
+    const k = (L * L - s * s) / (C[0] ** 2 + C[1] ** 2), D = [C[0] * k, C[1] * k];
+    return { segs: [[[0, 0], A], [[0, 0], B], [A, C], [C, B], [B, D], [D, A], [Q, C]], pins: [[0, 0], Q, A, B, C, D], grounds: [[0, 0], Q], P: D };
+  };
+  const four = p => phi => {
+    const s = Linkage.fourBar(p, phi); if (!s) return null;
+    return { segs: [[[0, 0], s.A], [[p.G, 0], s.B], [s.A, s.P]], pins: [[0, 0], [p.G, 0], s.A, s.B], grounds: [[0, 0], [p.G, 0]], P: s.P };
+  };
+  const PR = [
+    { name: 'Hoeken (crank-driven)', f: four({ G: 60, a: 30, c: 75, r: 75, u: 2, v: 0, sign: 1 }), note: 'A crank-rocker whose coupler point sits at twice the coupler length. The straight edge is a long part of each cycle; the return is a rounded arc.' },
+    { name: 'Watt (double rocker)', f: four({ G: 80, a: 40, c: 40, r: 40, u: 0.5, v: 0, sign: 1 }), note: 'Two equal rockers and a short coupler; the coupler midpoint crosses almost straight. Only rocks (no full rotation).' },
+    { name: 'Peaucellier–Lipkin', f: peau, note: 'Seven links: a rhombus and two long arms invert a circle into a true line. Exact in theory; in print, slop makes it approximate.' }
+  ];
+  let cur = 0, phi = 0, dir = 1, pts = [], run = null, bounds;
+  const SAMP = 720, phiOf = i => i / SAMP * TAU - Math.PI;
+  const canvas = document.getElementById('sl-canvas'), out = document.getElementById('sl-out');
+  function prepare() {
+    const f = PR[cur].f; pts = []; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, first = null;
+    for (let i = 0; i < SAMP; i++) {
+      const s = f(phiOf(i)); pts.push(s ? s.P : null); if (!s) continue; if (first === null) first = phiOf(i);
+      [...s.pins, s.P].forEach(p => { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+    }
+    bounds = [x0, x1, y0, y1]; phi = first; dir = 1;
+    const st = Linkage.straightest(pts, 0.003); run = st;
+    const full = pts.every(Boolean);
+    out.innerHTML = PR[cur].note + '<br>' + (st ? 'Straightest stretch: <strong>' + st.chord.toFixed(0) + ' mm</strong> long, deviation within <strong>±' + st.dev.toFixed(2) + ' mm</strong> (' + (st.dev / st.chord * 100).toFixed(2) + '% of its length).' : 'No stretch straight to 0.3%.') + (full ? '' : ' (Input swings back and forth.)');
+  }
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    if (!bounds) return;
+    const f = PR[cur].f, s = f(phi), m = 26, bw = bounds[1] - bounds[0], bh = bounds[3] - bounds[2], sc = Math.min((w - 2 * m) / bw, (h - 2 * m) / bh);
+    const ox = (w - bw * sc) / 2 - bounds[0] * sc, oy = (h + bh * sc) / 2 + bounds[2] * sc, X = x => ox + x * sc, Y = y => oy - y * sc;
+    // trace
+    c.strokeStyle = col.accent2; c.lineWidth = 2; c.beginPath(); let pen = false;
+    pts.forEach(p => { if (!p) { pen = false; return; } pen ? c.lineTo(X(p[0]), Y(p[1])) : c.moveTo(X(p[0]), Y(p[1])); pen = true; }); c.stroke();
+    if (run) { c.strokeStyle = col.good; c.lineWidth = 5; c.beginPath(); for (let k = 0; k <= run.len; k++) { const p = pts[(run.start + k) % SAMP]; if (!p) break; k ? c.lineTo(X(p[0]), Y(p[1])) : c.moveTo(X(p[0]), Y(p[1])); } c.stroke(); }
+    if (!s) return;
+    s.segs.forEach(g => Sim.line(c, X(g[0][0]), Y(g[0][1]), X(g[1][0]), Y(g[1][1]), col.accent, 4));
+    s.grounds.forEach(g => Sim.ground(c, X(g[0]), Y(g[1]), col.muted, 7));
+    s.pins.forEach(p => Sim.dot(c, X(p[0]), Y(p[1]), 4, col.surface, col.ink)); Sim.dot(c, X(s.P[0]), Y(s.P[1]), 6, col.accent2, col.surface);
+  });
+  PR.forEach((p, i) => { const b = document.createElement('button'); b.textContent = p.name; b.onclick = () => { cur = i; [...document.querySelectorAll('#sl-presets button')].forEach((q, k) => q.classList.toggle('on', k === i)); prepare(); view.redraw(); }; document.getElementById('sl-presets').append(b); });
+  const loop = Sim.loop(dt => { const n = phi + dir * dt * 1.4; if (PR[cur].f(n)) phi = n; else dir *= -1; view.redraw(); });
+  document.getElementById('sl-run').onclick = e => loop.toggle(e.target);
+  document.querySelector('#sl-presets button').classList.add('on');
+  prepare(); view.redraw(); loop.toggle(document.getElementById('sl-run'));
+})();
+
+/* ---------- Sim 4: toggle ---------- */
+(function () {
+  const S = { a: 20, F: 50 }, L = 60;
+  const ratio = a => 1 / (2 * Math.tan(a * Math.PI / 180));
+  const canvas = document.getElementById('tg-canvas'), out = document.getElementById('tg-out');
+  const view = Sim.make(canvas, 0.8, (c, w, h, col) => {
+    const topH = h * 0.5, a = S.a * Math.PI / 180, sc = (w - 120) / (2 * L), x0 = 50, yc = topH * 0.5 + 12;
+    const kx = x0 + L * Math.cos(a) * sc, ky = yc + L * Math.sin(a) * sc, ex = x0 + 2 * L * Math.cos(a) * sc;
+    c.fillStyle = col.muted; c.fillRect(x0 - 22, yc - 34, 14, 68);
+    Sim.line(c, x0 - 8, yc, x0, yc, col.muted, 3);
+    c.fillStyle = col.accent2; c.fillRect(ex, yc - 16, 18, 32);
+    c.fillStyle = col.line; c.fillRect(ex + 18, yc - 34, 14, 68);
+    c.strokeStyle = col.muted; c.lineWidth = 2; c.beginPath(); c.moveTo(x0, yc + 40); c.lineTo(w - 40, yc + 40); c.stroke();
+    Sim.line(c, x0, yc, kx, ky, col.accent, 6); Sim.line(c, kx, ky, ex, yc, col.accent, 6);
+    [[x0, yc], [kx, ky], [ex, yc]].forEach(p => Sim.dot(c, p[0], p[1], 5, col.surface, col.ink));
+    const arrow = (x, y1, y2, color, label) => {
+      const d = Math.sign(y2 - y1); Sim.line(c, x, y1, x, y2, color, 3);
+      c.fillStyle = color; c.beginPath(); c.moveTo(x, y2); c.lineTo(x - 6, y2 - d * 10); c.lineTo(x + 6, y2 - d * 10); c.fill();
+      c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText(label, x, y1 - 6);
+    };
+    arrow(kx, ky - 40, ky - 6, col.warn, 'input ' + S.F + ' N');
+    c.fillStyle = col.good; c.font = '12px system-ui'; c.textAlign = 'right'; c.fillText('output ' + (S.F * ratio(S.a)).toFixed(0) + ' N →', ex - 6, yc + 30);
+    // ratio plot
+    const l = 40, r = 12, t = topH + 24, b = h - 24, pw = w - l - r, ph = b - t, XP = d => l + (d - 1) / 44 * pw, YP = k => b - Math.min(k, 30) / 30 * ph;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.textAlign = 'right'; c.font = '12px system-ui';
+    [1, 5, 10, 20, 30].forEach(k => { c.beginPath(); c.moveTo(l, YP(k)); c.lineTo(l + pw, YP(k)); c.stroke(); c.fillText(k + '×', l - 4, YP(k) + 4); });
+    c.textAlign = 'center'; [1, 10, 20, 30, 45].forEach(d => c.fillText(d + '°', XP(d), h - 6));
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath(); for (let d = 1; d <= 45; d += 0.25) { const px = XP(d), py = YP(ratio(d)); d === 1 ? c.moveTo(px, py) : c.lineTo(px, py); } c.stroke();
+    Sim.dot(c, XP(S.a), YP(ratio(S.a)), 6, col.accent2, col.surface);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('force multiplication vs angle α from straight', l + 6, t + 12);
+  });
+  function refresh() {
+    const k = ratio(S.a), a = S.a * Math.PI / 180;
+    out.innerHTML = 'α = <strong>' + S.a + '°</strong> → output = input × <strong>' + k.toFixed(1) + '</strong> = <strong>' + (S.F * k).toFixed(0) + ' N</strong> (ideal, rigid links). Remaining travel to dead centre: <strong>' + (2 * L * (1 - Math.cos(a))).toFixed(1) + ' mm</strong> of slider stroke, so the multiplication buys force at the cost of distance.';
+    view.redraw();
+  }
+  const hs = document.getElementById('tg-ctl');
+  Sim.slider(hs, { label: 'Knee angle α', min: 1, max: 45, step: 0.5, dec: 1, value: S.a, unit: '°', onInput: v => { S.a = v; refresh(); } });
+  Sim.slider(hs, { label: 'Input force', min: 10, max: 200, value: S.F, unit: ' N', onInput: v => { S.F = v; refresh(); } });
+  refresh();
+})();
+</script>
+</body>
+</html>

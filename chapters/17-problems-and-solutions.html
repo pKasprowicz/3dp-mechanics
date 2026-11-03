@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 17 · Common problems and proven solutions</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.tbl td:nth-child(1) { white-space: nowrap; color: var(--muted); font-size: 13px; }
+input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+</style>
+</head>
+<body data-root="../" data-ch="17">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part C · Putting it together · Chapter 17</p>
+<h1>Common problems and proven solutions</h1>
+<p class="lead">Almost every printed mechanism fails in one of a few familiar ways, and almost every failure has a standard remedy. This chapter is the lookup table: a searchable list of symptoms with causes and fixes (and the chapter where each is explained), then three calculators for the problems that are really about numbers: tolerance stack-up, thermal expansion and stick-slip.</p>
+
+<h2>17.1 A way of debugging</h2>
+<ol>
+  <li><strong>Isolate.</strong> Find the smallest assembly that shows the problem. Remove the motor, the belt, the cover. Does the carriage move freely by hand? Does the gear turn alone?</li>
+  <li><strong>Measure, don't guess.</strong> Calipers on the part, a scale for forces, a phone camera slow-motion for motion, a thermometer or fingertip for heat.</li>
+  <li><strong>Classify.</strong> Is it a <em>geometry</em> problem (fit, alignment, over-constraint), a <em>material</em> problem (creep, brittleness, wear), a <em>load</em> problem (too much torque, too fast), or a <em>process</em> problem (warp, shrink, bad layers)?</li>
+  <li><strong>Change one thing at a time.</strong> A different material and a different clearance together teach you nothing.</li>
+  <li><strong>Print a test piece</strong>, not the whole part. Most fixes can be checked on a 10-minute coupon.</li>
+  <li><strong>Write it down.</strong> A line in a notebook ("608 seat, PETG, 0.15 shrink → snug") is worth more than a hundred remembered attempts (chapter 18).</li>
+</ol>
+
+<h2>17.2 The troubleshooter</h2>
+<p>Type a word (<em>bind</em>, <em>crack</em>, <em>loose</em>, <em>noise</em>, <em>heat</em>...) or pick a category.</p>
+<input id="ts-q" class="search" type="search" placeholder="Search symptoms, causes, fixes...">
+<div class="chips" id="ts-chips"></div>
+<table class="tbl" id="ts-table"></table>
+<p id="ts-count" style="color:var(--muted);font-size:14px"></p>
+
+<h2>17.3 Tolerance stack-up</h2>
+<p>A gap is the sum of several dimensions, each with its own tolerance. Printed dimensions are typically good to ±0.1–0.2 mm, bought parts to ±0.02–0.1 mm. In a chain of several, the errors add up. Two ways to add them:</p>
+<ul>
+  <li><strong>Worst case:</strong> every part at its extreme in the worst direction at once: <code>±Σ tol</code>. Safe, but conservative.</li>
+  <li><strong>Root-sum-square (RSS):</strong> statistical: <code>±√(Σ tol²)</code>. Realistic if the errors are independent; roughly what you will actually see across many assemblies.</li>
+</ul>
+<p>Design the gap so that the <em>worst-case</em> minimum still works (for safety-critical or one-off parts), or the RSS minimum (for large batches where a rare failure is OK). The simulation draws both and runs a Monte-Carlo of 4000 random assemblies.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Stack-up calculator</h4>
+  <p class="desc">Axial gap = sum of the signed dimensions. Edit the numbers: positive entries add to the gap, negative entries subtract. The default is a bearing in a printed pocket under a cover with a washer. The histogram is the distribution of the resulting gap over random assemblies (uniform errors within each tolerance).</p>
+  <div id="su-rows"></div>
+  <canvas id="su-canvas"></canvas>
+  <div class="readout" id="su-out"></div>
+</div>
+
+<h2>17.4 Thermal expansion</h2>
+<p>Everything grows with temperature: <code>ΔL = α · L · ΔT</code>. Plastics expand 3–8× more than steel, so a printed part carrying a steel rod, or sharing a bolt with a metal plate, gets looser when cold and tighter when warm. This matters for long parts (100 mm of PLA grows 0.07 mm per 10 K), for snug fits that must hold at both ends of a temperature range, and for plastic parts clamped to metal.</p>
+<div class="sim">
+  <h4>Simulation 2 · Thermal expansion</h4>
+  <p class="desc">Growth of a part of the given length for a temperature change, for different materials (coefficients in µm per metre per kelvin, typical values). The difference between a printed part and its metal neighbour is the change in the fit.</p>
+  <canvas id="te-canvas"></canvas>
+  <div class="row"><label>Compare printed <select id="te-a"></select> with <select id="te-b"></select></label></div>
+  <div class="controls" id="te-ctl"></div>
+  <div class="readout" id="te-out"></div>
+</div>
+
+<h2>17.5 Stick-slip</h2>
+<p>When a part slides slowly against a surface whose static friction is higher than its kinetic friction, and it is driven through something springy, it moves in jerks: it sticks, the drive winds up, it breaks free and lurches ahead, then sticks again. This is the squeal of a door hinge, the judder of a slow slide, the "grunting" of a leadscrew axis. The cure is one of: lower the static-to-kinetic ratio (lubricant, a better material pair), a stiffer drive, or a different speed.</p>
+<div class="sim">
+  <h4>Simulation 3 · Stick-slip</h4>
+  <p class="desc">A mass is pulled by a spring whose far end moves at a constant speed. The plot shows the mass position over 6 seconds against the ideal smooth motion. Reduce μₛ − μₖ, stiffen the spring, or speed it up, and the saw-tooth smooths out.</p>
+  <canvas id="ss-canvas"></canvas>
+  <div class="controls" id="ss-ctl"></div>
+  <div class="readout" id="ss-out"></div>
+</div>
+
+<h2>17.6 The ten fixes that solve most problems</h2>
+<ol>
+  <li><strong>Add a fillet</strong> to every inside corner that carries load.</li>
+  <li><strong>Reorient the part</strong> so loads run along layers.</li>
+  <li><strong>Print a fit coupon</strong> for each critical interface before the real part.</li>
+  <li><strong>Put a metal part where metal belongs:</strong> shaft, pin, bearing, insert, spring.</li>
+  <li><strong>Make one guide fixed and the other floating</strong> to avoid over-constraint.</li>
+  <li><strong>Increase the guide span</strong> or reduce the push offset (a ≥ L/2μ jams).</li>
+  <li><strong>Lengthen the flexure</strong> or thin it to bring the strain down.</li>
+  <li><strong>Add a washer, a shoulder or a cover</strong> so soft plastic isn't relied on to clamp or retain.</li>
+  <li><strong>Give moving parts a lubricant and a different material</strong> from their partner.</li>
+  <li><strong>Make it adjustable</strong> (a slot, a shim, a turnbuckle) wherever tolerances can't be held.</li>
+</ol>
+
+<h2>17.7 Check yourself</h2>
+<details class="quiz"><summary>Four independent dimensions each have a tolerance of ±0.1 mm. What are the worst-case and RSS stack-up?</summary>
+<p>Worst case: ±0.4 mm. RSS: √(4 × 0.1²) = ±0.2 mm. Half of the worst case, and it is the number you would see most of the time.</p></details>
+<details class="quiz"><summary>A 150 mm PLA frame (α ≈ 68 µm/m·K) holds a steel rod (12 µm/m·K) in a snug hole. The workshop warms by 20 K. How much does the fit change?</summary>
+<p>Δ = (68 − 12) × 10⁻⁶ × 150 × 20 = <strong>0.17 mm</strong>. A snug fit becomes loose when it warms (the plastic hole grows more than the rod) and tight when it cools; plan a slip fit for long spans.</p></details>
+<details class="quiz"><summary>A sliding axis judders at slow speed but is smooth when run fast. Why, and what is the cheapest fix?</summary>
+<p>Stick-slip: static friction exceeds kinetic friction and the drive is springy, and slow speeds give the mass time to stick. Cheapest fix: lubricant (lowers both, and narrows the gap), or run faster; longer term, a stiffer drive and a better material pair.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2;
+
+/* ---------- Troubleshooter ---------- */
+(function () {
+  // [category, symptom, causes, fixes, chapter]
+  const D = [
+    ['Motion', 'Carriage or slider binds partway along the travel', 'Two rigid guides not parallel (over-constraint); bent rod; separate mounts', 'One fixed + one floating guide; print both mounts in one part; shim', 9],
+    ['Motion', 'Slider jams when pushed off-centre', 'Push offset a ≥ L/(2μ)', 'Push near the guide axis; longer guide span; lower friction; second guide', 9],
+    ['Motion', 'Backlash or slop at the output', 'Pin clearance; gear backlash; nut play; belt stretch', 'Preload spring; anti-backlash nut; tighter fit; reduce stages', 7],
+    ['Motion', 'Juddering, squeaking, stick-slip', 'Static friction > kinetic; springy drive; dry plastic', 'Lubricant; different material pair; stiffer drive; faster speed', 17],
+    ['Motion', 'Vibration, ringing, resonance', 'Long free span; loose mounts; stepper resonance', 'Shorten spans; stiffen; microstep; add damping', 8],
+    ['Motion', 'Noise, whine, grinding', 'Misalignment; belt too tight; gear backlash too small', 'Align; reduce tension; more backlash; lubricate', 7],
+    ['Motion', 'Wobble at the end of a shaft', 'Bearings too close; radial play; long overhang', 'Span ≥ 2× overhang; tighter fit; bearings at both ends', 10],
+    ['Motion', 'Linkage locks or stalls at a position', 'Dead centre / low transmission angle', 'Change link lengths; add a stop; use a flywheel/spring to carry over', 5],
+    ['Motion', 'Gears click, skip or bind', 'Centre distance off; teeth too thin; elephant foot', 'Set centre distance exactly; chamfer base; bigger module; backlash 0.1–0.3', 7],
+    ['Motion', 'Belt skips teeth or walks off', 'Loose belt; misaligned pulleys; too few teeth in mesh', 'Tension; align in one plane; larger small pulley; flanges', 8],
+    ['Motion', 'Cam follower jumps or chatters', 'Spring too weak; acceleration jump in the law', 'Stiffer spring; cycloidal/3-4-5 law; lower speed; lighter follower', 6],
+    ['Motion', 'Ratchet does not advance or skips', 'Stroke too short; pawl in compression; weak spring', 'Longer stroke; pawl in tension; stiffer spring', 11],
+    ['Motion', 'Latch pops open by itself', 'Hook face leans out (β < −φ)', 'Square or undercut the face; positive stop; detent', 14],
+    ['Motion', 'Motor stalls or slows unexpectedly', 'Too little torque at the output; friction higher than expected', 'Larger ratio or motor; bearings; check torque margin', 16],
+    ['Motion', 'Stepper skips steps', 'Pull-out torque exceeded; accel too high; resonance', 'Lower acceleration; higher voltage; bigger motor; microstepping', 16],
+    ['Strength', 'Cracks along layer lines', 'Load pulls layers apart', 'Reorient so loads run along layers; more perimeters', 4],
+    ['Strength', 'Breaks at a sharp inside corner', 'Stress concentration', '1–3 mm fillet; thicker section', 2],
+    ['Strength', 'Slowly bends, sags or loosens under constant load', 'Creep (PLA especially)', 'PETG/nylon/ASA; thicker; metal part carries the sustained load', 3],
+    ['Strength', 'Sliding surfaces wear to dust', 'Soft plastic on plastic; PV too high; no lubricant', 'Steel shaft; bronze/polymer sleeve; nylon; grease; ball bearing', 10],
+    ['Strength', 'Flexing part cracks after repeated bends', 'Strain above the fatigue limit', 'Thinner/longer flexure; PETG or nylon; spread the bend', 12],
+    ['Strength', 'Screw hole strips after a few uses', 'Direct thread in plastic', 'Heat-set insert or captive nut', 13],
+    ['Strength', 'Part softens or deforms near heat', 'Material near its glass-transition', 'ASA, PC or PA-CF; move away from heat; thicker', 3],
+    ['Strength', 'Printed spring loses force', 'Creep, working near solid height', 'Use a steel spring; operate at 30–70% travel', 13],
+    ['Strength', 'Bearing loosens in its seat', 'Creep of the printed bore; bore too large', 'Shoulder + cover; snug fit; metal sleeve; adhesive', 10],
+    ['Fit', 'Parts too tight or won\'t go together', 'Hole shrink and elephant foot not allowed for', 'Fit coupon; add shrink; chamfer the base; ream holes', 4],
+    ['Fit', 'Hole prints too small', 'Perimeter bulges inward; shrinkage', 'Hole compensation (slicer or CAD, not both); drill or ream', 4],
+    ['Fit', 'Print-in-place joint fused solid', 'Gap too small; elephant foot; overextrusion', 'Gap 0.3–0.5 mm; chamfer; calibrate flow', 4],
+    ['Fit', 'Gap between assembled parts too tight or loose', 'Tolerance stack-up', 'Calculate the stack; worst case and RSS; add an adjustment', 17],
+    ['Fit', 'Snug fit changes with temperature', 'Thermal expansion mismatch (plastic vs metal)', 'Design a slip fit; short spans; same-material pairs', 17],
+    ['Fit', 'Bought part doesn\'t fit the pocket', 'Datasheet vs real size; shrink forgotten', 'Measure with calipers; fit coupon; parametric pockets', 15],
+    ['Process', 'Warped corners or a bowed long part', 'Shrinkage; uneven cooling', 'Brim; enclosure/chamber; split the part; ASA/ABS warm chamber', 3],
+    ['Process', 'Support scars on a functional surface', 'Overhang printed with supports', 'Reorient; chamfers; tune the interface gap; second nozzle for release material', 4],
+    ['Process', 'Drooping bridges or overhangs', 'Overhang over ~45°; weak cooling', 'Chamfer or teardrop; shorter bridges; more cooling', 4],
+    ['Process', 'Rough sliding surface (visible layer lines)', 'Orientation puts layers across the sliding direction', 'Slide on top/bottom faces; ironing; ream; sleeve', 4],
+    ['Assembly', 'Heat-set insert crooked or proud', 'Pressed at an angle or too fast', 'Press straight, slowly; flatten with a flat tool', 13],
+    ['Assembly', 'Over-tightened screw crushes the plastic', 'Small head area; too much torque', 'Washer; snug; metal sleeve through the plastic', 13],
+    ['Assembly', 'Cable fails at the motor or joint', 'No strain relief; tight bend', 'Clamp, loop, larger bend radius', 15],
+    ['Assembly', 'Magnet falls out or is the wrong polarity', 'Loose pocket; no polarity marking', 'Glue; mark polarity; press fit', 15],
+    ['Assembly', 'Two bearings on one shaft bind', 'Misaligned seats (over-constraint)', 'Print both seats in one part; ream; let one float axially', 10],
+    ['Heat', 'Motor or driver overheating', 'Current too high; no airflow; always on', 'Reduce current; fan or heatsink; sleep when idle', 16],
+    ['Heat', 'Plastic clutch or bearing melts or welds', 'Continuous sliding; PV too high', 'Ball bearing; different material; limit duty', 14]
+  ];
+  const cats = ['All', ...new Set(D.map(r => r[0]))];
+  let cat = 'All';
+  const q = document.getElementById('ts-q'), tbl = document.getElementById('ts-table'), cnt = document.getElementById('ts-count'), chips = document.getElementById('ts-chips');
+  const slug = { 1: '01-thinking-about-mechanisms', 2: '02-mechanics-you-need', 3: '03-materials-and-technologies', 4: '04-design-for-3d-printing', 5: '05-linkages', 6: '06-cams-and-followers', 7: '07-gears', 8: '08-belts-chains-cables', 9: '09-screws-and-linear-motion', 10: '10-bearings-shafts-joints', 11: '11-intermittent-motion', 12: '12-compliant-mechanisms', 13: '13-fasteners-joints-springs', 14: '14-latching-locking-clutching', 15: '15-hybrid-builds', 16: '16-actuation', 17: '17-problems-and-solutions' };
+  function render() {
+    const f = q.value.trim().toLowerCase(), rows = D.filter(r => (cat === 'All' || r[0] === cat) && (!f || r.slice(1, 4).join(' ').toLowerCase().includes(f) || r[0].toLowerCase().includes(f)));
+    tbl.innerHTML = '<tr><th>Category</th><th>Symptom</th><th>Likely causes</th><th>Fixes</th><th>See</th></tr>' + rows.map(r => '<tr><td>' + r[0] + '</td><td><strong>' + r[1] + '</strong></td><td>' + r[2] + '</td><td>' + r[3] + '</td><td><a href="' + (r[4] === 17 ? '#' : slug[r[4]] + '.html') + '">ch ' + r[4] + '</a></td></tr>').join('');
+    cnt.textContent = rows.length + ' of ' + D.length + ' entries';
+  }
+  cats.forEach(c => { const b = document.createElement('button'); b.textContent = c; b.onclick = () => { cat = c; [...chips.children].forEach(x => x.classList.toggle('on', x.textContent === c)); render(); }; if (c === 'All') b.classList.add('on'); chips.append(b); });
+  q.oninput = render; render();
+})();
+
+/* ---------- Sim 1: stack-up ---------- */
+(function () {
+  const R = [['Pocket depth (printed)', 7.5, 0.15], ['Bearing width (bought) — subtracts', -7.0, 0.06], ['Washer or shim — subtracts', -0.3, 0.05], ['Cover lip height (printed) — subtracts', -0.0, 0.0]];
+  const host = document.getElementById('su-rows'), out = document.getElementById('su-out'), canvas = document.getElementById('su-canvas');
+  R.forEach((r, i) => {
+    const d = document.createElement('div'); d.className = 'row'; d.style.margin = '3px 0';
+    d.innerHTML = '<span style="min-width:230px">' + r[0] + '</span><label>value <input type="number" step="0.01" value="' + r[1] + '"></label><label>± tol <input type="number" step="0.01" min="0" value="' + r[2] + '"></label>';
+    host.append(d); const ii = d.querySelectorAll('input'); ii[0].oninput = () => { R[i][1] = +ii[0].value; run(); }; ii[1].oninput = () => { R[i][2] = Math.abs(+ii[1].value); run(); };
+  });
+  let hist = null;
+  const view = Sim.make(canvas, 0.38, (c, w, h, col) => {
+    if (!hist) return; const l = 14, pw = w - 28, b = h - 30, ph = b - 14, X = v => l + (v - hist.lo) / (hist.hi - hist.lo) * pw, mx = Math.max(...hist.bins);
+    hist.bins.forEach((n, i) => { const x0 = l + i / hist.bins.length * pw, bw = pw / hist.bins.length, v = hist.lo + (i + 0.5) / hist.bins.length * (hist.hi - hist.lo); c.fillStyle = v < 0 ? col.warn : col.accent; c.fillRect(x0, b - n / mx * ph, bw - 1, n / mx * ph); });
+    c.strokeStyle = col.ink; c.lineWidth = 2; c.beginPath(); c.moveTo(X(0), 8); c.lineTo(X(0), b); c.stroke();
+    c.fillStyle = col.good; c.fillRect(X(hist.nom - hist.wc), b + 6, X(hist.nom + hist.wc) - X(hist.nom - hist.wc), 5); c.fillStyle = col.accent2; c.fillRect(X(hist.nom - hist.rss), b + 13, X(hist.nom + hist.rss) - X(hist.nom - hist.rss), 5);
+    c.fillStyle = col.muted; c.font = '11px system-ui'; c.textAlign = 'left'; c.fillText('0 = interference line · green: worst-case range · orange: RSS range', l, h - 1);
+  });
+  function run() {
+    const nom = R.reduce((a, r) => a + r[1], 0), wc = R.reduce((a, r) => a + r[2], 0), rss = Math.sqrt(R.reduce((a, r) => a + r[2] ** 2, 0)), N = 4000, vals = [];
+    for (let i = 0; i < N; i++) vals.push(R.reduce((a, r) => a + r[1] + (Math.random() * 2 - 1) * r[2], 0));
+    const lo = Math.min(nom - wc * 1.1, -0.1), hi = Math.max(nom + wc * 1.1, 0.1), bins = new Array(40).fill(0); vals.forEach(v => { bins[Math.min(39, Math.max(0, Math.floor((v - lo) / (hi - lo) * 40)))]++; });
+    hist = { lo, hi, bins, nom, wc, rss }; const bad = vals.filter(v => v < 0).length / N * 100;
+    out.innerHTML = 'Nominal gap <strong>' + nom.toFixed(2) + ' mm</strong> · worst case <strong>' + (nom - wc).toFixed(2) + ' to ' + (nom + wc).toFixed(2) + ' mm</strong> · RSS <strong>' + (nom - rss).toFixed(2) + ' to ' + (nom + rss).toFixed(2) + ' mm</strong> · random assemblies with interference: <strong style="color:var(--' + (bad > 0.5 ? 'warn' : 'good') + ')">' + bad.toFixed(1) + '%</strong>. ' + (nom - wc >= 0 ? 'Safe even at worst case.' : nom - rss >= 0 ? 'Safe on a statistical basis but not at worst case: add slack or an adjustment if failure is not acceptable.' : 'Interference is likely: increase the nominal gap or reduce tolerances.');
+    view.redraw();
+  }
+  run();
+})();
+
+/* ---------- Sim 2: thermal expansion ---------- */
+(function () {
+  const M = { 'PLA': 68, 'PETG': 60, 'ABS / ASA': 90, 'Nylon (PA)': 90, 'PA-CF': 28, 'Aluminium': 23, 'Brass': 19, 'Steel': 12 };
+  const S = { L: 100, dT: 20 }, a = document.getElementById('te-a'), b = document.getElementById('te-b');
+  ['PLA', 'PETG', 'ABS / ASA', 'Nylon (PA)', 'PA-CF'].forEach(k => a.add(new Option(k, k))); ['Steel', 'Aluminium', 'Brass'].forEach(k => b.add(new Option(k, k)));
+  const canvas = document.getElementById('te-canvas'), out = document.getElementById('te-out');
+  const view = Sim.make(canvas, 0.45, (c, w, h, col) => {
+    const keys = Object.keys(M), l = 100, pw = w - l - 16, rh = (h - 12) / keys.length, g = k => M[k] * 1e-6 * S.L * S.dT, mx = Math.max(...keys.map(g), 0.01) * 1.1;
+    c.font = '12px system-ui'; c.textBaseline = 'middle';
+    keys.forEach((k, i) => { const y = 6 + i * rh + rh / 2, v = g(k), sel = k === a.value || k === b.value; c.textAlign = 'right'; c.fillStyle = sel ? col.ink : col.muted; c.fillText(k, l - 8, y); c.fillStyle = (k === a.value ? col.accent2 : k === b.value ? col.accent : col.line); c.fillRect(l, y - rh * 0.3, v / mx * pw, rh * 0.6); c.textAlign = 'left'; c.fillStyle = col.ink; c.fillText(v.toFixed(3) + ' mm', l + v / mx * pw + 6, y); });
+  });
+  function info() {
+    const da = M[a.value] * 1e-6 * S.L * S.dT, db = M[b.value] * 1e-6 * S.L * S.dT;
+    out.innerHTML = a.value + ' grows <strong>' + da.toFixed(3) + ' mm</strong>, ' + b.value + ' grows <strong>' + db.toFixed(3) + ' mm</strong> over ' + S.L + ' mm and ' + S.dT + ' K → the fit changes by <strong>' + Math.abs(da - db).toFixed(3) + ' mm</strong> (' + (da > db ? 'the printed hole/part grows more: a snug fit loosens when warm' : 'the metal grows more') + '). Printed fits that must hold over a range need that much slack, or a compliant mount.';
+    view.redraw();
+  }
+  const hs = document.getElementById('te-ctl');
+  Sim.slider(hs, { label: 'Length', min: 10, max: 400, value: S.L, unit: ' mm', onInput: v => { S.L = v; info(); } }); Sim.slider(hs, { label: 'Temperature change', min: 1, max: 80, value: S.dT, unit: ' K', onInput: v => { S.dT = v; info(); } });
+  a.onchange = b.onchange = info; info();
+})();
+
+/* ---------- Sim 3: stick-slip ---------- */
+(function () {
+  const S = { m: 0.5, k: 1, v: 2, mus: 0.5, muk: 0.3 }, g = 9.81;
+  const canvas = document.getElementById('ss-canvas'), out = document.getElementById('ss-out');
+  function sim() {
+    const T = 6, dt = 0.0002, n = Math.round(T / dt), k = S.k * 1000, v0 = S.v / 1000, m = S.m, Fs = S.mus * m * g, Fk = S.muk * m * g, c = 2 * 0.02 * Math.sqrt(k * m);
+    let x = 0, v = 0, stuck = true; const xs = [], step = Math.round(0.005 / dt);
+    for (let i = 0; i < n; i++) {
+      const xd = v0 * i * dt, Fsp = k * (xd - x);
+      if (stuck) { if (Math.abs(Fsp) <= Fs) v = 0; else stuck = false; }
+      if (!stuck) { const Ff = -Fk * Math.sign(v || Fsp), a = (Fsp + Ff - c * v) / m, vn = v + a * dt; if (v !== 0 && Math.sign(vn) !== Math.sign(v)) { v = 0; stuck = true; } else v = vn; x += v * dt; }
+      if (i % step === 0) xs.push([i * dt, x * 1000, xd * 1000]);
+    }
+    return xs;
+  }
+  let data = sim();
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const l = 44, r = 12, t = 12, b = h - 26, pw = w - l - r, ph = b - t, mx = Math.max(...data.map(d => d[2]), 0.1) * 1.05, X = tt => l + tt / 6 * pw, Y = v => b - v / mx * ph;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'right'; [0, mx / 2, mx].forEach(v => { c.beginPath(); c.moveTo(l, Y(v)); c.lineTo(l + pw, Y(v)); c.stroke(); c.fillText(v.toFixed(1), l - 4, Y(v) + 4); });
+    c.textAlign = 'center'; [0, 2, 4, 6].forEach(tt => c.fillText(tt + ' s', X(tt), h - 8));
+    c.strokeStyle = col.muted; c.setLineDash([4, 4]); c.beginPath(); data.forEach((d, i) => i ? c.lineTo(X(d[0]), Y(d[2])) : c.moveTo(X(d[0]), Y(d[2]))); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath(); data.forEach((d, i) => i ? c.lineTo(X(d[0]), Y(d[1])) : c.moveTo(X(d[0]), Y(d[1]))); c.stroke();
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('mass position (mm) vs time; dashed = drive position', l + 6, t + 10);
+  });
+  function info() {
+    data = sim(); const lag = data.slice(600).map(d => d[2] - d[1]), ripple = Math.max(...lag) - Math.min(...lag), slide = S.muk * S.m * 9.81 / (S.k * 1000) * 1000, ss = ripple > 0.25 * Math.max(slide, 0.02);
+    const stretch = (S.mus * S.m * 9.81 / (S.k * 1000)) * 1000;
+    out.innerHTML = 'Spring must stretch ≈ <strong>' + stretch.toFixed(2) + ' mm</strong> to break the mass free (μₛ·m·g/k). Lag ripple ≈ <strong>' + ripple.toFixed(2) + ' mm</strong> → ' + (ss ? '<strong style="color:var(--warn)">stick-slip: jerky motion</strong>' : '<strong style="color:var(--good)">smooth</strong>') + '. ' + (S.mus <= S.muk ? 'With μₛ = μₖ the stick-slip disappears.' : 'Try a stiffer drive, a lower μₛ − μₖ, or a faster speed.');
+    view.redraw();
+  }
+  const hs = document.getElementById('ss-ctl');
+  [['m', 'Mass', 0.05, 2, 0.05, 2, ' kg'], ['k', 'Drive stiffness', 0.1, 50, 0.1, 1, ' N/mm'], ['v', 'Drive speed', 0.2, 20, 0.2, 1, ' mm/s'], ['mus', 'Static μₛ', 0.05, 0.9, 0.01, 2, ''], ['muk', 'Kinetic μₖ', 0.05, 0.9, 0.01, 2, '']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
+})();
+</script>
+</body>
+</html>

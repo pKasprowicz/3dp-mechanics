@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 10 · Rotary joints, bearings and shafts</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="10">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 10</p>
+<h1>Rotary joints, bearings and shafts</h1>
+<p class="lead">Every linkage pivot, every gear shaft, every wheel and every turntable is a rotary joint. This is the single most worthwhile place to spend money on bought parts: a few bearings and some steel rod turn a rattly printed assembly into something that feels like a machine. This chapter shows when a printed bearing is enough, how to choose and mount a real one, and how to connect shafts to everything else.</p>
+
+<h2>10.1 What a rotary joint has to do</h2>
+<p>A rotating joint allows one rotation and removes everything else. It has to carry <strong>radial load</strong> (sideways, across the shaft), <strong>axial / thrust load</strong> (along the shaft) and sometimes a <strong>tilting moment</strong>, with low friction and little play. Pick the simplest joint that handles the real loads:</p>
+<table>
+  <tr><th>Joint</th><th>Good for</th><th>Limits</th></tr>
+  <tr><td><strong>Pin or screw in a printed hole</strong></td><td>Hinges, linkages, light and occasional rotation</td><td>Wears and gets sloppy fast; stick-slip</td></tr>
+  <tr><td><strong>Plain bushing</strong> (printed, polymer or bronze sleeve)</td><td>Slow-to-medium speeds, moderate loads, quiet, cheap</td><td>PV limit (heat/wear); needs lubricant or the right material pair</td></tr>
+  <tr><td><strong>Ball bearing</strong> (deep-groove)</td><td>Speed, low friction, precision, long life</td><td>Cost; needs a proper seat; not for shocks</td></tr>
+  <tr><td><strong>Thrust bearing / thrust washer</strong></td><td>Axial loads (turntables, leadscrews)</td><td>Ball radial bearings carry little axial load</td></tr>
+  <tr><td><strong>Needle / roller</strong></td><td>High load in a small diameter</td><td>Need hardened shaft or races</td></tr>
+  <tr><td><strong>Flexure pivot</strong></td><td>Tiny rotation, no friction, no play</td><td>Limited angle (chapter 12)</td></tr>
+</table>
+
+<h2>10.2 Plain bearings: the PV rule</h2>
+<p>A plain bearing is a shaft sliding in a sleeve. It fails from <strong>heat and wear</strong>, and the limit is captured by the <strong>PV value</strong>: the bearing pressure times the sliding speed.</p>
+<div class="eq">Bearing pressure  P = F / (d · L)         (projected area, MPa when F in N and d, L in mm)<br>
+Sliding speed     v = π · d · n / 60000    (m/s, d in mm, n in rpm)<br>
+PV = P · v        (MPa·m/s)         friction heat ≈ μ · F · v  (W)</div>
+<p>Every bearing material has a PV limit above which it overheats, softens and wears quickly. Printed plastics on a steel shaft have low limits; polymer-bearing materials and sintered bronze have far higher ones. Lubrication raises the limit several-fold and also reduces the friction.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Plain bearing PV check</h4>
+  <p class="desc">Set the load, the shaft size, the bearing length and the speed. The vertical line is your PV; the bars are indicative limits of common bearing materials on a steel shaft (orders of magnitude, not datasheet values). Ticking "lubricated" raises the limits and lowers friction.</p>
+  <canvas id="pv-canvas"></canvas>
+  <div class="row"><label><input type="checkbox" id="pv-lube"> lubricated (silicone / PTFE grease)</label></div>
+  <div class="controls" id="pv-ctl"></div>
+  <div class="readout" id="pv-out"></div>
+</div>
+
+<p>Practical conclusions:</p>
+<ul>
+  <li><strong>Slow and light</strong> (a hinge, a knob, a pivot turning a few times a minute): a printed hole with a steel pin is fine. Use PETG or nylon, not PLA.</li>
+  <li><strong>Moderate</strong> (a wheel on an axle, a roller, a pulley, rpm in the tens to hundreds): press a <strong>brass, bronze or polymer sleeve</strong> into the printed hole. Cheap, and PV limits go up by 10×.</li>
+  <li><strong>Fast or heavy or precise</strong> (a motor-driven shaft, a gear train): ball bearings.</li>
+  <li><strong>Length:</strong> bearing length ≈ 1–1.5× the shaft diameter. Very long bushings are sensitive to misalignment (ends carry all the load).</li>
+</ul>
+
+<h2>10.3 Ball bearings: choosing and seating them</h2>
+<p>A deep-groove ball bearing is the cheapest, most useful precision part you can buy. It has an <strong>inner ring</strong> (fits on the shaft), an <strong>outer ring</strong> (fits in the housing), and balls between them. Common sizes (bore × outer diameter × width, mm):</p>
+<table>
+  <tr><th>Bearing</th><th>Bore × OD × width</th><th>Typical use</th></tr>
+  <tr><td>683</td><td>3 × 7 × 3</td><td>Tiny idlers, small robots</td></tr>
+  <tr><td>693</td><td>3 × 8 × 4</td><td>Small pulleys, idlers</td></tr>
+  <tr><td>623</td><td>3 × 10 × 4</td><td>The workhorse for M3 shafts and idler pulleys</td></tr>
+  <tr><td>624</td><td>4 × 13 × 5</td><td>M4 shafts, belt idlers</td></tr>
+  <tr><td>625</td><td>5 × 16 × 5</td><td>M5 shafts</td></tr>
+  <tr><td>685 / 695</td><td>5 × 11 × 5 / 5 × 13 × 4</td><td>Compact 5 mm shafts</td></tr>
+  <tr><td>688</td><td>8 × 16 × 5</td><td>Compact 8 mm shafts, wheels</td></tr>
+  <tr><td>608</td><td>8 × 22 × 7</td><td>Skate bearing: very cheap, 8 mm shafts, wheels, turntables, fidget spinners</td></tr>
+  <tr><td>6000 / 6001</td><td>10 × 26 × 8 / 12 × 28 × 8</td><td>Larger shafts, gearboxes</td></tr>
+</table>
+<p>Suffixes: <strong>ZZ</strong> metal shields (light protection, spins freely), <strong>2RS</strong> rubber seals (better dirt protection, a little more drag). Skip unneeded drag in light mechanisms with ZZ.</p>
+
+<h3>Seating a bearing in a printed housing</h3>
+<ul>
+  <li><strong>Design the bore from your measured hole shrink</strong> (chapter 4's coupon). The printed bore ends up <em>smaller</em> than modelled; model it larger by the shrink amount.</li>
+  <li><strong>Fit type:</strong> a light press (0.05–0.1 mm interference) holds the bearing without anything else, but a printed housing <strong>creeps</strong> and relaxes over weeks. Do not rely on friction alone for anything important: add a <strong>shoulder</strong> on one side and a <strong>cover plate</strong> or retaining ring on the other, so the bearing is captured mechanically.</li>
+  <li><strong>Don't squeeze too hard.</strong> A bearing in a too-tight bore deforms its outer ring, gets stiff and gritty and wears out. If it won't turn freely by hand after pressing, the bore is too small.</li>
+  <li><strong>Wall thickness:</strong> at least 3 mm, or 20% of the bearing OD, whichever is larger; thin rings split or ovalise.</li>
+  <li><strong>The shoulder lip</strong> should land on the <em>outer ring only</em>: about 1–1.5 mm of overlap, never touching the inner ring or the seal.</li>
+  <li><strong>Press bearings in square</strong>, using a socket or washer against the outer ring (never press on the inner ring or balls); a vice with two flat blocks works well. A little heat (hair dryer) on the housing helps with printed parts.</li>
+</ul>
+<h3>On the shaft</h3>
+<ul>
+  <li>The inner ring must be <strong>clamped axially</strong> against a shoulder or collar by a nut, a screw, an E-clip, or the next part; otherwise it creeps and spins.</li>
+  <li>A <strong>screw or bolt as a shaft</strong> is the cheapest option (M3 for 623, M5 for 625, M8 for 608). A bolt's thread is a little under nominal size, so a shoulder bolt (with a true unthreaded shoulder) gives a proper fit.</li>
+  <li>Use <strong>two bearings</strong> spaced apart for any shaft that carries a load or an overhang; one bearing alone cannot resist tilting.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 2 · Bearing seat and shaft play</h4>
+  <p class="desc">Pick a bearing and the fit you want. The calculator gives the bore to model, the lip and wall sizes, and, for a shaft on two bearings with an overhang, the rattle you can expect at the tip.</p>
+  <canvas id="bs-canvas"></canvas>
+  <div class="row"><label>Bearing <select id="bs-bear"></select></label><label>Fit <select id="bs-fit"><option value="0.08">Light press (0.08 interference)</option><option value="0.02" selected>Snug (0.02)</option><option value="-0.08">Slip with retainer (0.08 clearance)</option></select></label></div>
+  <div class="controls" id="bs-ctl"></div>
+  <div class="readout" id="bs-out"></div>
+</div>
+
+<h2>10.4 Shafts and connecting them to things</h2>
+<p>A shaft is a rod. The standard choice is <strong>ground steel rod</strong> (silver steel, precision shafts in 3, 4, 5, 6, 8, 10 mm): round, hard, smooth, and far stronger than anything printed. A bolt or threaded rod is the cheap alternative where precision matters less. Printed shafts only work for tiny loads or slow hand-turned mechanisms.</p>
+<p>Torque must pass between the shaft and each part on it (gear, pulley, cam, hub). Options:</p>
+<table>
+  <tr><th>Method</th><th>Capacity</th><th>Notes</th></tr>
+  <tr><td>Round hole + grub (set) screw on the round shaft</td><td>Low</td><td>Digs a divot and loosens; fine for light loads only</td></tr>
+  <tr><td><strong>D-shaft (flat) + grub screw on the flat</strong></td><td>Medium–high</td><td>The cheap, strong, standard answer; use a nut trap for the grub screw in the printed hub</td></tr>
+  <tr><td>Split clamp hub with a screw</td><td>Medium</td><td>Works well in print; clamping force relaxes if the plastic creeps</td></tr>
+  <tr><td>Keyway + key</td><td>High</td><td>Hard to print neatly; for metal hubs</td></tr>
+  <tr><td>Cross pin / roll pin</td><td>High</td><td>Drill through hub and shaft; reliable</td></tr>
+  <tr><td>Hex or square shaft + matching hole</td><td>High</td><td>Prints well; hex holes need a small clearance</td></tr>
+  <tr><td>Metal hub (bought) in the printed part</td><td>High</td><td>Best for gears under real load</td></tr>
+  <tr><td>Press fit into the printed hole</td><td>Low–medium</td><td>Creeps and loosens; avoid for torque</td></tr>
+</table>
+<p><strong>Axial retention</strong> of shafts: E-clips or circlips in a groove (a groove in a steel rod is cut or bought), shaft collars with a grub screw, a nut and washer on a bolt, or a printed shoulder plus a cover.</p>
+
+<div class="sim">
+  <h4>Simulation 3 · How much torque can a shaft take?</h4>
+  <p class="desc">Torsion stress in a solid round shaft is τ = 16T/(πd³). The allowable stresses are conservative working values (printed parts: layer-shear limited). Compare a printed shaft with steel.</p>
+  <div class="row"><label>Shaft material <select id="sh-mat"></select></label></div>
+  <div class="controls" id="sh-ctl"></div>
+  <div class="readout" id="sh-out"></div>
+</div>
+
+<h2>10.5 Couplings</h2>
+<p>A coupling joins two shafts end to end (motor to leadscrew, motor to gearbox). The shafts are never perfectly aligned, so choose by what it must absorb:</p>
+<table>
+  <tr><th>Coupling</th><th>Absorbs</th><th>Notes</th></tr>
+  <tr><td>Rigid (sleeve with grub screws, clamp)</td><td>Nothing</td><td>Only if the shafts are held in alignment by one rigid part; otherwise it bends the shafts and wrecks bearings</td></tr>
+  <tr><td>Helical / beam (a cut spiral tube)</td><td>Angular + parallel misalignment; torsionally stiff</td><td>The standard bought coupling for steppers and leadscrews</td></tr>
+  <tr><td>Jaw / spider (elastomer insert)</td><td>All three; damps vibration</td><td>Printable hubs with a TPU spider</td></tr>
+  <tr><td><strong>Oldham</strong> (two hubs + a slotted disc)</td><td>Parallel offset</td><td>Prints well in 3 parts; sliding faces need lubricant</td></tr>
+  <tr><td>Universal (cardan) joint</td><td>Large angular misalignment</td><td>Speed fluctuates unless used in pairs</td></tr>
+  <tr><td>Flexible shaft / tubing</td><td>Everything, little torque</td><td>Toy-level</td></tr>
+</table>
+<p>Misalignment types: <em>parallel</em> (shifted axes), <em>angular</em> (tilted), and <em>axial</em> (the ends move together/apart). Rule: <strong>if two shafts are each held by their own bearings, the coupling between them must be flexible.</strong> That is the over-constraint rule of chapter 1 again.</p>
+
+<h2>10.6 Hinges and pivots</h2>
+<ul>
+  <li><strong>Pin hinge</strong>: two knuckles and a pin (a screw, a steel pin, filament). Use a pin through a <em>clevis</em> (fork) so the pin is loaded in double shear. The hole in each knuckle should be a snug fit on the pin and a looser fit in the fixed part.</li>
+  <li><strong>Print-in-place hinge</strong> (chapter 4): needs 0.3–0.5 mm clearance and a break-free step; only light duty.</li>
+  <li><strong>Living hinge</strong> (a thin flexing strip): chapter 12.</li>
+  <li><strong>Friction/detent hinge</strong>: a washer, a spring or a printed ratchet holds the angle.</li>
+  <li><strong>Axial stops</strong>: washers keep links from rubbing flat faces and leave a defined side gap.</li>
+</ul>
+
+<h2>10.7 Thrust loads and turntables</h2>
+<p>Radial ball bearings tolerate a little axial load; heavy axial load (a turntable under a weight, a leadscrew) needs a <strong>thrust bearing</strong> (flat race) or, cheaply, a <strong>thrust washer</strong> (PTFE, nylon or bronze) between a shoulder and the rotating part. A <strong>printed lazy-susan</strong> is a ring of 6–8 mm steel balls in two printed grooved rings (groove radius a little larger than the ball radius, smooth surfaces, a printed cage to space the balls): inexpensive, big diameter, surprisingly smooth. A <strong>wheel-on-a-ring</strong> alternative (3–4 skate bearings on a printed track) is even easier.</p>
+
+<h2>10.8 Materials, lubrication and care</h2>
+<ul>
+  <li><strong>Shaft:</strong> steel, polished. Not PLA on PLA.</li>
+  <li><strong>Sleeve / hole:</strong> nylon or PETG against steel; avoid printing a bearing surface on a vertical wall with visible layer ridges if you can ream it.</li>
+  <li><strong>Lubricant:</strong> silicone or PTFE grease for plastic-on-steel. Mineral oils and some greases can cause stress cracking in ABS, polycarbonate and some other plastics: check compatibility. Don't lubricate a press fit you're relying on.</li>
+  <li><strong>Ball bearings:</strong> fine in dusty places if sealed. Keep chips and printing debris out of the housing; do not wash bearings with solvents that dissolve their grease.</li>
+  <li><strong>Reaming:</strong> run a drill bit of exact size by hand through a printed hole to smooth it, remove stringing and round it up.</li>
+</ul>
+
+<h2>10.9 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+  <tr><td>Bearing is stiff or gritty after pressing in</td><td>Bore too small (outer ring squeezed)</td><td>Enlarge the bore by 0.05–0.1 mm; ream; heat the housing</td></tr>
+  <tr><td>Bearing spins in the housing</td><td>Bore too large; creep</td><td>Shoulder + cover plate; a smaller bore; a drop of adhesive (not on the balls)</td></tr>
+  <tr><td>Shaft turns inside the inner ring</td><td>No axial clamp; shaft too small</td><td>Clamp the inner ring; shoulder bolt; fit tolerance</td></tr>
+  <tr><td>Wobble at the shaft end</td><td>Bearings too close together; play; overhang too long</td><td>Longer span, shorter overhang (span ≥ 2× overhang); tighter fit</td></tr>
+  <tr><td>Axial rattle</td><td>No preload or a gap</td><td>Wave washer or spring washer to preload; shims</td></tr>
+  <tr><td>Binds when two bearings carry one shaft</td><td>Misaligned seats (over-constraint)</td><td>Print both seats in one part; ream; let one bearing float axially</td></tr>
+  <tr><td>Squeak or squeal</td><td>Dry stick-slip in a plain bearing</td><td>Lubricate; change material pair</td></tr>
+  <tr><td>Bushing seized or melted</td><td>PV too high (see Simulation 1)</td><td>Bigger or longer bearing, lubricant, ball bearing</td></tr>
+  <tr><td>Hub slips on the shaft</td><td>Round fit; no flat</td><td>D-flat and grub screw, pin, or hex</td></tr>
+</table>
+
+<h2>10.10 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Joint type chosen from the real loads (PV, thrust, tilt).</li>
+  <li>☐ Shaft is steel (or a shoulder bolt); torque transferred via a flat, pin or hex, not just friction.</li>
+  <li>☐ Bearing bore modelled from measured shrink; shoulder on one side, retainer on the other.</li>
+  <li>☐ Inner ring clamped axially; outer ring seat squeezes nothing.</li>
+  <li>☐ Two bearings, span ≥ 2× overhang.</li>
+  <li>☐ Flexible coupling between separately supported shafts.</li>
+  <li>☐ Thrust path planned.</li>
+</ul>
+<ul>
+  <li>Press-fitting a bearing in a thin printed ring that cracks at the first tightening.</li>
+  <li>Using a PLA hole as a bearing for a motor-driven shaft.</li>
+  <li>Using one bearing on a long overhanging shaft.</li>
+  <li>Rigidly coupling a motor to a leadscrew held by its own bearing.</li>
+</ul>
+
+<h2>10.11 Check yourself</h2>
+<details class="quiz"><summary>A 6 mm steel shaft turns at 300 rpm in a 10 mm long printed bushing under a 20 N radial load. What are P, v and PV?</summary>
+<p>P = 20/(6 × 10) = 0.33 MPa. v = π × 6 × 300/60000 = 0.094 m/s. PV = 0.031 MPa·m/s. That's right at the limit for a dry printed bearing: use a bronze/polymer sleeve, lubricant, or a ball bearing for continuous running.</p></details>
+<details class="quiz"><summary>A shaft has two bearings 40 mm apart with 0.1 mm of total radial play, and a pulley 30 mm beyond the second bearing. What is the rattle at the pulley?</summary>
+<p>Peak-to-peak ≈ c·(1 + 2a/S) = 0.1 × (1 + 2×30/40) = 0.1 × 2.5 = <strong>0.25 mm</strong>. Space the bearings 60 mm apart and it drops to 0.2 mm; move the pulley closer and it falls further.</p></details>
+<details class="quiz"><summary>Why do two bearings on one shaft sometimes bind even though each is fine alone?</summary>
+<p>Their seats are not perfectly coaxial, so the shaft is held at two slightly different centres: over-constraint. Print both seats in one part, ream them together, or let one bearing float.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+/* ---------- Sim 1: plain bearing PV ---------- */
+(function () {
+  // Indicative PV limits, MPa*m/s, dry on steel. Order-of-magnitude only.
+  const MAT = [['Printed PLA', 0.02], ['Printed PETG', 0.04], ['Printed nylon', 0.08], ['POM (acetal) sleeve', 0.1], ['Polymer bearing (igus-type)', 0.3], ['Oil-impregnated bronze', 1.0]];
+  const S = { F: 40, d: 8, L: 10, n: 100 };
+  const lube = document.getElementById('pv-lube'), canvas = document.getElementById('pv-canvas'), out = document.getElementById('pv-out');
+  const calc = () => { const P = S.F / (S.d * S.L), v = Math.PI * S.d * S.n / 60000; return { P, v, PV: P * v, mu: lube.checked ? 0.1 : 0.25 }; };
+  const view = Sim.make(canvas, 0.55, (c, w, h, col) => {
+    const k = calc(), l = 150, r = 14, t = 14, b = h - 28, pw = w - l - r, rh = (b - t) / MAT.length, f = lube.checked ? 3 : 1;
+    const X = v => l + (Math.log10(Math.max(v, 1e-4)) + 4) / 5 * pw; // 1e-4 .. 10
+    c.font = '12px system-ui'; c.textBaseline = 'middle';
+    [0.001, 0.01, 0.1, 1].forEach(v => { c.strokeStyle = col.line; c.beginPath(); c.moveTo(X(v), t); c.lineTo(X(v), b); c.stroke(); c.fillStyle = col.muted; c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillText(v, X(v), h - 10); c.textBaseline = 'middle'; });
+    MAT.forEach((m, i) => {
+      const y = t + i * rh + rh / 2, lim = m[1] * f, col2 = k.PV <= lim * 0.5 ? col.good : k.PV <= lim ? col.accent2 : col.warn;
+      c.fillStyle = col.ink; c.textAlign = 'right'; c.fillText(m[0], l - 8, y);
+      c.fillStyle = col2 + '66'; c.fillRect(l, y - rh * 0.3, X(lim) - l, rh * 0.6); c.fillStyle = col2; c.fillRect(X(lim) - 3, y - rh * 0.3, 3, rh * 0.6);
+    });
+    c.strokeStyle = col.ink; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(X(k.PV), t); c.lineTo(X(k.PV), b); c.stroke(); c.setLineDash([]);
+    c.textBaseline = 'alphabetic'; c.fillStyle = col.ink; c.textAlign = 'center'; c.fillText('PV ' + k.PV.toFixed(3), Math.min(w - 40, Math.max(l + 30, X(k.PV))), t + 10);
+  });
+  function info() {
+    const k = calc(), ok = MAT.filter(m => k.PV <= m[1] * (lube.checked ? 3 : 1) * 0.5).map(m => m[0]);
+    out.innerHTML = 'Pressure <strong>' + k.P.toFixed(2) + ' MPa</strong> · speed <strong>' + k.v.toFixed(3) + ' m/s</strong> · PV <strong>' + k.PV.toFixed(3) + ' MPa·m/s</strong> · friction torque ≈ ' + (k.mu * S.F * S.d / 2000).toFixed(3) + ' N·m, heat ≈ <strong>' + (k.mu * S.F * k.v).toFixed(2) + ' W</strong>.<br>' +
+      (ok.length ? 'Comfortably within limits (≤ 50% of the limit): <strong style="color:var(--good)">' + ok.join(', ') + '</strong>.' : '<strong style="color:var(--warn)">Beyond every plain-bearing material here: use a ball bearing.</strong>') + (S.P > 5 ? '' : '');
+  }
+  const refresh = () => { view.redraw(); info(); };
+  const hs = document.getElementById('pv-ctl');
+  [['F', 'Radial load', 1, 500, 1, 0, ' N'], ['d', 'Shaft Ø', 3, 25, 1, 0, ' mm'], ['L', 'Bearing length', 3, 40, 1, 0, ' mm'], ['n', 'Speed', 1, 3000, 1, 0, ' rpm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; refresh(); } }));
+  lube.onchange = refresh; refresh();
+})();
+
+/* ---------- Sim 2: bearing seat ---------- */
+(function () {
+  const B = { '683 (3×7×3)': [3, 7, 3], '693 (3×8×4)': [3, 8, 4], '623 (3×10×4)': [3, 10, 4], '624 (4×13×5)': [4, 13, 5], '625 (5×16×5)': [5, 16, 5], '688 (8×16×5)': [8, 16, 5], '608 (8×22×7)': [8, 22, 7], '6001 (12×28×8)': [12, 28, 8] };
+  const S = { shrink: 0.15, span: 50, over: 25, play: 0.1 };
+  const sel = document.getElementById('bs-bear'), fit = document.getElementById('bs-fit'); Object.keys(B).forEach(k => sel.add(new Option(k, k))); sel.value = '623 (3×10×4)';
+  const canvas = document.getElementById('bs-canvas'), out = document.getElementById('bs-out');
+  const calc = () => { const [bore, od, wd] = B[sel.value], inter = +fit.value, bored = od - inter + S.shrink, lip = Math.min(1.5, (od - bore) / 4), wall = Math.max(3, 0.2 * od); return { bore, od, wd, bored, lip, wall, depth: wd + 0.2, tip: S.play * (1 + 2 * S.over / S.span) }; };
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const k = calc(), R = k.od / 2 + k.wall, sc = Math.min((h - 24) / (2 * R), (w * 0.45) / (2 * R)), cx = w * 0.27, cy = h / 2;
+    const circ = (r, fill, stroke, lw) => { c.beginPath(); c.arc(cx, cy, r * sc, 0, 2 * Math.PI); if (fill) { c.fillStyle = fill; c.fill(); } if (stroke) { c.strokeStyle = stroke; c.lineWidth = lw || 1.5; c.stroke(); } };
+    circ(R, col.muted + '44', col.muted, 2); circ(k.bored / 2, col.bg, col.warn, 1.5); circ(k.od / 2, col.accent + '55', col.accent, 2); circ(k.od / 2 - (k.od - k.bore) / 4, col.surface, col.line, 1);
+    circ(k.bore / 2 + (k.od - k.bore) / 4, col.accent + '33', col.accent, 1.5); circ(k.bore / 2, col.ink + 'cc', col.ink, 1);
+    c.setLineDash([3, 3]); circ(k.od / 2 - k.lip, null, col.good, 1.5); c.setLineDash([]);
+    c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'left';
+    const tx = w * 0.27 + R * sc + 18, rows = [['model bore Ø ' + k.bored.toFixed(2) + ' mm', col.warn], ['bearing OD ' + k.od + ' mm', col.accent], ['lip ID ' + (k.od - 2 * k.lip).toFixed(1) + ' mm', col.good], ['boss OD ≥ ' + (2 * R).toFixed(1) + ' mm', col.muted], ['shaft Ø ' + k.bore + ' mm', col.ink]];
+    rows.forEach((r2, i) => { c.fillStyle = r2[1]; c.fillRect(tx - 12, cy - 50 + i * 22 - 5, 8, 8); c.fillStyle = col.ink; c.fillText(r2[0], tx, cy - 50 + i * 22 + 4); });
+  });
+  function info() {
+    const k = calc();
+    out.innerHTML = '<strong>Model the housing bore at Ø ' + k.bored.toFixed(2) + ' mm</strong> (bearing OD ' + k.od + ' mm, ' + (+fit.value > 0 ? 'interference ' + fit.value : 'clearance ' + (-fit.value)) + ', plus the ' + S.shrink.toFixed(2) + ' mm your printer shrinks holes). Pocket depth ≈ <strong>' + k.depth.toFixed(1) + ' mm</strong> + lip; shoulder lip ID ≈ <strong>' + (k.od - 2 * k.lip).toFixed(1) + ' mm</strong> (overlap ' + k.lip.toFixed(1) + ' mm on the outer ring only); wall around the bearing ≥ <strong>' + k.wall.toFixed(1) + ' mm</strong>.<br>' +
+      'Shaft rattle: bearings ' + S.span + ' mm apart, ' + S.over + ' mm overhang, ' + S.play + ' mm radial play → about <strong>' + k.tip.toFixed(2) + ' mm</strong> peak-to-peak at the tip' + (S.span < 2 * S.over ? ' <strong style="color:var(--warn)">(span is under 2× overhang: spread the bearings or shorten the overhang)</strong>.' : '.');
+    view.redraw();
+  }
+  const hs = document.getElementById('bs-ctl');
+  [['shrink', 'Hole shrink', 0, 0.4, 0.01, 2, ' mm'], ['span', 'Bearing spacing', 10, 150, 1, 0, ' mm'], ['over', 'Overhang', 0, 100, 1, 0, ' mm'], ['play', 'Total radial play', 0.02, 0.5, 0.01, 2, ' mm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  sel.onchange = fit.onchange = info; info();
+})();
+
+/* ---------- Sim 3: shaft torsion ---------- */
+(function () {
+  const MAT = { 'Printed PETG shaft (layer-shear limited)': 6, 'Printed nylon shaft': 8, 'Aluminium rod': 40, 'Brass rod': 40, 'Steel rod (silver steel)': 100 };
+  const S = { d: 5, T: 0.5 }, sel = document.getElementById('sh-mat'), out = document.getElementById('sh-out'); Object.keys(MAT).forEach(k => sel.add(new Option(k + ' (τ ≈ ' + MAT[k] + ' MPa)', k))); sel.value = 'Steel rod (silver steel)';
+  function info() {
+    const tau = MAT[sel.value], Tmax = tau * Math.PI * S.d ** 3 / 16 / 1000, sf = Tmax / S.T, stress = 16 * S.T * 1000 / (Math.PI * S.d ** 3);
+    out.innerHTML = 'Allowable torque for a Ø' + S.d + ' mm shaft: <strong>' + Tmax.toFixed(2) + ' N·m</strong>. Applied ' + S.T.toFixed(2) + ' N·m gives τ = ' + stress.toFixed(1) + ' MPa → safety factor <strong style="color:var(--' + (sf >= 3 ? 'good' : sf >= 1.5 ? 'accent2' : 'warn') + ')">' + sf.toFixed(1) + '</strong>' + (sf < 3 ? ' (want ≥ 3 for printed, ≥ 2 for steel in steady use)' : '') + '. Note that the connection to the hub is usually the weaker part, not the shaft.';
+  }
+  const hs = document.getElementById('sh-ctl');
+  Sim.slider(hs, { label: 'Shaft Ø', min: 3, max: 25, step: 1, value: S.d, unit: ' mm', onInput: v => { S.d = v; info(); } });
+  Sim.slider(hs, { label: 'Torque', min: 0.01, max: 5, step: 0.01, dec: 2, value: S.T, unit: ' N·m', onInput: v => { S.T = v; info(); } });
+  sel.onchange = info; info();
+})();
+</script>
+</body>
+</html>

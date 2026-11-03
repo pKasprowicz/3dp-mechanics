@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 11 · Intermittent and indexing motion</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="11">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 11</p>
+<h1>Intermittent and indexing motion</h1>
+<p class="lead">Not every mechanism moves smoothly. A film projector pulls each frame down and stops it; a clock lets its gears advance one tick at a time; a tool turns in one direction only; a rotary switch clicks into position. These are intermittent mechanisms, and several of them are some of the most satisfying things to print, because they work with small, simple parts and no electronics at all.</p>
+
+<h2>11.1 The family</h2>
+<table>
+  <tr><th>Mechanism</th><th>What it does</th><th>Typical use</th></tr>
+  <tr><td><strong>Ratchet and pawl</strong></td><td>One-way stepping or locking</td><td>Winches, counters, socket wrenches, cable ties, tensioners</td></tr>
+  <tr><td><strong>Geneva (Maltese cross) drive</strong></td><td>Continuous input → positive, locked indexing steps</td><td>Film projectors, indexing tables, tool changers, revolvers</td></tr>
+  <tr><td><strong>Intermittent (mutilated) gear</strong></td><td>A gear with teeth missing; the driven gear moves only while teeth mesh</td><td>Counters, mechanical sequencers (needs a lock arc)</td></tr>
+  <tr><td><strong>Escapement</strong></td><td>Releases stored energy a tooth at a time, timed by an oscillator</td><td>Clocks, music-box governors, toy timers</td></tr>
+  <tr><td><strong>One-way clutch / freewheel</strong></td><td>Transmits torque in one direction, slips in the other</td><td>Bicycle hubs, winches, anti-reverse locks</td></tr>
+  <tr><td><strong>Detent / indexing plunger</strong></td><td>A spring-loaded ball or pin snaps into notches</td><td>Rotary selectors, hinges with set positions, adjusters</td></tr>
+  <tr><td><strong>Barrel-cam indexer</strong></td><td>A roller follower rides a cam to step a turret</td><td>Industrial high-speed indexing (chapter 6 ideas)</td></tr>
+</table>
+
+<h2>11.2 Ratchet and pawl</h2>
+<p>A ratchet wheel has asymmetric (sawtooth) teeth. A <strong>pawl</strong>, a small spring-loaded lever, rides up the gentle ramp of each tooth as the wheel turns one way, drops into the root with a click, and blocks the wheel if it tries to turn back by pushing on the steep face. Used alone it is a <strong>backstop</strong> (a holding pawl). Add a second, <strong>drive pawl</strong> on an oscillating lever and you have a stepping drive: every forward swing of the lever pushes the wheel on by one or more teeth, and the holding pawl keeps what has been gained.</p>
+<ul>
+  <li><strong>Step size</strong> = 360° / z. More teeth give finer steps but smaller teeth.</li>
+  <li><strong>The lever stroke must exceed one tooth pitch, plus the gap between the drive pawl's rest position and the next tooth face</strong> (up to a second pitch). Within that gap the pawl is only travelling, not pushing; after contact it must still push the wheel a full pitch for the holding pawl to catch the next tooth. A stroke under one pitch can never advance the wheel, and any partial tooth is lost. Set the drive pawl's rest position just behind a tooth face and one pitch plus a little is enough.</li>
+  <li><strong>Pawl placement:</strong> the pawl should be pulled into engagement by the load, not pushed out. Put its pivot so that the force at the tooth passes between the pivot and the wheel; the pawl is then in tension and self-engaging. A pawl in compression that "buckles out" will skip under load.</li>
+  <li><strong>Tooth face:</strong> a face slightly undercut (leaning so that the pawl is drawn in) holds better than a radial face; a face leaning away lets the pawl climb out under load.</li>
+  <li><strong>Silent ratchets, internal ratchets</strong> (the pawl inside, as in a cable tie or a freewheel hub) and <strong>linear ratchets</strong> (a toothed strip) are variations of the same idea.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 1 · Ratchet and pawl</h4>
+  <p class="desc">A lever with a drive pawl oscillates; a fixed holding pawl catches the wheel. Change the number of teeth and the stroke. A stroke that is too short never carries the wheel to the next holding position, so nothing advances; the readout tells you the minimum for this layout. The counter shows net teeth advanced.</p>
+  <canvas id="rt-canvas"></canvas>
+  <div class="controls" id="rt-ctl"></div>
+  <div class="readout" id="rt-out"></div>
+</div>
+
+<h3>Printing ratchets</h3>
+<ul>
+  <li>Print the wheel flat. Teeth are strong in the XY plane. Use modest tooth counts (12–36) with teeth at least 2–3 mm wide at the base, and fillet every root (chapter 2).</li>
+  <li>The pawl is the part that breaks. Print it with its length in the XY plane (layers along it), thick enough to survive the load, and consider a <strong>steel pin or a bolt as the pawl tip</strong> for real torque. A cantilever printed as an integral spring makes a one-piece pawl, but it creeps and fatigues, so it is for light duty (chapter 12).</li>
+  <li>Use a separate <strong>spring</strong> (a small compression spring or a rubber band) for long life; printed springs lose force over weeks, particularly PLA.</li>
+  <li>The click is loud; for quiet use many fine teeth and a light pawl, or a friction clutch instead.</li>
+</ul>
+
+<h2>11.3 The Geneva drive</h2>
+<p>A Geneva drive turns a <strong>continuous rotation into positive indexed steps</strong>. The driver wheel carries a single <strong>pin</strong> and a <strong>locking disc</strong>. The driven wheel is a star with <em>n</em> radial slots. On each driver revolution the pin enters a slot, turns the star by 1/n of a revolution, and leaves; for the rest of the turn the locking disc, fitting a concave cut-out of the star, <strong>holds the star perfectly still</strong>. This lock is the whole point: unlike a ratchet, the output can't drift or overshoot.</p>
+<div class="eq">Pin radius (crank)   a = C · sin(π/n)           (C = centre distance)<br>
+Index angle          360° / n   per driver revolution<br>
+Moving fraction      1/2 − 1/n  of each driver turn   (n = 4: 25%, n = 6: 33%, n = 8: 37.5%)<br>
+Peak speed ratio     ω_driven / ω_driver = sin(π/n) / (1 − sin(π/n))   at mid-step</div>
+<p>The motion starts and ends gently (the pin enters radially, so the star's velocity is zero at the start), but acceleration jumps abruptly at entry and exit, which causes the characteristic Geneva "knock". Fewer slots = bigger shocks: n = 3 is harsh, n = 4–8 normal. For fast, quiet indexing use cam indexers instead.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · Geneva drive</h4>
+  <p class="desc">The driver (right) spins clockwise at constant speed. The lower plot shows the star's angular speed relative to the driver over one turn; the flat stretches are the locked dwell.</p>
+  <canvas id="gv-canvas"></canvas>
+  <div class="row"><button id="gv-run" class="on">Pause</button></div>
+  <div class="controls" id="gv-ctl"></div>
+  <div class="readout" id="gv-out"></div>
+</div>
+
+<h3>Printing a Geneva drive</h3>
+<ul>
+  <li>Print both wheels flat. The centre distance C must be accurate to about ±0.2 mm, since the pin must enter each slot at exactly the right place. Print both wheels' bearing seats in one frame (chapter 4).</li>
+  <li>Slot width = pin diameter + 0.3–0.5 mm clearance. Use a <strong>steel pin or an M3 screw with a small ball bearing on it as a roller</strong>: it cuts wear sharply.</li>
+  <li>The locking disc and the star's concave arcs rub every revolution. Give them 0.2–0.3 mm clearance and a lubricant. Keep the surfaces smooth (print the vertical faces slowly).</li>
+  <li>Work out the shock: the star carries inertia, so drive slowly (tens of rpm) or add a damping flywheel.</li>
+</ul>
+
+<h2>11.4 Escapements</h2>
+<p>A clock stores energy in a falling weight or a spring and releases it a tooth at a time. The <strong>escapement</strong> does that: an <strong>escape wheel</strong> pushed by the drive is blocked by a pair of <strong>pallets</strong> on an <strong>anchor</strong>, which rocks back and forth with an <strong>oscillator</strong> (a pendulum or a balance wheel). At each swing one pallet releases a tooth and the other catches the next, and the wheel gains a small impulse that tops up the oscillator's energy. The oscillator sets the rate, and the escapement only counts it.</p>
+<div class="eq">Pendulum period  T = 2π · √(L / g)       (small swings; L from pivot to the weight's centre)<br>
+Seconds pendulum T = 2 s → L ≈ 0.994 m<br>
+Escape wheel with z teeth, one tooth per period: one turn takes z · T</div>
+<p>Printed clocks and desk toys work, but expect friction to be the enemy: the drive needs enough torque to beat friction across the whole gear train, yet the escapement must be sensitive enough to count. Use ball bearings in the train, a fairly heavy weight on a cord for power, tooth profiles with generous clearance, and tune by adjusting the pallet spacing (a slotted mount). Accuracy depends on the pendulum, not the escape wheel: even a good print is a toy timekeeper, but a satisfying one.</p>
+
+<div class="sim">
+  <h4>Simulation 3 · Pendulum and escape wheel</h4>
+  <p class="desc">Set the pendulum length and the tooth count of the escape wheel; see the beat and how fast the wheel turns.</p>
+  <div class="controls" id="pd-ctl"></div>
+  <div class="readout" id="pd-out"></div>
+</div>
+
+<h2>11.5 One-way clutches and torque limiters</h2>
+<ul>
+  <li><strong>Ratchet freewheel:</strong> a ratchet wheel with pawls on the other member. It drives one way, clicks over the other. Use several pawls staggered by a fraction of a tooth so it engages every 1/(z·k) of a turn.</li>
+  <li><strong>Roller/sprag clutch:</strong> rollers or balls wedge in tapered pockets: silent and instantly engaging. A printed version with steel balls or pins can work for light torque.</li>
+  <li><strong>Wrap-spring clutch:</strong> a coil spring around two drums grips one way and slips the other. Cheap and compact.</li>
+  <li><strong>Torque limiter / slip clutch:</strong> a friction plate pressed by a spring, or a ball-and-detent coupling that slips at a set torque. It protects printed gears from jamming and breaking, and is usually worth putting in any hand-cranked or motor-driven gearbox.</li>
+</ul>
+
+<h2>11.6 Detents and indexing positions</h2>
+<p>A <strong>detent</strong> is a spring-loaded ball or tip that snaps into a notch. It gives a click and a set of stable positions without a locked step. Torque to move out of a notch depends on the spring force and the flank slope. On a V-shaped notch with flank slope β from the direction of motion, the tangential force needed to climb out is</p>
+<div class="eq">F_t = F · (tan β + μ) / (1 − μ · tan β)        (F = spring force on the ball, μ = friction)</div>
+<p>Steeper flanks and stronger springs give firmer clicks; shallow flanks give a smooth, light feel. A flank steep enough that μ·tan β ≥ 1 would never release.</p>
+
+<div class="sim">
+  <h4>Simulation 4 · Ball detent</h4>
+  <p class="desc">A ball pressed into a row of V-notches. The curve shows the tangential force to move the ball along the track: positive climbing out, negative falling into the next notch. A notch the ball falls into with force to spare feels like a click; if falling is negative only barely, it feels mushy.</p>
+  <canvas id="dt-canvas"></canvas>
+  <div class="controls" id="dt-ctl"></div>
+  <div class="readout" id="dt-out"></div>
+</div>
+
+<ul>
+  <li>In soft printed plastic a steel ball slowly <strong>wears a dimple</strong> into the notch; use a harder or filled material for the notches, or a spring steel tab, or let the ball ride a metal track.</li>
+  <li><strong>Printed flexure detents</strong> (a cantilever tooth that snaps over a bump) are compact but fatigue; fine for adjusters you change a few times.</li>
+  <li>Magnets are another option: they snap positions without wear, but they are not easily adjusted.</li>
+</ul>
+
+<h2>11.7 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Ratchet does not advance</td><td>Stroke shorter than a tooth pitch; weak spring; pawl pivot wrong</td><td>Lengthen stroke or use fewer teeth; stiffer spring; re-place pivot</td></tr>
+  <tr><td>Ratchet skips under load</td><td>Pawl in compression; face leaning wrong way</td><td>Pawl in tension; undercut face; shorter pawl</td></tr>
+  <tr><td>Pawl or tooth breaks</td><td>Thin cantilever, sharp root, layers peel</td><td>Thicker, fillets, orient along layers, metal tip</td></tr>
+  <tr><td>Wheel overshoots by a tooth</td><td>Inertia, no holding pawl</td><td>Add a holding pawl and light friction</td></tr>
+  <tr><td>Geneva jams at entry or exit</td><td>Centre distance off; pin too thick or tight; slot misaligned</td><td>Adjust C to ±0.2 mm; add clearance; smooth entry chamfer</td></tr>
+  <tr><td>Geneva star drifts or rattles in dwell</td><td>Locking disc clearance too large</td><td>Reduce clearance; shim</td></tr>
+  <tr><td>Escapement stops</td><td>Friction beats drive torque; too little pendulum amplitude</td><td>Ball bearings, a heavier weight, adjust pallet spacing, longer pendulum swing</td></tr>
+  <tr><td>Detent gets mushy over time</td><td>Notch worn by the ball; plastic creep in the spring</td><td>Harder notch material; metal spring plunger; replace the printed spring</td></tr>
+</table>
+
+<h2>11.8 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Right tool: ratchet to hold, Geneva to index and lock, detent to click, clutch to slip.</li>
+  <li>☐ Ratchet stroke &gt; one tooth pitch; pawls in tension; holding pawl present.</li>
+  <li>☐ Geneva: C accurate to ±0.2 mm; pin on a bearing; locking disc clearance set.</li>
+  <li>☐ Pawls and springs sized for the load; metal where it matters.</li>
+  <li>☐ A torque limiter before anything fragile.</li>
+</ul>
+<ul>
+  <li>Printing a thin, single-layer-wide pawl and wondering why it snaps.</li>
+  <li>Driving a Geneva wheel fast without damping.</li>
+  <li>Using a printed compression-spring-like cantilever as a permanent preload.</li>
+</ul>
+
+<h2>11.9 Check yourself</h2>
+<details class="quiz"><summary>A six-slot Geneva drive turns at 60 rpm. How long does each index step take, what is the step angle, and what is the star's peak speed?</summary>
+<p>Step angle 360/6 = 60°. Moving fraction = 1/2 − 1/6 = 1/3 of each 1-second turn, so each step takes <strong>0.33 s</strong> (the star dwells for 0.67 s). Peak speed ratio = sin 30° / (1 − sin 30°) = 1.0, so the star peaks at 60 rpm.</p></details>
+<details class="quiz"><summary>A 24-tooth ratchet is driven by a lever swinging 12°. Does it step?</summary>
+<p>Tooth pitch = 360/24 = 15°. A 12° swing is shorter than one pitch, so it can never move the wheel from one holding position to the next: any partial tooth is lost on the return. Raise the stroke above one pitch plus the pawl's rest gap: 30° (two pitches) is guaranteed.</p></details>
+<details class="quiz"><summary>A pendulum is 1.0 m long and drives a 30-tooth escape wheel, one tooth per period. How long does the wheel take to turn once?</summary>
+<p>T = 2π√(1/9.81) ≈ 2.006 s. One turn = 30 × 2.006 ≈ <strong>60.2 s</strong>: very nearly a seconds hand.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2;
+
+/* ---------- Sim 1: ratchet ---------- */
+(function () {
+  const S = { z: 16, A: 40, R: 64, th: 0, psi: 0, eng: false, N: 0, t: 0, th0: 0, adv: 0 };
+  const psiH = Math.PI / 2, HOFF = 0.45, p = () => TAU / S.z, depth = () => Math.min(11, 0.55 * TAU * S.R / S.z);
+  const alpha = t => Math.PI * 0.95 + (S.A * Math.PI / 180) * (0.5 - 0.5 * Math.cos(t * 2.2));
+  const prof = q => { const u = q - Math.floor(q); return S.R - depth() * u; };
+  function reset() { const pp = p(); S.th = psiH - Math.ceil((psiH - 0.3) / pp) * pp; S.th0 = S.th; S.eng = false; S.t = 0; S.psi = alpha(0) - HOFF; S.adv = 0; }
+  function step() {
+    const pp = p(), psiN = alpha(S.t) - HOFF, d = psiN - S.psi, q = (S.psi - S.th) / pp, qn = (psiN - S.th) / pp;
+    if (d > 0) { if (S.eng || Math.floor(qn + 1e-9) > Math.floor(q + 1e-9)) { if (!S.eng) { S.eng = true; S.N = Math.floor(qn + 1e-9); } S.th = psiN - S.N * pp; } }
+    else if (d < 0 && S.eng) {
+      const qh = (psiH - S.th) / pp, rest = psiH - Math.ceil(qh - 1e-9) * pp, cand = psiN - S.N * pp;
+      if (cand >= rest) S.th = cand; else { S.th = rest; S.eng = false; }
+    }
+    S.psi = psiN; S.adv = Math.round((S.th - S.th0) / pp * 100) / 100;
+  }
+  const canvas = document.getElementById('rt-canvas'), out = document.getElementById('rt-out');
+  const view = Sim.make(canvas, 0.8, (c, w, h, col) => {
+    const R = S.R, sc = Math.min(w, h) / 2 / (R + 34), cx = w / 2, cy = h / 2, pp = p(), rr = R - depth();
+    const X = (r, a) => cx + r * Math.cos(a) * sc, Y = (r, a) => cy - r * Math.sin(a) * sc;
+    c.beginPath();
+    for (let k = 0; k < S.z; k++) {
+      const a0 = S.th + k * pp;
+      c.lineTo(X(R, a0), Y(R, a0)); // steep face jumps from root to tip at a0
+      for (let i = 1; i <= 6; i++) { const a = a0 + pp * i / 6; c.lineTo(X(R - depth() * i / 6, a), Y(R - depth() * i / 6, a)); }
+    }
+    c.closePath(); c.fillStyle = col.accent + '55'; c.fill(); c.strokeStyle = col.accent; c.lineWidth = 2; c.stroke();
+    Sim.dot(c, cx, cy, 5, col.ink);
+    const pawl = (psi, hinge, color) => { const q = (psi - S.th) / pp, r = prof(q); Sim.line(c, X(R + 24, hinge), Y(R + 24, hinge), X(r, psi), Y(r, psi), color, 5); Sim.dot(c, X(R + 24, hinge), Y(R + 24, hinge), 5, col.surface, col.ink); Sim.dot(c, X(r, psi), Y(r, psi), 3, color); };
+    pawl(psiH, psiH + HOFF, col.good);
+    const ah = S.psi + HOFF; Sim.line(c, cx, cy, X(R + 24, ah), Y(R + 24, ah), col.accent2, 4); pawl(S.psi, ah, col.accent2);
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('green = holding pawl, orange = lever + drive pawl', 10, h - 10);
+  });
+  function info() {
+    const pr = p(), start = Math.PI * 0.95 - HOFF, delta = (((psiH - start) % pr) + pr) % pr, need = (delta + pr) * 180 / Math.PI, pp = 360 / S.z;
+    out.innerHTML = 'Step = <strong>' + pp.toFixed(1) + '°</strong> per tooth · stroke <strong>' + S.A + '°</strong>. With the pawl resting ' + (delta * 180 / Math.PI).toFixed(1) + '° before the next tooth face, this geometry needs a stroke of at least <strong>' + need.toFixed(0) + '°</strong> to advance one tooth: ' +
+      (S.A >= need ? '<strong style="color:var(--good)">it advances</strong>' : '<strong style="color:var(--warn)">it only idles</strong>') + ' · net advance so far: <strong id="rt-adv">0</strong> teeth.';
+  }
+  const hs = document.getElementById('rt-ctl');
+  Sim.slider(hs, { label: 'Teeth z', min: 8, max: 40, value: S.z, onInput: v => { S.z = v; reset(); info(); } });
+  Sim.slider(hs, { label: 'Lever stroke', min: 5, max: 120, value: S.A, unit: '°', onInput: v => { S.A = v; reset(); info(); } });
+  const loop = Sim.loop(dt => { S.t += dt; step(); const e = document.getElementById('rt-adv'); if (e) e.textContent = S.adv.toFixed(0); view.redraw(); });
+  reset(); info(); loop.toggle(); view.redraw();
+})();
+
+/* ---------- Sim 2: Geneva ---------- */
+(function () {
+  const S = { n: 6, th: 0, k: 0 }, C = 100;
+  const phiOf = (th, n) => { const a = C * Math.sin(Math.PI / n), te = Math.PI / 2 - Math.PI / n; if (Math.abs(th) <= te) return Math.atan2(a * Math.sin(th), C - a * Math.cos(th)); return Math.sign(th) * Math.PI / n; };
+  const velOf = (th, n) => { const a = C * Math.sin(Math.PI / n), te = Math.PI / 2 - Math.PI / n; if (Math.abs(th) > te) return 0; return a * (C * Math.cos(th) - a) / (C * C + a * a - 2 * a * C * Math.cos(th)); };
+  const wrap = x => { x = ((x + Math.PI) % TAU + TAU) % TAU - Math.PI; return x; };
+  const canvas = document.getElementById('gv-canvas'), out = document.getElementById('gv-out');
+  const view = Sim.make(canvas, 0.85, (c, w, h, col) => {
+    const n = S.n, a = C * Math.sin(Math.PI / n), topH = h * 0.62, Ro0 = C * Math.cos(Math.PI / n) + 0.1 * C, sc = Math.min((w - 20) / (Ro0 + C + 0.9 * a), (topH - 10) / (2 * Ro0)), cx = 10 + Ro0 * sc, cy = topH / 2 + 4;
+    const th = wrap(S.th), Th = S.k * TAU / n + phiOf(th, n), pinR = 0.07 * C, rl = 0.88 * a, Ro = C * Math.cos(Math.PI / n) + 0.1 * C, dx = cx + C * sc;
+    const P = (x, y) => [cx + x * sc, cy - y * sc];
+    // driven star
+    c.save(); c.beginPath(); c.arc(cx, cy, Ro * sc, 0, TAU); c.fillStyle = col.accent + '44'; c.fill(); c.strokeStyle = col.accent; c.lineWidth = 2; c.stroke(); c.clip();
+    for (let j = 0; j < n; j++) {
+      const sa = Th + j * TAU / n, ca = sa + Math.PI / n; // slot angle, cut-out angle
+      c.beginPath(); c.arc(cx + C * Math.cos(ca) * sc, cy - C * Math.sin(ca) * sc, rl * sc, 0, TAU); c.fillStyle = col.bg; c.fill(); c.strokeStyle = col.accent; c.lineWidth = 1.5; c.stroke();
+    }
+    for (let j = 0; j < n; j++) { const sa = Th + j * TAU / n; Sim.line(c, cx + (C - a - pinR * 0.5) * Math.cos(sa) * sc, cy - (C - a - pinR * 0.5) * Math.sin(sa) * sc, cx + (Ro + 4) * Math.cos(sa) * sc, cy - (Ro + 4) * Math.sin(sa) * sc, col.bg, 2 * (pinR + 2) * sc); }
+    c.restore(); Sim.dot(c, cx, cy, 4, col.ink);
+    // driver: locking disc with a notch around the pin direction
+    const pa = Math.PI - th; // pin direction from driver centre (screen math angle, y up)
+    const te = Math.PI / 2 - Math.PI / n;
+    c.beginPath(); c.moveTo(dx, cy); c.arc(dx, cy, rl * sc, -pa + te, -pa - te + TAU, false); c.closePath();
+    c.fillStyle = col.accent2 + '55'; c.fill(); c.strokeStyle = col.accent2; c.lineWidth = 2; c.stroke();
+    c.beginPath(); c.arc(dx, cy, rl * sc, 0, TAU); c.setLineDash([3, 4]); c.strokeStyle = col.accent2 + '88'; c.lineWidth = 1; c.stroke(); c.setLineDash([]);
+    const pin = P(C - a * Math.cos(th), a * Math.sin(th)); Sim.line(c, dx, cy, pin[0], pin[1], col.accent2, 4); Sim.dot(c, pin[0], pin[1], pinR * sc, col.warn, col.surface); Sim.dot(c, dx, cy, 4, col.ink);
+    // plot
+    const l = 38, r = 10, pt = topH + 18, pb = h - 22, pw = w - l - r, ph = pb - pt, XP = t => l + (t + Math.PI) / TAU * pw, vmax = a / (C - a), YP = v => pb - Math.max(0, v) / (vmax * 1.1) * ph;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.beginPath(); c.moveTo(l, pb); c.lineTo(l + pw, pb); c.stroke();
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath(); for (let i = 0; i <= 360; i++) { const t = -Math.PI + i / 360 * TAU, y = YP(velOf(t, n)); i ? c.lineTo(XP(t), y) : c.moveTo(XP(t), y); } c.stroke();
+    c.strokeStyle = col.ink; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(XP(th), pt); c.lineTo(XP(th), pb); c.stroke(); c.setLineDash([]);
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'center'; [-180, -90, 0, 90, 180].forEach(d => c.fillText(d + '°', XP(d * Math.PI / 180), h - 6));
+    c.textAlign = 'left'; c.fillText('star speed / driver speed over one driver turn', l + 6, pt + 10);
+  });
+  function info() { const n = S.n, s = Math.sin(Math.PI / n); out.innerHTML = '<strong>' + n + ' slots</strong>: index step <strong>' + (360 / n).toFixed(0) + '°</strong>, moving for <strong>' + ((0.5 - 1 / n) * 100).toFixed(1) + '%</strong> of each driver turn (' + ((0.5 - 1 / n) * 360).toFixed(0) + '°), locked for the rest · pin radius a = ' + (C * s).toFixed(1) + ' per ' + C + ' centre distance · peak speed ratio <strong>' + (s / (1 - s)).toFixed(2) + '</strong>' + (n < 4 ? ' · <strong style="color:var(--warn)">n = 3 gives severe shocks</strong>' : '') + '.'; }
+  Sim.slider(document.getElementById('gv-ctl'), { label: 'Slots n', min: 3, max: 12, value: S.n, onInput: v => { S.n = v; S.k = 0; info(); view.redraw(); } });
+  let prev = 0;
+  const loop = Sim.loop(dt => { const t0 = wrap(S.th); S.th += dt * 1.1; const t1 = wrap(S.th); if (t1 < t0) S.k++; view.redraw(); });
+  document.getElementById('gv-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('gv-run')); info();
+})();
+
+/* ---------- Sim 3: pendulum ---------- */
+(function () {
+  const S = { L: 99.4, z: 30 }, out = document.getElementById('pd-out');
+  function info() {
+    const T = 2 * Math.PI * Math.sqrt(S.L / 100 / 9.81), turn = S.z * T;
+    out.innerHTML = 'Period <strong>' + T.toFixed(3) + ' s</strong> (' + (60 / T).toFixed(1) + ' swings/min, ' + (120 / T).toFixed(0) + ' beats/min) · one tooth per period → the ' + S.z + '-tooth escape wheel turns once in <strong>' + turn.toFixed(1) + ' s</strong>' + (Math.abs(turn - 60) < 1.5 ? ' (≈ a seconds hand)' : ' (' + (60 / turn).toFixed(2) + ' rpm)') + '. For a seconds-hand wheel with this pendulum you need <strong>' + (60 / T).toFixed(1) + ' teeth</strong>.';
+  }
+  const hs = document.getElementById('pd-ctl');
+  Sim.slider(hs, { label: 'Pendulum length', min: 5, max: 150, step: 0.5, dec: 1, value: S.L, unit: ' cm', onInput: v => { S.L = v; info(); } });
+  Sim.slider(hs, { label: 'Escape wheel teeth', min: 10, max: 60, value: S.z, onInput: v => { S.z = v; info(); } });
+  info();
+})();
+
+/* ---------- Sim 4: detent ---------- */
+(function () {
+  const S = { F: 4, beta: 35, mu: 0.15, z: 12, r: 18, x: 0 };
+  const canvas = document.getElementById('dt-canvas'), out = document.getElementById('dt-out');
+  const tb = () => Math.tan(S.beta * Math.PI / 180);
+  const up = () => S.F * (tb() + S.mu) / (1 - S.mu * tb()), down = () => S.F * (tb() - S.mu) / (1 + S.mu * tb());
+  const view = Sim.make(canvas, 0.65, (c, w, h, col) => {
+    const topH = h * 0.5, pitch = 70, depth = pitch / 2 * tb(), y0 = topH - 14;
+    const yAt = x => { const m = (((x % pitch) + pitch) % pitch) / pitch; return depth * Math.abs(m - 0.5) * 2; }; // 0 at the notch bottom, depth at the crest
+    c.beginPath(); c.moveTo(0, topH + 10);
+    for (let x = 0; x <= w; x += 2) c.lineTo(x, y0 - yAt(x + S.x));
+    c.lineTo(w, topH + 10); c.closePath(); c.fillStyle = col.accent + '55'; c.fill(); c.strokeStyle = col.accent; c.lineWidth = 2; c.stroke();
+    const bx = w / 2, by = y0 - yAt(bx + S.x) - 12;
+    Sim.dot(c, bx, by, 12, col.accent2, col.surface); Sim.line(c, bx, by - 12, bx, by - 52, col.good, 3);
+    c.fillStyle = col.good; c.beginPath(); c.moveTo(bx, by - 12); c.lineTo(bx - 6, by - 24); c.lineTo(bx + 6, by - 24); c.fill();
+    c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('spring force ' + S.F + ' N', bx + 10, by - 38);
+    // force curve over three pitches
+    const l = 40, r = 10, pt = topH + 24, pb = h - 18, pw = w - l - r, ph = pb - pt, fmax = Math.max(up(), 1) * 1.25, mid = pt + ph / 2, YP = f => mid - f / fmax * ph / 2;
+    const fAt = m => (m < 0.5 ? -down() : up());
+    c.strokeStyle = col.line; c.lineWidth = 1; c.beginPath(); c.moveTo(l, mid); c.lineTo(l + pw, mid); c.stroke();
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath();
+    for (let i = 0; i <= pw; i += 2) { const m = ((i / pw) * 3) % 1, y = YP(fAt(m)); i ? c.lineTo(l + i, y) : c.moveTo(l + i, y); } c.stroke();
+    const m0 = (((S.x + w / 2) % pitch) + pitch) % pitch / pitch;
+    Sim.dot(c, l + (1 + m0) / 3 * pw, YP(fAt(m0)), 5, col.accent2, col.surface);
+    c.fillStyle = col.muted; c.textAlign = 'left'; c.fillText('tangential force on the ball (negative = it pulls itself in)', l + 4, pt + 10);
+  });
+  function info() {
+    const T = up() * S.r / 1000, step = 360 / S.z, fall = down(), feel = fall > 0.3 * S.F * 0.1 ? 'crisp click' : fall > -0.01 ? 'soft' : 'sticky (friction holds the ball on the flank)';
+    out.innerHTML = 'Breakaway force <strong>' + up().toFixed(2) + ' N</strong> → torque out of a notch on a ' + S.r + ' mm radius track: <strong>' + T.toFixed(3) + ' N·m</strong> (' + (T * 1000).toFixed(0) + ' N·mm). Notches every <strong>' + step.toFixed(0) + '°</strong>. ' +
+      'Falling into the next notch pulls with ' + fall.toFixed(2) + ' N → <strong>' + feel + '</strong>.' + (S.mu * tb() >= 1 ? ' <strong style="color:var(--warn)">The flank would jam the ball.</strong>' : '');
+  }
+  const hs = document.getElementById('dt-ctl'), up2 = () => { view.redraw(); info(); };
+  [['F', 'Spring force', 0.5, 20, 0.5, 1, ' N'], ['beta', 'Flank slope', 10, 65, 1, 0, '°'], ['mu', 'Friction μ', 0.02, 0.5, 0.01, 2, ''], ['z', 'Notches / turn', 4, 36, 1, 0, ''], ['r', 'Track radius', 8, 60, 1, 0, ' mm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; up2(); } }));
+  const loop = Sim.loop(dt => { S.x += dt * 40; view.redraw(); }); loop.toggle(); info();
+})();
+</script>
+</body>
+</html>

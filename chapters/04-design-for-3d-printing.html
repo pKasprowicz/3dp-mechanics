@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 4 · Design for 3D printing</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="4">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part A · Foundations · Chapter 4</p>
+<h1>Design for 3D printing (DfAM)</h1>
+<p class="lead">A printer is not a magic "model to object" box. It is a process with its own habits: layers, lines, shrinkage, rounded corners, stringing. Designing <em>with</em> those habits is the biggest single difference between parts that work first time and parts you reprint six times. This chapter is the process rules, the numbers, and a calibration coupon to find the numbers for your own machine.</p>
+
+<h2>4.1 What the printer actually does</h2>
+<p>The slicer cuts your model into layers (typically 0.12–0.28 mm tall) and, in each layer, traces <strong>perimeters</strong> (the outlines, "walls"), fills the inside with <strong>infill</strong>, and closes the top and bottom with solid <strong>top/bottom layers</strong>. Everything is made of extruded lines about as wide as the nozzle (0.4 mm nozzle → ~0.42–0.5 mm lines).</p>
+<p>Consequences you can design around:</p>
+<ul>
+  <li><strong>Resolution is lumpy.</strong> Vertical size is quantized to layer height. Horizontal size is quantized to line width. A 0.5 mm wall can't be built reliably: use multiples of line width (0.84 mm = 2 lines, 1.26 mm = 3 lines).</li>
+  <li><strong>Strength is in the perimeters</strong> (section 4.4), not the infill.</li>
+  <li><strong>The vertical direction is different.</strong> Layers are welded to each other, which is the weak plane (chapter 3).</li>
+  <li><strong>Corners round, holes shrink.</strong> The nozzle is a round tool of finite size, and molten plastic shrinks as it cools onto the layer below.</li>
+</ul>
+
+<h2>4.2 Orientation: the first design decision</h2>
+<p>Before you finalise any shape, decide how it lies on the bed. Orientation sets the strength direction, the accuracy of round features, the support need, and the surface quality. Rank the requirements, then choose:</p>
+<table>
+  <tr><th>Priority</th><th>Rule</th></tr>
+  <tr><td><strong>1. Load path</strong></td><td>Tension and bending stress should run <em>along</em> layers. Never let a main load pull layers apart. A tab or hook loaded to snap needs its length in the XY plane.</td></tr>
+  <tr><td><strong>2. Round features</strong></td><td>Holes and shafts with their axis <strong>vertical</strong> print roundest and most accurate. Horizontal holes print as slightly squashed circles (the top bridges and sags, the bottom is stair-stepped). Horizontal pins and shafts print less round but have the layers lined up with the bending stress: strong.</td></tr>
+  <tr><td><strong>3. Sliding and bearing faces</strong></td><td>Put them on faces parallel to the bed (top and bottom skins are smooth) or accept that the layer-line ridges will wear. Faces cut by layers (vertical walls) have a ridge every layer height.</td></tr>
+  <tr><td><strong>4. Overhangs and supports</strong></td><td>Orient to minimise supports on functional surfaces, because support leaves a rough scar. Choose orientations with big flat bottoms.</td></tr>
+  <tr><td><strong>5. Bed contact and warp</strong></td><td>A large flat face on the bed is stable. Tall thin parts wobble and warp; add a brim.</td></tr>
+</table>
+<div class="callout tip">
+  <span class="tag">Pins and axles</span>
+  A printed pin loaded sideways is in bending. Printed <em>standing up</em>, the bending tension pulls layers apart: it snaps at low load. Printed <em>lying down</em>, the layers run along the pin and it is several times stronger, though slightly less round. For anything loaded, use a steel pin or screw. For a lightly loaded printed pin, print it horizontally.
+</div>
+<p>When no single orientation satisfies everything, <strong>split the part</strong> (4.8) and print the pieces in their ideal orientations.</p>
+
+<h2>4.3 Overhangs, bridges and supports</h2>
+<p>Each new layer sits on the one below, shifted outward by <code>offset = layer height × tan(θ)</code>, where θ is the overhang angle from vertical. If the offset grows to a large fraction of the line width, most of the new line hangs in the air. About half-supported is the usual limit, which gives the old "45° rule" (it depends on layer height, line width and cooling).</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Overhang staircase</h4>
+  <p class="desc">A stack of printed lines, each shifted outward as the wall leans. Colour shows how much of each line rests on the one below: green is solid, orange is marginal, red droops. Try the effect of thicker layers (more offset) and wider lines (more overlap).</p>
+  <canvas id="oh-canvas"></canvas>
+  <div class="controls" id="oh-ctl"></div>
+  <div class="readout" id="oh-out"></div>
+</div>
+
+<p><strong>Design to avoid supports:</strong></p>
+<ul>
+  <li><strong>Chamfer, don't overhang.</strong> Replace a 90° horizontal shelf with a 45° chamfer: it prints clean.</li>
+  <li><strong>Teardrop and diamond holes.</strong> For a horizontal hole, make the top a point (teardrop, 45° each side) instead of a round arch. For a horizontal hole you want round, use a teardrop and ream it, or a round hole with a sacrificial bridging layer that you cut out.</li>
+  <li><strong>Bridges</strong> (flat spans between two supports) work to roughly 20–60 mm depending on material and cooling, but sag more with length. Keep them short, or add a support pillar, or orient the span so it's a layer with a gap.</li>
+  <li><strong>Sloped bottoms.</strong> Make the underside of a bump a smooth slope, not an abrupt horizontal.</li>
+</ul>
+<p>When you can't avoid supports, put them where finish doesn't matter, use the tree/organic style on curves, tune <strong>support interface layers</strong> and the gap (a Z gap of 1–2 layers is the usual starting point) so they snap off cleanly, and consider your second nozzle for a dedicated release material on tight functional interfaces. See your slicer's support settings, which differ by version.</p>
+
+<h2>4.4 Walls, infill and where strength comes from</h2>
+<p>Chapter 2 showed that in bending and torsion the stress is highest at the surface, so the <strong>outer shell carries most of the load</strong>. The inside is mostly there to keep the shell from buckling and to support the top layers. So:</p>
+<ul>
+  <li><strong>Adding walls (perimeters) strengthens a part far more per gram than raising infill.</strong></li>
+  <li>Typical mechanical starting point: <strong>3–4 walls, 4–5 top and bottom layers, 15–30% infill</strong> in a pattern that works in all directions (gyroid and cubic are popular). Use more for thin parts, small bosses and screw holes, where the walls <em>are</em> the part.</li>
+  <li><strong>Solid is occasionally right</strong>: small gears, thin pins, screw bosses, anything under 3–4 mm thick is already mostly walls.</li>
+  <li>Per-region control: slicers let you add modifiers so that a screw boss, a hinge or a bearing seat gets extra walls or 100% infill while the rest stays light.</li>
+</ul>
+<div class="sim">
+  <h4>Simulation 2 · Walls vs infill</h4>
+  <p class="desc">A 20 × 10 mm printed bar in bending. This is a simple illustrative model (shell + weaker infill core), not a measurement, but it shows the right trend. Compare presets or drag the sliders, and watch stiffness, strength and mass.</p>
+  <canvas id="wl-canvas"></canvas>
+  <div class="row" id="wl-presets"></div>
+  <div class="controls" id="wl-ctl"></div>
+  <div class="readout" id="wl-out"></div>
+</div>
+
+<h2>4.5 Accuracy: what the printer gets wrong, and how to compensate</h2>
+<table>
+  <tr><th>Effect</th><th>What happens</th><th>Design response</th></tr>
+  <tr><td>Hole shrinkage</td><td>Holes print 0.1–0.4 mm too small (the perimeter bulges inward, plastic shrinks onto it); smaller holes lose proportionally more</td><td>Add hole compensation (slicer setting or CAD offset). Measure with a coupon; ream critical holes.</td></tr>
+  <tr><td>Elephant foot</td><td>First layers squash outward, so parts are too wide at the bed</td><td>Chamfer the bottom edge (0.4–0.6 mm) or use the slicer's elephant-foot compensation. Keep sliding parts off the bed face edge.</td></tr>
+  <tr><td>Corner rounding</td><td>Sharp outside corners round off slightly; inside corners fill in</td><td>Don't rely on sharp internal edges for fit; leave a relief.</td></tr>
+  <tr><td>Overall shrinkage</td><td>Material contracts as it cools: low for PLA/PETG (~0.2–0.5%), higher for ABS/ASA/nylon (~0.5–1.5%); less for fibre-filled</td><td>On long parts, scale the model or the slicer's filament shrinkage setting. Warped bases are the big risk (draft, brim, chamber).</td></tr>
+  <tr><td>Layer quantisation</td><td>Heights snap to multiples of the layer height</td><td>Choose Z dimensions as integer multiples of the layer height (e.g. 3.0 mm = 15 × 0.2 mm). A gap that should be 0.3 mm in Z at 0.2 mm layers becomes 0.2 or 0.4.</td></tr>
+  <tr><td>Flow and extrusion error</td><td>Over-extrusion makes everything fat: parts and pins oversize, holes undersize</td><td>Calibrate flow and pressure advance (the slicer has built-in calibration routines) before trusting any dimension.</td></tr>
+</table>
+<p>The golden rule of printed fits: <strong>measure your own printer, in the actual material, at the actual size.</strong> The generic numbers below are only starting points.</p>
+
+<h2>4.6 Clearances and fits</h2>
+<p>Define clearance as the <em>diametral</em> gap, i.e. hole diameter minus pin diameter. Starting points for a 0.4 mm nozzle, typical layer heights, vertical axes (adjust after your coupon test):</p>
+<table>
+  <tr><th>Fit</th><th>Diametral clearance (mm)</th><th>Use</th></tr>
+  <tr><td>Press fit</td><td>about −0.1 to 0 (interference)</td><td>Bearings pressed into printed seats, heat-set insert holes (follow the insert maker), permanent joins. Test first.</td></tr>
+  <tr><td>Snug / locating</td><td>0.1 – 0.2</td><td>Alignment pins, parts that should stay in place but be removable</td></tr>
+  <tr><td>Sliding / running</td><td>0.2 – 0.3 (more for horizontal holes)</td><td>Pin hinges, shafts in printed bushings, drawer slides</td></tr>
+  <tr><td>Loose / free</td><td>0.4 – 0.5</td><td>Print-in-place gaps, parts that must never bind</td></tr>
+  <tr><td>Sloppy</td><td>&gt; 0.6</td><td>Rattles: rarely useful</td></tr>
+</table>
+<p>Printed-in-place gaps need more clearance than separate parts, since both surfaces are rough and any fusing ruins the joint. Use a <strong>0.3–0.5 mm gap</strong> as a starting point, and round vertical gaps to layer-height multiples.</p>
+
+<div class="sim">
+  <h4>Simulation 3 · Fit calculator</h4>
+  <p class="desc">Type in what your printer does, and see whether the pin turns freely or binds. The gap is drawn 10× larger than real so you can see it.</p>
+  <canvas id="fit-canvas"></canvas>
+  <div class="row"><label><input type="checkbox" id="fit-horiz"> hole axis is horizontal (top bridges and sags a little)</label></div>
+  <div class="controls" id="fit-ctl"></div>
+  <div class="readout" id="fit-out"></div>
+</div>
+
+<h3>Calibration coupon: measure your fits</h3>
+<p>Print a plate of holes with increasing clearance, and matching pegs, in <strong>the material and settings you'll use for the real part</strong>. The smallest hole where the peg drops in and turns freely tells you your "sliding" clearance. Do it twice: once with vertical holes, once with the plate standing on its edge (horizontal holes).</p>
+<p>I wrote an OpenSCAD file for it: <a href="../tools/clearance_coupon.scad" download>clearance_coupon.scad</a> (OpenSCAD is free; set <code>part</code> to <code>plate</code>, <code>plate_upright</code>, <code>peg</code> or <code>peg_horizontal</code>, press F6, export STL). I haven't been able to run OpenSCAD here, so if it errors tell me and I'll fix it. You can also model the same thing in any CAD in a few minutes: a 4 mm plate with holes of 8.0, 8.1, 8.2, 8.3, 8.4, 8.5 mm, and an 8.0 mm peg.</p>
+<ol>
+  <li>Print the vertical plate and the peg. Try the peg in each hole.</li>
+  <li>Print the upright plate and horizontal peg. Repeat.</li>
+  <li>Record: <em>press</em>, <em>snug</em>, <em>sliding</em>, <em>loose</em> hole sizes. Write them on a sticky note on the printer, or better, in a file, per material.</li>
+  <li>Measure the peg with calipers: how much oversize is it? Measure the holes too, to separate "holes shrink" from "pins swell".</li>
+</ol>
+
+<h2>4.7 Print-in-place mechanisms</h2>
+<p>Print-in-place means printing a mechanism fully assembled with working joints, so no post-assembly is needed. Hinges, chains, ball joints, planetary gearboxes and whole mechanisms can come off the bed ready to move. The cost is design discipline:</p>
+<ul>
+  <li><strong>Gaps are everything.</strong> 0.3–0.5 mm radial/axial in the plane, with the vertical gap a clean multiple of layer height. Too tight and the surfaces fuse; too loose and it rattles.</li>
+  <li><strong>No supports inside the gap</strong>, since you can't remove them. Design the moving surfaces so they print without support: conical or chamfered joints (45° or steeper), teardrop pin holes, domed ball joints. If you must, use the second nozzle for a release material.</li>
+  <li><strong>Break-free.</strong> Most print-in-place joints need a small twist or push to free them from slight fusing. Design a finger-sized handle or lever arm, not a thin pin you'll snap.</li>
+  <li><strong>First layers fuse worse than you'd expect.</strong> Elephant foot closes the gap at the bed. Chamfer the bottom edge of any gap near the bed.</li>
+  <li><strong>Wear</strong>: printed-on-printed sliding is rough. Fine for toys and hinges that flip a few thousand times; for real duty, assemble from separate parts with proper bushings or bearings (chapter 10).</li>
+</ul>
+
+<h2>4.8 Splitting parts, alignment and assembly</h2>
+<p>Don't be afraid to cut a part in two. A split lets each piece print in the best orientation, with no supports, within the bed volume. Rules:</p>
+<ul>
+  <li>Cut <strong>away from highly stressed regions</strong> and across weak axes, not through them.</li>
+  <li>Add <strong>alignment features</strong>: pins and sockets, dovetails, keys, a tongue-and-groove, or a large stepped lip. Do not depend on glue or screws to locate.</li>
+  <li>Join with <strong>screws into heat-set inserts</strong> or bolts through the part (chapter 13), adhesive (CA, epoxy, solvent weld for ABS/ASA) or snap-fits.</li>
+  <li>Leave a small <strong>clearance (0.1–0.2 mm) on mating surfaces</strong> so a slightly warped face still seats.</li>
+</ul>
+
+<h2>4.9 Features and minimum sizes</h2>
+<table>
+  <tr><th>Feature</th><th>Practical minimum (0.4 mm nozzle)</th></tr>
+  <tr><td>Wall thickness</td><td>0.8 mm = 2 lines absolute minimum; 1.2–2 mm for functional walls</td></tr>
+  <tr><td>Pins and posts (standing)</td><td>≥ 3 mm diameter, and under ~10× tall; thinner snaps off</td></tr>
+  <tr><td>Holes for screws</td><td>Model at the core diameter for self-tapping, or the clearance size for bolts (chapter 13); small holes close up</td></tr>
+  <tr><td>Embossed or engraved text</td><td>Height 0.6–1 mm, stroke width ≥ 0.8 mm</td></tr>
+  <tr><td>Fillets (internal corners)</td><td>1–3 mm on any loaded corner (chapter 2)</td></tr>
+  <tr><td>Chamfer on first layer edges</td><td>0.4–0.6 mm</td></tr>
+  <tr><td>Gaps in a single part</td><td>≥ 0.3–0.4 mm so they stay open</td></tr>
+</table>
+<p>Prefer <strong>chamfers and fillets</strong> over sharp edges everywhere: they print better, resist cracking and are comfortable to hold. Use <strong>ribs and gussets</strong> (a rib 40–60% of the wall thickness) to stiffen thin walls instead of making them thick: thick walls cool unevenly and warp.</p>
+
+<h2>4.10 Slicer settings that matter for mechanisms</h2>
+<p>Names vary between slicer versions; this list is for Bambu Studio / OrcaSlicer-style settings:</p>
+<ul>
+  <li><strong>Layer height</strong>: 0.16–0.2 mm for mechanisms; lower for round shafts and tight tolerances. Thicker layers are stronger per layer but less precise.</li>
+  <li><strong>Walls</strong> 3–4, <strong>top/bottom</strong> 4–5 layers, <strong>infill</strong> 15–30% gyroid/cubic; avoid "lightning" infill for load-bearing parts.</li>
+  <li><strong>Seam position</strong>: set it somewhere harmless (back, or aligned to a corner); the seam is a weak line.</li>
+  <li><strong>Hole / XY compensation and elephant-foot compensation</strong>: apply what your coupon showed. Don't compensate in CAD <em>and</em> in the slicer.</li>
+  <li><strong>Print speed and cooling</strong>: slow down on small features and overhangs; faster is weaker (poorer layer bonding), especially for brittle materials.</li>
+  <li><strong>Ironing</strong> on top surfaces that must slide smooth; <strong>brim</strong> for warp-prone or tall parts.</li>
+  <li><strong>Per-object / modifier settings</strong> for local walls, infill or supports.</li>
+</ul>
+
+<h2>4.11 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Orientation chosen on purpose: load path first, round features second.</li>
+  <li>☐ Every overhang under ~45°, or chamfered, or supported where it doesn't matter.</li>
+  <li>☐ Holes compensated, with clearances from <em>my</em> coupon rather than a guess.</li>
+  <li>☐ Z gaps are multiples of the layer height.</li>
+  <li>☐ Fillets on loaded corners; chamfer on the bed-side edge.</li>
+  <li>☐ Walls, not infill, sized for strength; local reinforcement where screws and hinges are.</li>
+  <li>☐ Long parts split, with alignment features.</li>
+</ul>
+<ul>
+  <li>Printing a lever or hook standing up so the layers peel apart.</li>
+  <li>Designing 0.1 mm clearances because CAD says it is fine.</li>
+  <li>Compensating twice (CAD plus slicer).</li>
+  <li>Cranking infill to 100% for "strength" while using two walls.</li>
+  <li>Tuning a part on PLA, then reprinting it in PETG or nylon with the same clearances: shrinkage and flow change them all.</li>
+</ul>
+
+<h2>4.12 Check yourself</h2>
+<details class="quiz"><summary>You want a stiffer arm. Which is more effective per gram: 15% → 50% infill, or 2 → 5 walls?</summary>
+<p>Adding walls. In bending the stress and stiffness live in the outer shell, so extra perimeters are worth far more than denser infill. Try it in Simulation 2.</p></details>
+<details class="quiz"><summary>A 0.2 mm layer print needs a 0.3 mm vertical gap between a moving part and its housing. What will you actually get?</summary>
+<p>Layers can only be 0.2 mm multiples, so you'll get 0.2 or 0.4 mm. Design 0.4 mm (two layers) for a safe gap, or switch to 0.1 mm layers (0.3 = 3 layers).</p></details>
+<details class="quiz"><summary>Your 8 mm holes print at 7.75 mm and the 8 mm pins at 8.05 mm. What diametral clearance should you design for a free-running pin?</summary>
+<p>Hole error −0.25, pin error +0.05 → 0.3 mm lost. For a ~0.25 mm sliding gap you need to design about 0.55 mm of clearance, or better, apply −0.25 mm hole compensation in the slicer and design for 0.25. Then verify on a coupon.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+/* ---------- Sim 1: overhang staircase ---------- */
+(function () {
+  const S = { h: 0.2, w: 0.45, th: 40 };
+  const canvas = document.getElementById('oh-canvas'), out = document.getElementById('oh-out');
+  const sup = () => 1 - S.h * Math.tan(S.th * Math.PI / 180) / S.w;
+  const view = Sim.make(canvas, 0.6, (c, w, h, col) => {
+    const N = 14, off = S.h * Math.tan(S.th * Math.PI / 180), s = sup();
+    const total = S.w + off * N, sc = Math.min((w - 60) / total, (h - 40) / (S.h * N + 0.5)), x0 = 30, yb = h - 22;
+    c.strokeStyle = col.muted; c.lineWidth = 3; c.beginPath(); c.moveTo(10, yb + 2); c.lineTo(w - 10, yb + 2); c.stroke();
+    const color = s >= 0.6 ? col.good : s >= 0.3 ? col.accent2 : col.warn;
+    for (let i = 0; i < N; i++) {
+      const x = x0 + i * off * sc, y = yb - (i + 1) * S.h * sc, lw = S.w * sc, lh = S.h * sc;
+      const first = i === 0, rr = Math.min(lh / 2, 6);
+      c.fillStyle = first ? col.accent : color; c.beginPath();
+      if (c.roundRect) c.roundRect(x, y, lw, lh, rr); else c.rect(x, y, lw, lh);
+      c.fill(); c.strokeStyle = col.bg; c.lineWidth = 1; c.stroke();
+    }
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left';
+    c.fillText('each layer sits ' + off.toFixed(2) + ' mm further out', x0, 16);
+  });
+  function refresh() {
+    const s = sup(), off = S.h * Math.tan(S.th * Math.PI / 180);
+    const crit = Math.atan(S.w / (2 * S.h)) * 180 / Math.PI;
+    const verdict = s >= 0.6 ? ['good', 'prints well'] : s >= 0.3 ? ['accent2', 'marginal: slow, cool it, or expect droop'] : s > 0 ? ['warn', 'will droop badly; support it'] : ['warn', 'no support from below: needs support or bridging'];
+    out.innerHTML = 'Offset per layer ' + off.toFixed(2) + ' mm → each line is <strong>' + Math.round(Math.max(0, s) * 100) + '% supported</strong>: <strong style="color:var(--' + verdict[0] + ')">' + verdict[1] +
+      '</strong>. 50% support at about <strong>' + crit.toFixed(0) + '°</strong> for these settings.';
+    view.redraw();
+  }
+  const hs = document.getElementById('oh-ctl');
+  Sim.slider(hs, { label: 'Overhang angle', min: 0, max: 80, value: S.th, unit: '°', onInput: v => { S.th = v; refresh(); } });
+  Sim.slider(hs, { label: 'Layer height', min: 0.08, max: 0.32, step: 0.04, dec: 2, value: S.h, unit: ' mm', onInput: v => { S.h = v; refresh(); } });
+  Sim.slider(hs, { label: 'Line width', min: 0.35, max: 0.7, step: 0.01, dec: 2, value: S.w, unit: ' mm', onInput: v => { S.w = v; refresh(); } });
+  refresh();
+})();
+
+/* ---------- Sim 2: walls vs infill ---------- */
+(function () {
+  const B = 20, H = 10, LW = 0.45, TB = 1.0; // bar section, line width, top/bottom thickness (mm)
+  const S = { n: 3, inf: 15 };
+  const PRE = { 'Draft: 2 walls, 10%': [2, 10], 'Standard: 3 walls, 15%': [3, 15], 'More infill: 3 walls, 50%': [3, 50], 'More walls: 6 walls, 15%': [6, 15], 'Solid': [10, 100] };
+  const calc = () => {
+    const t = S.n * LW, bc = Math.max(0, B - 2 * t), hc = Math.max(0, H - 2 * TB), d = S.inf / 100, k = Math.pow(d, 1.5);
+    const Isolid = B * H ** 3 / 12, Icore = bc * hc ** 3 / 12, Ishell = Isolid - Icore;
+    const area = B * H, acore = bc * hc, mass = (area - acore + d * acore) / area;
+    const stiff = (Ishell + k * Icore) / Isolid;
+    // strength ~ section modulus of the shell (core adds little); same height so proportional to I
+    return { stiff, mass, per: stiff / mass, bc, hc, t };
+  };
+  const canvas = document.getElementById('wl-canvas'), out = document.getElementById('wl-out');
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const r = calc(), sc = Math.min((w * 0.4) / B, (h - 40) / H), bx = 20, by = (h - H * sc) / 2;
+    c.fillStyle = col.accent; c.fillRect(bx, by, B * sc, H * sc);
+    const cx = bx + (B - r.bc) / 2 * sc, cy = by + (H - r.hc) / 2 * sc;
+    c.fillStyle = col.bg; c.fillRect(cx, cy, r.bc * sc, r.hc * sc);
+    c.strokeStyle = col.accent; c.lineWidth = 1; c.globalAlpha = Math.min(1, S.inf / 100 + 0.15); // infill hatch density
+    const gap = 14 - 11 * S.inf / 100;
+    c.save(); c.beginPath(); c.rect(cx, cy, r.bc * sc, r.hc * sc); c.clip();
+    for (let x = cx - r.hc * sc; x < cx + r.bc * sc; x += gap) { c.beginPath(); c.moveTo(x, cy + r.hc * sc); c.lineTo(x + r.hc * sc, cy); c.stroke(); }
+    c.restore(); c.globalAlpha = 1;
+    // bars
+    const gx = bx + B * sc + 40, gw = w - gx - 16, items = [['Stiffness', r.stiff, col.good], ['Strength', r.stiff, col.accent2], ['Mass', r.mass, col.muted]];
+    c.font = '13px system-ui'; c.textAlign = 'left';
+    items.forEach((it, i) => {
+      const y = h / 2 - 54 + i * 40;
+      c.fillStyle = col.ink; c.fillText(it[0] + ' ' + Math.round(it[1] * 100) + '% of solid', gx, y);
+      c.fillStyle = col.line; c.fillRect(gx, y + 6, gw, 12); c.fillStyle = it[2]; c.fillRect(gx, y + 6, gw * it[1], 12);
+    });
+  });
+  function refresh() {
+    const r = calc();
+    out.innerHTML = '<strong>' + S.n + ' walls (' + r.t.toFixed(1) + ' mm), ' + S.inf + '% infill:</strong> ' + Math.round(r.stiff * 100) + '% of the solid bar\'s bending stiffness at ' + Math.round(r.mass * 100) +
+      '% of its mass → <strong>' + r.per.toFixed(2) + '× stiffness per gram</strong> vs a solid bar.';
+    view.redraw();
+  }
+  const hs = document.getElementById('wl-ctl');
+  const s1 = Sim.slider(hs, { label: 'Walls', min: 1, max: 10, value: S.n, onInput: v => { S.n = v; refresh(); } });
+  const s2 = Sim.slider(hs, { label: 'Infill', min: 0, max: 100, step: 5, value: S.inf, unit: '%', onInput: v => { S.inf = v; refresh(); } });
+  Object.keys(PRE).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.onclick = () => { S.n = PRE[k][0]; S.inf = PRE[k][1]; s1.set(S.n); s2.set(S.inf); refresh(); }; document.getElementById('wl-presets').append(b); });
+  refresh();
+})();
+
+/* ---------- Sim 3: fit calculator ---------- */
+(function () {
+  const D = 8, S = { c: 0.4, eh: 0.15, ep: 0.05 }, SAG = 0.15;
+  const horiz = document.getElementById('fit-horiz');
+  const canvas = document.getElementById('fit-canvas'), out = document.getElementById('fit-out');
+  const gap = () => S.c - S.eh - S.ep - (horiz.checked ? SAG : 0);
+  const cls = g => g < -0.05 ? ['warn', 'interference: will not assemble without force'] : g < 0.1 ? ['accent2', 'tight / press fit'] : g < 0.3 ? ['good', 'sliding / running fit'] : g < 0.5 ? ['good', 'loose fit (good for print-in-place)'] : ['accent2', 'sloppy: rattles'];
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const sc = Math.min(w, h * 2) / 2 / (D + 4), cx = w / 2, cy = h / 2, g = gap(), mag = 10;
+    const hd = D + S.c - S.eh, hole = hd / 2 * sc, pin = (D + S.ep) / 2 * sc;
+    // pin radius = hole radius minus the real gap magnified 10x, so the gap is visible
+    const gapPx = g / 2 * sc * mag, pinR = Math.max(4, hole - gapPx);
+    c.fillStyle = col.line; c.beginPath(); c.arc(cx, cy, hole + 26, 0, 6.2832); c.fill();
+    c.fillStyle = col.bg; c.beginPath(); c.ellipse(cx, cy, hole, hole - (horiz.checked ? SAG / 2 * sc * mag : 0), 0, 0, 6.2832); c.fill();
+    c.strokeStyle = col.muted; c.lineWidth = 2; c.stroke();
+    c.fillStyle = (g < -0.05 ? col.warn : col.accent) + 'cc'; c.beginPath(); c.arc(cx, cy, Math.min(pinR, hole + 3), 0, 6.2832); c.fill();
+    c.fillStyle = col.ink; c.font = '13px system-ui'; c.textAlign = 'center';
+    c.fillText('gap ' + g.toFixed(2) + ' mm (×10 for display)', cx, h - 12);
+  });
+  function refresh() {
+    const g = gap(), v = cls(g);
+    out.innerHTML = 'Actual diametral gap = ' + S.c.toFixed(2) + ' − ' + S.eh.toFixed(2) + ' (hole shrink) − ' + S.ep.toFixed(2) + ' (pin swell)' + (horiz.checked ? ' − ' + SAG.toFixed(2) + ' (horizontal sag)' : '') +
+      ' = <strong>' + g.toFixed(2) + ' mm</strong> → <strong style="color:var(--' + v[0] + ')">' + v[1] + '</strong>.';
+    view.redraw();
+  }
+  const hs = document.getElementById('fit-ctl');
+  Sim.slider(hs, { label: 'Design clearance', min: -0.2, max: 0.8, step: 0.05, dec: 2, value: S.c, unit: ' mm', onInput: v => { S.c = v; refresh(); } });
+  Sim.slider(hs, { label: 'Hole shrink', min: 0, max: 0.4, step: 0.01, dec: 2, value: S.eh, unit: ' mm', onInput: v => { S.eh = v; refresh(); } });
+  Sim.slider(hs, { label: 'Pin swell', min: 0, max: 0.2, step: 0.01, dec: 2, value: S.ep, unit: ' mm', onInput: v => { S.ep = v; refresh(); } });
+  horiz.onchange = refresh; refresh();
+})();
+</script>
+</body>
+</html>

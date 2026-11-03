@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 19 · Worked case studies</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="19">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part D · Practice · Chapter 19</p>
+<h1>Worked case studies</h1>
+<p class="lead">Five real-sized projects, each taken from requirements through concept, numbers, materials and printing to the traps you will meet. Each has a small calculator to play with so you can see how the pieces interact. Nothing here introduces new theory: it is the previous eighteen chapters in use.</p>
+
+<h2>Case 1 · A servo-driven parallel gripper</h2>
+<p><strong>Requirement:</strong> pick up objects up to 40 mm wide and up to 300 g with a small servo; fingers soft enough not to damage them.</p>
+<p><strong>Concept.</strong> The simplest mechanism for a parallel jaw is a <strong>pinion between two racks</strong> (chapter 7): the servo turns the pinion, the racks drive the two jaws in opposite directions, so the object stays centred. Each jaw rides on a printed guide (chapter 9) and carries a <strong>TPU pad</strong> for friction (chapter 3). A gripper must work with the servo's derated torque (chapter 16).</p>
+<p><strong>The numbers.</strong> The pinion's torque T is shared between the two racks: each jaw pushes with <code>F = T / (2·r)</code> (r = pinion pitch radius). Holding force needs friction on both pads: <code>2·μ·F ≥ SF · m·g</code>. Opening stroke per jaw is <code>r·θ</code> (θ = 180° of servo travel), so a bigger pinion opens wider but grips weaker: the classic trade-off.</p>
+<div class="sim">
+  <h4>Calculator 1 · Gripper force and capacity</h4>
+  <div class="controls" id="g1-ctl"></div>
+  <div class="row"><label>Servo <select id="g1-servo"><option value="2.2">MG90S micro (2.2 kg·cm)</option><option value="6">Standard (6 kg·cm)</option><option value="9.4">MG996R (9.4 kg·cm)</option><option value="20">High-torque (20 kg·cm)</option></select></label></div>
+  <div class="readout" id="g1-out"></div>
+</div>
+<p><strong>Printing.</strong> Pinion and racks in nylon or PETG at module 1.5–2, printed flat; jaws printed in the plane of the load; TPU pads glued or printed with the second nozzle. <strong>Pitfalls:</strong> a servo holding a grip continuously overheats (add a self-locking worm or a spring-loaded ratchet if holding for long); the object slips if pads are hard; backlash in the rack and pinion centres the object poorly: add a light spring across the jaws as a preload.</p>
+
+<h2>Case 2 · A motorised camera slider</h2>
+<p><strong>Requirement:</strong> 1 m of smooth travel carrying a 1.5 kg camera, with time-lapse speeds as slow as 30 minutes per metre and video speeds up to 100 mm/s.</p>
+<p><strong>Concept.</strong> A <strong>GT2 belt</strong> loop driven by a NEMA 17 (chapter 8) pulls a carriage on two <strong>8 mm steel rods with LM8UU bearings</strong> or a profile rail (chapter 9). The frame is a length of 2020 extrusion (chapter 15) with printed end caps, motor mount (slotted for belt tension) and carriage plate. Over-constraint is avoided by fixing one rod bearing and letting the second float.</p>
+<p><strong>The numbers.</strong> Travel per motor turn = teeth × pitch (20 × 2 = 40 mm), so 1 m takes 25 revolutions: at a 30-minute move the motor turns at a tiny 0.8 rpm (microstepping makes it smooth), at 100 mm/s it turns at 150 rpm (well within the NEMA 17's range, chapter 16). Belt force for acceleration is <code>F = m·a</code> plus a little friction: even 1 m/s² on 1.5 kg is only 1.5 N.</p>
+<div class="sim">
+  <h4>Calculator 2 · Slider speed, steps and motor load</h4>
+  <div class="controls" id="g2-ctl"></div>
+  <div class="readout" id="g2-out"></div>
+</div>
+<p><strong>Printing.</strong> Carriage plate in PETG or PA-CF, with bearing pockets sized from the fit coupon; belt clamp teeth printed fine; a stiff motor mount in PA-CF or with a metal plate behind. <strong>Pitfalls:</strong> belt flutter on a long span at certain speeds (shorten or tension up); stepper resonance at low speed (use microstepping or a TMC2209-class driver); sagging of a long unsupported rod (use a supported rail for more than ~600 mm or a thicker rod); a camera on a long arm adds a moment: keep the load centred over the guides.</p>
+
+<h2>Case 3 · A compact planetary gearbox</h2>
+<p><strong>Requirement:</strong> reduce a small motor (0.05 N·m, 3000 rpm) to about 10:1 inside a 60 mm diameter, with several N·m of output torque.</p>
+<p><strong>Concept.</strong> A single-stage planetary (chapter 7): sun on the motor shaft, three planets on a carrier, fixed ring gear, output from the carrier. Ratio = 1 + Z<sub>r</sub>/Z<sub>s</sub>. A ratio near 10 wants Z<sub>r</sub> ≈ 9 Z<sub>s</sub>: a small sun (e.g. 10 teeth) and a large ring, so the planet size is (Z<sub>r</sub> − Z<sub>s</sub>)/2 teeth. Constraints: assembly condition (Z<sub>s</sub> + Z<sub>r</sub>)/N an integer, and the weakest gear (the sun, with few teeth) takes the full motor torque.</p>
+<div class="sim">
+  <h4>Calculator 3 · Planetary gearbox sizing</h4>
+  <canvas id="g3-canvas"></canvas>
+  <div class="controls" id="g3-ctl"></div>
+  <div class="readout" id="g3-out"></div>
+</div>
+<p><strong>Printing.</strong> Herringbone or helical gears are quiet and self-aligning; print the ring gear housing with extra walls, planets and sun in nylon (or PA-CF for stiffness); carrier plates with steel pins or M3 screws and small bearings; a sun gear on a D-shaft with a grub screw. <strong>Pitfalls:</strong> ring gear teeth are tight to print at small sizes (use module ≥ 1.2); planets that don't mesh at the same time when the assembly condition fails; a floppy ring gear housing (stiffen); heat in a closed gearbox (a slip clutch and rest periods).</p>
+
+<h2>Case 4 · A compliant parallel clamp</h2>
+<p><strong>Requirement:</strong> a one-piece holder that clamps a 12 mm rod (or a pen, a probe) with a steady force, released by squeezing two tabs. No pins, no screws.</p>
+<p><strong>Concept.</strong> A printed <strong>spring clip</strong>: two cantilever arms (chapter 12) with jaws on their free ends, a thick root and fillets. Releasing means deflecting the arms outward: strain ε = 1.5·t·y/L² (cyclic limit for PETG 1.5%, nylon 3%). Clamp force = the beam stiffness times the preload deflection.</p>
+<div class="sim">
+  <h4>Calculator 4 · Clamp arm strain and force</h4>
+  <div class="controls" id="g4-ctl"></div>
+  <div class="row"><label>Material <select id="g4-mat"><option value="2000|1.5">PETG</option><option value="1500|3">Nylon (PA)</option><option value="3000|0.5">PLA</option><option value="2000|1">ABS / ASA</option></select></label></div>
+  <div class="readout" id="g4-out"></div>
+</div>
+<p><strong>Printing.</strong> Print flat so the arms' length is in the XY plane; use 4+ walls, no infill in the arms; fillet the root (1.5 mm minimum); design for the pre-load deflection to be less than the maximum opening deflection so that it grips but is not over-stressed. <strong>Pitfalls:</strong> creep (the clip loosens over weeks if left clamped on a rod in PLA); a clamp for an out-of-round object; temperature (a warm car).</p>
+
+<h2>Case 5 · A Hoeken-linkage walker</h2>
+<p><strong>Requirement:</strong> a small walking toy with one motor driving two or more legs.</p>
+<p><strong>Concept.</strong> A <strong>Hoeken linkage</strong> per leg (chapter 5): a crank-rocker whose foot point traces a path with a long, nearly straight bottom edge, so the body glides forward while the foot is on the ground, then lifts it back. Several legs run on one crankshaft with <strong>phase offsets</strong> (e.g. 0° and 180° for two pairs, or three legs at 120°) so that at least one set is always in contact.</p>
+<div class="sim">
+  <h4>Calculator 5 · Hoeken leg</h4>
+  <p class="desc">The foot (orange) traces the curve; the green stretch is the nearly-straight ground contact. Change the crank radius to scale the leg, and the motor speed to see the body speed.</p>
+  <canvas id="g5-canvas"></canvas>
+  <div class="row"><button id="g5-run" class="on">Pause</button></div>
+  <div class="controls" id="g5-ctl"></div>
+  <div class="readout" id="g5-out"></div>
+</div>
+<p><strong>Printing.</strong> All links print flat in PETG or PLA at 3–4 mm thick; each pivot is an M3 screw with a bushing or a shoulder screw; spacers keep legs and links out of each other's planes; the crankshaft is steel with D-flats and grub screws. <strong>Pitfalls:</strong> the ground-contact fraction of one leg is under 50%, so you need three or more legs for stable walking; feet slip without rubber pads; link lengths must match the ratios exactly (check the CAD skeleton; a 0.5 mm error changes the path); friction in many pivots adds up: use bearings or a stronger motor.</p>
+
+<h2>What the five have in common</h2>
+<ul>
+  <li><strong>The critical interface was found first</strong>: the bearing seat, the gear mesh, the jaw friction. Each got a coupon.</li>
+  <li><strong>The load path was designed</strong>, not left to chance: metal pins and rods where the force concentrates, printed parts around them.</li>
+  <li><strong>The weak link was chosen on purpose</strong>: a slip clutch, a cheap pad, a replaceable bushing.</li>
+  <li><strong>Calculations were done first</strong>, in a few lines, and the first print was a test of the calculation.</li>
+</ul>
+
+<h2>Practice projects</h2>
+<p>If you want exercises, in rising difficulty: (1) a click-pen mechanism with a heart-cam (chapter 11); (2) a box with a printed living-hinge lid and a snap latch (chapters 12, 14); (3) a hand-cranked automaton with two cams (chapter 6); (4) a 3-stage gear train with torque limiter (chapters 7, 14); (5) a wheel-less walker (case 5); (6) a belt-driven turntable with indexing (chapters 8, 11, 10).</p>
+
+<h2>Check yourself</h2>
+<details class="quiz"><summary>In the gripper, doubling the pinion radius does what to the opening stroke, the grip force and the holdable mass?</summary>
+<p>Stroke doubles, grip force halves (F = T/2r), holdable mass halves. Use a gear reduction or a leverage change if you need both width and force.</p></details>
+<details class="quiz"><summary>A 1 m slider needs to move in 10 minutes with a 20-tooth GT2 pulley and 16× microstepping. What step rate is that?</summary>
+<p>Speed = 1000 mm / 600 s = 1.67 mm/s. Steps per mm = 200 × 16 / 40 = 80, so the step rate = 1.67 × 80 ≈ <strong>133 microsteps per second</strong>: trivially low for a driver, but a stepper turns only 2.5 rpm, so use microstepping (or a quiet driver) for smooth motion.</p></details>
+<details class="quiz"><summary>Why can't a walker with a single Hoeken leg per side walk stably?</summary>
+<p>The straight ground-contact portion is less than half of the cycle for one leg, so with only one leg per side there are moments where no leg supports the body. Use at least three legs with phase offsets, or four in two phase groups.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script src="../assets/gears.js"></script>
+<script src="../assets/linkage.js"></script>
+<script>
+const TAU = Math.PI * 2;
+const sliders = (id, S, defs, cb) => { const h = document.getElementById(id); defs.forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(h, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; cb(); } })); };
+
+/* ---------- Case 1: gripper ---------- */
+(function () {
+  const S = { r: 8, mu: 0.8, m: 200, sf: 2 }, sv = document.getElementById('g1-servo'), out = document.getElementById('g1-out');
+  function info() {
+    const T = +sv.value * 0.098 * 0.5, F = T / (2 * S.r / 1000), cap = 2 * S.mu * F / (S.sf * 9.81) * 1000, open = 2 * S.r * Math.PI;
+    out.innerHTML = 'Usable servo torque (50%) <strong>' + T.toFixed(2) + ' N·m</strong> → force per jaw <strong>' + F.toFixed(1) + ' N</strong>; holdable mass with the safety factor <strong>' + cap.toFixed(0) + ' g</strong> → ' + (cap >= S.m ? '<strong style="color:var(--good)">holds your ' + S.m + ' g object</strong>' : '<strong style="color:var(--warn)">too weak for ' + S.m + ' g: use a smaller pinion, a stronger servo, or grippier pads</strong>') + '. Total jaw opening ≈ <strong>' + open.toFixed(0) + ' mm</strong> over 180°.';
+  }
+  sliders('g1-ctl', S, [['r', 'Pinion radius', 4, 20, 0.5, 1, ' mm'], ['mu', 'Pad friction μ', 0.2, 1.2, 0.05, 2, ''], ['m', 'Object mass', 20, 1000, 10, 0, ' g'], ['sf', 'Safety factor', 1, 4, 0.5, 1, '']], info);
+  sv.onchange = info; info();
+})();
+
+/* ---------- Case 2: slider ---------- */
+(function () {
+  const S = { trav: 1000, t: 600, m: 1.5, z: 20, micro: 16, acc: 0.5 }, out = document.getElementById('g2-out');
+  function info() {
+    const perRev = S.z * 2, v = S.trav / S.t, rpm = v / perRev * 60, spmm = 200 * S.micro / perRev, sps = v * spmm, F = S.m * S.acc + 0.02 * S.m * 9.81, r = perRev / TAU / 1000, T = F * r / 0.9;
+    out.innerHTML = 'Average speed <strong>' + v.toFixed(2) + ' mm/s</strong> · motor <strong>' + rpm.toFixed(1) + ' rpm</strong> · <strong>' + sps.toFixed(0) + ' microsteps/s</strong> (' + spmm.toFixed(0) + ' per mm, ' + (1000 / spmm).toFixed(1) + ' µm each) · belt force for ' + S.acc + ' m/s² plus rail friction: <strong>' + F.toFixed(2) + ' N</strong> → motor torque ≈ <strong>' + (T * 1000).toFixed(1) + ' mN·m</strong>, a few percent of a NEMA 17\'s ~400 mN·m. ' +
+      (rpm < 5 ? 'At this speed the motor turns very slowly: use microstepping and a quiet driver to avoid visible stepping. ' : '') + (v > 300 ? 'High speed: check pull-out torque (chapter 16) and belt flutter. ' : '') + 'For a time-lapse of 250 frames the carriage advances <strong>' + (S.trav / 250).toFixed(2) + ' mm</strong> per frame.';
+  }
+  sliders('g2-ctl', S, [['trav', 'Travel', 200, 2000, 10, 0, ' mm'], ['t', 'Move duration', 5, 3600, 5, 0, ' s'], ['m', 'Camera mass', 0.3, 5, 0.1, 1, ' kg'], ['z', 'Pulley teeth', 16, 40, 2, 0, ''], ['micro', 'Microstepping', 1, 64, 1, 0, '×'], ['acc', 'Acceleration', 0.05, 5, 0.05, 2, ' m/s²']], info);
+  info();
+})();
+
+/* ---------- Case 3: planetary ---------- */
+(function () {
+  const S = { Zs: 10, Zp: 14, m: 1.5, b: 12, N: 3, sig: 10, Tin: 0.05 }, out = document.getElementById('g3-out'), canvas = document.getElementById('g3-canvas');
+  const calc = () => { const Zr = S.Zs + 2 * S.Zp, ratio = 1 + Zr / S.Zs, rs = S.m * S.Zs / 2, Ftcap = 0.8 * S.N * S.sig * S.b * S.m * Gears.lewisY(S.Zs), Tcap = Ftcap * rs / 1000, od = S.m * (Zr + 2.5) + 8; return { Zr, ratio, Tcap, od, ok: (S.Zs + Zr) % S.N === 0, Tout: S.Tin * ratio * 0.9 }; };
+  const view = Sim.make(canvas, 0.55, (c, w, h, col) => {
+    const k = calc(), R = S.m * k.Zr / 2 + 2.5 * S.m, sc = Math.min(h / 2 - 8, w * 0.3) / R, cx = w * 0.27, cy = h / 2, a = S.m * (S.Zs + S.Zp) / 2;
+    const ring = (x, y, r, f, s) => { c.beginPath(); c.arc(x, y, r * sc, 0, TAU); if (f) { c.fillStyle = f; c.fill(); } c.strokeStyle = s; c.lineWidth = 2; c.stroke(); };
+    ring(cx, cy, R, col.muted + '33', col.muted); ring(cx, cy, S.m * k.Zr / 2, null, col.muted);
+    for (let j = 0; j < S.N; j++) { const an = TAU * j / S.N, px = cx + a * Math.cos(an) * sc, py = cy - a * Math.sin(an) * sc; ring(px, py, S.m * S.Zp / 2, col.accent2 + '55', col.accent2); }
+    ring(cx, cy, S.m * S.Zs / 2, col.accent + '55', col.accent);
+    c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'left'; const tx = w * 0.27 + R * sc + 20; [['ring ' + k.Zr + 'T', col.muted], ['planets ' + S.N + ' × ' + S.Zp + 'T', col.accent2], ['sun ' + S.Zs + 'T', col.accent]].forEach((r, i) => { c.fillStyle = r[1]; c.fillRect(tx - 12, cy - 22 + i * 20 - 5, 8, 8); c.fillStyle = col.ink; c.fillText(r[0], tx, cy - 22 + i * 20 + 4); });
+  });
+  function info() {
+    const k = calc(), ok = S.Tin * 1 <= k.Tcap / 1;
+    out.innerHTML = 'Ring <strong>' + k.Zr + '</strong> teeth, ratio <strong>' + k.ratio.toFixed(2) + ':1</strong>, outside diameter ≈ <strong>' + k.od.toFixed(0) + ' mm</strong>. Assembly: (Zs+Zr)/N = ' + ((S.Zs + k.Zr) / S.N).toFixed(2) + ' → ' + (k.ok ? '<strong style="color:var(--good)">OK</strong>' : '<strong style="color:var(--warn)">not an integer: change teeth or planet count</strong>') + '. The sun (weakest gear, load shared at 80% efficiency among planets) can take about <strong>' + k.Tcap.toFixed(2) + ' N·m</strong> input; yours is ' + S.Tin + ' N·m → ' + (S.Tin <= k.Tcap ? '<strong style="color:var(--good)">within capacity</strong>' : '<strong style="color:var(--warn)">over capacity: wider gears, larger module or a larger sun</strong>') + '. Output torque ≈ <strong>' + k.Tout.toFixed(2) + ' N·m</strong> (90% efficiency).' + (S.Zs < 12 ? ' The sun is below 12 teeth: weak and undercut: consider a profile shift or a different ratio.' : '');
+    view.redraw();
+  }
+  sliders('g3-ctl', S, [['Zs', 'Sun teeth', 8, 24, 1, 0, ''], ['Zp', 'Planet teeth', 8, 30, 1, 0, ''], ['N', 'Planets', 2, 5, 1, 0, ''], ['m', 'Module', 1, 2.5, 0.25, 2, ' mm'], ['b', 'Face width', 5, 25, 1, 0, ' mm'], ['sig', 'Allowable σ', 5, 20, 1, 0, ' MPa'], ['Tin', 'Input torque', 0.01, 0.3, 0.01, 2, ' N·m']], info);
+  info();
+})();
+
+/* ---------- Case 4: clamp ---------- */
+(function () {
+  const S = { L: 40, t: 2, b: 10, y: 2, pre: 1.2 }, out = document.getElementById('g4-out'), sel = document.getElementById('g4-mat');
+  function info() {
+    const [E, c] = sel.value.split('|').map(Number), eps = 1.5 * S.t * S.y / (S.L * S.L) * 100, I = S.b * S.t ** 3 / 12, k = 3 * E * I / S.L ** 3, Fclamp = 2 * k * S.pre, ok = eps <= c;
+    out.innerHTML = 'Arm strain at full opening (' + S.y + ' mm): <strong style="color:var(--' + (ok ? 'good' : 'warn') + ')">' + eps.toFixed(2) + '%</strong> vs cyclic limit ' + c + '% → ' + (ok ? 'fine' : 'too high: longer, thinner arms or a different material') + '. Arm stiffness <strong>' + k.toFixed(2) + ' N/mm</strong>; clamp force with ' + S.pre + ' mm preload per jaw ≈ <strong>' + Fclamp.toFixed(1) + ' N</strong> total (two arms). Opening force at full travel ≈ ' + (k * S.y).toFixed(1) + ' N per arm.';
+  }
+  sliders('g4-ctl', S, [['L', 'Arm length', 15, 80, 1, 0, ' mm'], ['t', 'Arm thickness', 0.8, 4, 0.1, 1, ' mm'], ['b', 'Arm width', 4, 20, 1, 0, ' mm'], ['y', 'Opening deflection', 0.5, 5, 0.1, 1, ' mm'], ['pre', 'Preload deflection', 0.2, 4, 0.1, 1, ' mm']], info);
+  sel.onchange = info; info();
+})();
+
+/* ---------- Case 5: Hoeken ---------- */
+(function () {
+  const S = { a: 20, rpm: 60, ph: 0, N: 720 }, out = document.getElementById('g5-out'), canvas = document.getElementById('g5-canvas');
+  const P = () => ({ G: 2 * S.a, a: S.a, c: 2.5 * S.a, r: 2.5 * S.a, u: 2, v: 0, sign: 1 });
+  let pts = [], run = null, stats = {};
+  function prep() {
+    const p = P(); pts = []; for (let i = 0; i < S.N; i++) { const s = Linkage.fourBar(p, i / S.N * TAU); pts.push(s ? s.P : null); }
+    run = Linkage.straightest(pts, 0.01); let h = 0;
+    if (run) { const p0 = pts[run.start], p1 = pts[(run.start + run.len) % S.N], ch = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]); pts.forEach(q => { if (!q) return; const d = ((p1[0] - p0[0]) * (p0[1] - q[1]) - (p0[0] - q[0]) * (p1[1] - p0[1])) / ch; h = Math.max(h, Math.abs(d)); }); }
+    stats = { stride: run ? run.chord : 0, duty: run ? run.len / S.N : 0, lift: h };
+  }
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const p = P(), sc = Math.min(w / (9 * S.a), h / (7 * S.a)), cx = w * 0.32, cy = h * 0.3, X = x => cx + x * sc, Y = y => cy + y * sc; // y flipped so the straight edge is at the bottom
+    c.strokeStyle = col.accent2; c.lineWidth = 2; c.beginPath(); let pen = false; pts.forEach(q => { if (!q) { pen = false; return; } pen ? c.lineTo(X(q[0]), Y(q[1])) : c.moveTo(X(q[0]), Y(q[1])); pen = true; }); c.stroke();
+    if (run) { c.strokeStyle = col.good; c.lineWidth = 5; c.beginPath(); for (let k = 0; k <= run.len; k++) { const q = pts[(run.start + k) % S.N]; if (!q) break; k ? c.lineTo(X(q[0]), Y(q[1])) : c.moveTo(X(q[0]), Y(q[1])); } c.stroke(); }
+    const s = Linkage.fourBar(p, S.ph); if (!s) return;
+    Sim.line(c, X(0), Y(0), X(s.A[0]), Y(s.A[1]), col.accent, 4); Sim.line(c, X(p.G), Y(0), X(s.B[0]), Y(s.B[1]), col.accent, 4); Sim.line(c, X(s.A[0]), Y(s.A[1]), X(s.P[0]), Y(s.P[1]), col.ink, 3);
+    [[0, 0], [p.G, 0], s.A, s.B].forEach(q => Sim.dot(c, X(q[0]), Y(q[1]), 4, col.surface, col.ink)); Sim.dot(c, X(s.P[0]), Y(s.P[1]), 6, col.accent2, col.surface);
+  });
+  function info() { prep(); const v = stats.stride * S.rpm / 60;
+    out.innerHTML = 'Foot path: straight stretch <strong>' + stats.stride.toFixed(0) + ' mm</strong> (' + (stats.stride / S.a).toFixed(2) + '× crank radius), on the ground for <strong>' + (stats.duty * 100).toFixed(0) + '%</strong> of each turn, lifting the foot <strong>' + stats.lift.toFixed(0) + ' mm</strong>. At ' + S.rpm + ' rpm the body advances about <strong>' + v.toFixed(0) + ' mm/s</strong> (stride × rpm/60, ignoring slip). With ' + (stats.duty < 0.5 ? '<strong>one leg per side the body is unsupported for part of the cycle: use three or more legs with phase offsets</strong>.' : 'a contact fraction over 50% two legs may suffice.');
+    view.redraw(); }
+  sliders('g5-ctl', S, [['a', 'Crank radius', 8, 30, 1, 0, ' mm'], ['rpm', 'Motor speed', 10, 200, 5, 0, ' rpm']], info);
+  const loop = Sim.loop(dt => { S.ph += dt * TAU * S.rpm / 60 * 0.4; view.redraw(); });
+  document.getElementById('g5-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('g5-run')); info();
+})();
+</script>
+</body>
+</html>

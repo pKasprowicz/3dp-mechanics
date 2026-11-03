@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 2 · Mechanics you need</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="2">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part A · Foundations · Chapter 2</p>
+<h1>Mechanics you need</h1>
+<p class="lead">You do not need a mechanical-engineering degree to design printed mechanisms, but you do need about ten ideas and the habit of putting numbers on them. This chapter is those ten ideas, with calculators you can play with, aimed at the questions you will actually ask: <em>Is this motor strong enough? Will this arm bend? Why did it crack at that corner?</em></p>
+
+<div class="callout warn">
+  <span class="tag">About the numbers</span>
+  Material values here are typical, order-of-magnitude figures for FDM parts, used to build intuition and for a first sizing. Real strength depends on your printer, settings, filament brand, moisture, and orientation. Treat results as "will it survive, roughly", then confirm with a printed test. Do not use these for safety-critical parts (see 2.9).
+</div>
+
+<h2>2.1 Force, moment, torque</h2>
+<p><strong>Force</strong> pushes or pulls: unit newton (N). 1 kg hanging from a string pulls with about 9.81 N. <strong>Moment</strong> (or <strong>torque</strong>) is a force's turning effect about a point: <code>M = F × d</code>, where <em>d</em> is the perpendicular distance from the point to the line of the force. Unit: N·m (or N·mm).</p>
+<p>Two habits will take you far:</p>
+<ol>
+  <li><strong>Draw a free-body diagram.</strong> Isolate one part, draw it as a blob, and draw <em>every</em> force and moment acting on it, one arrow per contact or load. Most "mystery" failures turn out to be a force you forgot to draw.</li>
+  <li><strong>Static equilibrium</strong>: if the part is not accelerating, forces sum to zero and moments about any point sum to zero. Pick the point that kills the most unknowns (usually a pivot).</li>
+</ol>
+<div class="callout tip">
+  <span class="tag">Units trap</span>
+  Hobby motor and servo torque is quoted in <strong>kgf·cm</strong> or <strong>oz·in</strong>. Convert: <code>1 kgf·cm = 0.0981 N·m</code>, <code>1 oz·in = 0.00706 N·m</code>. A "20 kg·cm" servo can hold a 20 kg load on a 1 cm arm, or 2 kg on a 10 cm arm. Force at the end of an arm is always <code>F = T / r</code>.
+</div>
+
+<h2>2.2 Levers, mechanical advantage, work and power</h2>
+<p>A lever balances moments about its fulcrum, so a small force on a long arm balances a big force on a short arm: <code>F_effort × b = F_load × a</code>. The ratio <code>b/a</code> is the <strong>mechanical advantage</strong>. But nothing is free: the effort end moves <code>b/a</code> times farther. This is <strong>conservation of work</strong> (ideal case: force × distance in = force × distance out).</p>
+<p>The rotary version of the same trade is <strong>power</strong>: <code>P = T × ω</code> (W = N·m × rad/s). For a given motor power, gearing down trades speed for torque and gearing up does the reverse. Every gear train, pulley or leadscrew you meet later is this idea in costume. Real systems lose some power to friction, so efficiency is below 100%: typically 90%+ for spur gears, 30–50% for steep worm gears.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Lever balance</h4>
+  <p class="desc">Set the load, where the fulcrum sits, and the effort you push with. The bar tilts toward whichever moment wins. Find the balance point, then see how much effort you save and how much farther your hand moves.</p>
+  <canvas id="lv-canvas"></canvas>
+  <div class="controls" id="lv-ctl"></div>
+  <div class="readout" id="lv-out"></div>
+  <div class="row">
+    <strong>Motor to force:</strong>
+    <label>torque <input type="number" id="tq-t" value="5" min="0" step="0.5"> kgf·cm</label>
+    <label>arm radius <input type="number" id="tq-r" value="25" min="1"> mm</label>
+    <span id="tq-out"></span>
+  </div>
+</div>
+
+<h2>2.3 Friction</h2>
+<p>Coulomb friction is the usual model: friction force is proportional to the normal force, <code>F_f ≤ μ·N</code>, and acts opposite to (impending) sliding. There are two coefficients: <strong>static</strong> μₛ (to start sliding) is higher than <strong>kinetic</strong> μₖ (once sliding). That gap is what causes <strong>stick-slip</strong>: the squeal of a door hinge or the jerky motion of a slowly pushed drawer.</p>
+<table>
+  <tr><th>Pair (dry, rough guide)</th><th>μ approx.</th></tr>
+  <tr><td>Printed PLA / PETG on itself (rough layered surface)</td><td>0.3 – 0.6, can be higher</td></tr>
+  <tr><td>Nylon on steel</td><td>0.2 – 0.4</td></tr>
+  <tr><td>PTFE-based on steel</td><td>0.05 – 0.15</td></tr>
+  <tr><td>Plastic on plastic with thin silicone/PTFE lubricant</td><td>0.05 – 0.15</td></tr>
+  <tr><td>Rubber / TPU on a clean surface</td><td>0.6 – 1.5</td></tr>
+  <tr><td>Rolling (bearing) equivalent</td><td>0.001 – 0.01</td></tr>
+</table>
+<p>Two practical consequences:</p>
+<ul>
+  <li><strong>The friction angle.</strong> A surface at slope θ holds a block still while <code>tan θ ≤ μ</code>, i.e. <code>θ ≤ arctan μ</code>. The same rule decides whether a <strong>screw self-locks</strong> (a lead angle smaller than the friction angle means the load cannot back-drive it), whether a wedge holds, and whether a cam follower binds.</li>
+  <li><strong>Friction does not depend on contact area</strong> in this simple model, but wear and heat do. A bigger printed bearing surface does not slide easier; it just wears slower.</li>
+</ul>
+<div class="callout tip">
+  <span class="tag">3D printing</span>
+  Printed surfaces are rough, with ridges every layer height, and the ridges lock into each other. Printed-on-printed sliding therefore has a higher μ than the textbook value and wears fast (PLA on PLA gets "sticky"). Remedies you will see across the chapters: sliding on a metal rod or smooth bushing instead, using a printed-in-nylon or PTFE-filled insert, orienting the sliding face parallel to the bed (clean top layers), adding a thin lubricant, and making sliding parts from different materials.
+</div>
+
+<div class="sim">
+  <h4>Simulation 2 · Friction on a slope</h4>
+  <p class="desc">A 1 kg block on a tilting plane. Raise the angle until it slips: it will happen exactly when tan(angle) = μ.</p>
+  <canvas id="fr-canvas"></canvas>
+  <div class="controls" id="fr-ctl"></div>
+  <div class="readout" id="fr-out"></div>
+</div>
+
+<h2>2.4 Stress, strain, stiffness and strength</h2>
+<p>A force on its own tells you little. What damages a part is force <em>per unit area</em>:</p>
+<div class="eq">Normal stress  σ = F / A        (tension or compression, N/mm² = MPa)<br>
+Shear stress   τ = F / A        (force parallel to the area)<br>
+Strain         ε = ΔL / L       (relative stretch, dimensionless)<br>
+Hooke's law    σ = E · ε        (E = Young's modulus, the material's stiffness)</div>
+<p>Two very different material numbers, and they're often confused:</p>
+<ul>
+  <li><strong>Strength</strong> (yield or ultimate stress): how much stress before it permanently deforms or breaks.</li>
+  <li><strong>Stiffness</strong> (E): how much it stretches under a given stress. A material can be strong and floppy (TPU, nylon) or stiff and brittle (PLA).</li>
+</ul>
+<p>Brittle materials (PLA, many CF-filled filaments) give little warning: they crack. Ductile ones (PETG, nylon, ASA, ABS) yield and bend first. For anything that must not suddenly fail, prefer a ductile material, or add enough margin that you stay far below the break.</p>
+
+<table>
+  <tr><th>Typical FDM, ballpark</th><th>E (GPa)</th><th>Tensile strength, along layers (MPa)</th><th>Behaviour</th></tr>
+  <tr><td>PLA</td><td>~3</td><td>~45</td><td>stiff, brittle, creeps, softens ~55 °C</td></tr>
+  <tr><td>PETG</td><td>~2</td><td>~40</td><td>tougher, more flexible, creeps less</td></tr>
+  <tr><td>ABS / ASA</td><td>~2</td><td>~35</td><td>tough, heat-resistant, warps</td></tr>
+  <tr><td>PA (nylon) / PA-CF</td><td>~1.5 (PA) – 5 (CF)</td><td>~40 – 70</td><td>tough, wear-resistant, absorbs moisture</td></tr>
+</table>
+<p>Chapter 3 goes into materials in depth, including your printer's specifics. For now, keep the shape: <strong>plastics are 20–100× less stiff than steel (E ≈ 200 GPa) and 5–10× weaker</strong>, so printed parts are bulky and deflect more.</p>
+
+<h2>2.5 Beams: bending is what usually kills your part</h2>
+<p>Most printed parts fail in <strong>bending</strong>, not pure tension: arms, brackets, levers, tabs, spokes, anything that is a beam. Bending puts one side in tension and the other in compression, with the maximum at the surface farthest from the centre. For a rectangle (width <em>b</em>, thickness <em>h</em> in the bending direction):</p>
+<div class="eq">Second moment of area   I = b·h³ / 12<br>
+Bending stress          σ = M·c / I      → cantilever end load: σ = 6·F·L / (b·h²)<br>
+Cantilever deflection   δ = F·L³ / (3·E·I)<br>
+Simply supported, centre load: δ = F·L³ / (48·E·I)</div>
+<p>Read these like a designer, not a mathematician:</p>
+<ul>
+  <li><strong>Thickness is cubed in stiffness (h³) and squared in strength (h²).</strong> Doubling the thickness makes it 8× stiffer and 4× less stressed. Doubling the width only doubles both. <em>Make the part deeper in the direction of bending</em>; ribs and flanges exist for this reason.</li>
+  <li><strong>Length is cubed in deflection (L³).</strong> A 30% longer arm deflects more than twice as much. Shorten the overhang before you thicken it.</li>
+  <li><strong>Hollow is almost as good as solid</strong> in bending, since the material near the centre carries little stress. This is why tubes, I-beams and 3-perimeter walls with sparse infill work.</li>
+</ul>
+<p><strong>Shear in pins and bolts.</strong> A pin loaded across its axis is in shear: <code>τ = F / A</code> per shear plane (single shear: one plane, double shear: two planes, twice the capacity). A steel M3 screw is very rarely the weak link. The <em>plastic around the hole</em> usually is, through <strong>bearing stress</strong> <code>σ_b = F / (d × t)</code> (hole diameter × plate thickness). It crushes, ovalizes and creeps, so keep it low.</p>
+<p><strong>Buckling.</strong> A long slender part in compression fails by suddenly bowing sideways, well before its material strength. Euler's load is <code>P_cr = π²·E·I / (K·L)²</code> (K = 1 for pinned ends, 2 for one end free, 0.5 for fixed). Same lesson: it scales with I (depth) and falls with L². Slender printed push-rods and linkage members are prime buckling candidates.</p>
+
+<div class="sim">
+  <h4>Simulation 3 · Printed cantilever beam</h4>
+  <p class="desc">A printed arm fixed at the left with a load at the tip. The shape is exaggerated by the "×" factor shown. Change the geometry, material and printing orientation and see deflection, stress and safety factor respond.</p>
+  <canvas id="bm-canvas"></canvas>
+  <div class="row">
+    <label>Material <select id="bm-mat"></select></label>
+    <label>Orientation <select id="bm-or">
+      <option value="flat">Layers parallel to the beam (printed lying flat)</option>
+      <option value="upright">Beam printed standing up (load pulls layers apart)</option>
+    </select></label>
+    <label><input type="checkbox" id="bm-lt"> constant load for weeks (creep derating)</label>
+  </div>
+  <div class="controls" id="bm-ctl"></div>
+  <div class="readout" id="bm-out"></div>
+</div>
+
+<h2>2.6 Torsion (twisting)</h2>
+<p>A shaft transmitting torque <em>T</em> has shear stress <code>τ = 16·T / (π·d³)</code> for a solid round shaft of diameter <em>d</em>: <strong>cubic in diameter</strong>, so a 20% larger shaft is 1.7× stronger. Printed shafts have a second problem: layer lines. Torque transmitted across layer interfaces is weak, and the connection from shaft to printed hub (keys, set-screw flats, D-profiles) concentrates stress. As a rule, <strong>do not transmit significant torque through a thin printed shaft</strong>; use a steel or brass rod and let the plastic be a hub or housing (chapters 10 and 15).</p>
+
+<h2>2.7 Stress concentrations: why parts crack at corners</h2>
+<p>The stress formulas above give <em>nominal</em> stress for smooth shapes. Wherever a section changes abruptly (a sharp inside corner, a hole, a groove, the root of a thread), the stress flow bunches up and the local peak stress is <code>σ_peak = Kt × σ_nominal</code>. For a sharp internal corner Kt can be 3 to 10+. A simple estimate for a notch of depth <em>d</em> and root radius <em>r</em> is <code>Kt ≈ 1 + 2·√(d / r)</code> (pessimistic for gentle fillets). The practical lesson is the cheapest in the whole book: <strong>put a fillet on every inside corner.</strong></p>
+
+<div class="callout tip">
+  <span class="tag">3D printing</span>
+  Printing makes it worse: the layer boundary at a sharp corner is a built-in crack starter, and brittle materials like PLA feel the full Kt. A 1–2 mm fillet at the root of a snap-fit hook, a lever, or a screw boss often changes a part from "snaps at first use" to "lasts years". It also does not cost anything in CAD.
+</div>
+
+<div class="sim">
+  <h4>Simulation 4 · Notch and fillet radius</h4>
+  <p class="desc">A 20 mm wide, 5 mm thick printed bar pulled across layers (the weakest direction, about 22 MPa usable for PLA). A notch narrows it. Change the notch depth and root radius to see the peak stress against the limit.</p>
+  <canvas id="kt-canvas"></canvas>
+  <div class="controls" id="kt-ctl"></div>
+  <div class="readout" id="kt-out"></div>
+</div>
+
+<h2>2.8 What is special about printed plastics</h2>
+<ul>
+  <li><strong>Anisotropy.</strong> Parts are strong along the extruded lines and weak <em>between</em> layers (typically 30–70% of the in-layer strength, lower for brittle or poorly-bonded prints). Orient parts so the main tensile or bending stress runs <em>along</em> layers, never pulling them apart. Chapter 4 makes this a design rule.</li>
+  <li><strong>Creep and stress relaxation.</strong> Under constant load, plastics slowly deform further; under constant deformation, the force relaxes. A PLA clip that's tight on day one is loose after weeks. For parts under permanent load, derate strength drastically (a factor 0.3–0.5 for PLA) or pick a more creep-resistant material (PETG, ASA, CF-nylon), or let a metal part carry the sustained load.</li>
+  <li><strong>Temperature.</strong> Stiffness and strength fall as plastic warms, long before it melts. PLA gets soft around 55–60 °C, which a car dashboard in the sun reaches. Heated motors and hot-ends are close neighbours.</li>
+  <li><strong>Fatigue.</strong> Repeated loading breaks things at stresses far below their static strength. A snap-fit or living hinge flexed 10,000 times needs strain well below the one-shot limit.</li>
+  <li><strong>Moisture.</strong> Nylon (and to a lesser extent PETG/PLA) absorbs water, which changes stiffness and dimensions.</li>
+  <li><strong>Infill, perimeters.</strong> For bending and torsion, the outer walls carry the load. Adding perimeters (and top/bottom layers) strengthens a part far more per gram than adding infill.</li>
+</ul>
+
+<h2>2.9 Safety factors</h2>
+<p>The <strong>safety factor</strong> is <code>SF = allowable stress / actual stress</code>. The allowable is the material strength <em>after</em> derating for orientation, creep, temperature and stress concentration. Then you add a margin for the unknown. A reasonable starting point for printed parts:</p>
+<table>
+  <tr><th>Situation</th><th>Minimum SF on derated strength</th></tr>
+  <tr><td>Static, well-known load, forgiving failure (a desk gadget)</td><td>2</td></tr>
+  <tr><td>Normal use, loads somewhat uncertain</td><td>3 – 4</td></tr>
+  <tr><td>Repeated loading, impact, sustained load</td><td>5 – 10 (or test)</td></tr>
+  <tr><td>Failure could injure someone or cause damage</td><td>Do not rely on a printed part alone; use a metal part and, if possible, a design that fails safe</td></tr>
+</table>
+<p>For critical parts such as climbing, lifting, vehicle, medical or pressure-bearing, use certified components. Printing is not the right way to make them.</p>
+
+<h2>2.10 A quick-estimate workflow</h2>
+<ol>
+  <li>Write down the <strong>loads</strong> in newtons (weights, motor torque ÷ radius, spring forces, a person pushing: 20–100 N is typical; a hard push or drop can be several times that).</li>
+  <li>Sketch a <strong>free-body diagram</strong> of the part; find the reaction forces and the worst moment.</li>
+  <li>Reduce the part to a <strong>beam, pin, or shaft</strong> and compute stress with the formulas above.</li>
+  <li>Take material strength from the table, <strong>derate</strong> for orientation (×0.5 across layers), creep (×0.4 if sustained) and stress concentrations (÷Kt, or fillet them).</li>
+  <li>Check <strong>deflection</strong> too, since it is often what really limits a mechanism: a stiff-enough arm that still flexes 3 mm will wreck gear mesh or sensor alignment.</li>
+  <li>Print a <strong>test part</strong>, load it, and measure. A bathroom scale and some stacked weights is a legitimate test rig.</li>
+</ol>
+
+<h2>2.11 Common mistakes</h2>
+<ul>
+  <li>Designing in tension when the part is actually in bending: bending stresses are far higher than F/A suggests.</li>
+  <li>Making a long, thin arm and then being surprised by the L³ deflection.</li>
+  <li>Sharp inside corners on any highly stressed part.</li>
+  <li>Printing a part so that the load pulls layers apart (Z-direction tension): the weakest direction.</li>
+  <li>Sizing a motor for holding force but ignoring peak accelerations and friction (see ch. 16).</li>
+  <li>Forgetting units: kg vs N, mm vs m, kgf·cm vs N·m.</li>
+</ul>
+
+<h2>2.12 Check yourself</h2>
+<details class="quiz"><summary>A servo is rated 5 kgf·cm. What force can it exert at the end of a 25 mm horn?</summary>
+<p>T = 5 × 0.0981 = 0.49 N·m. F = T / r = 0.49 / 0.025 ≈ <strong>19.6 N</strong> (about 2 kg). In practice use half or less of the rated stall torque.</p></details>
+<details class="quiz"><summary>An arm deflects 4 mm and carries stress near its limit. You make it 1.5× thicker (deeper). What happens?</summary>
+<p>Stiffness ∝ h³: 1.5³ = 3.4× stiffer, so the deflection drops to about 1.2 mm. Stress ∝ 1/h²: it drops to 1/2.25 ≈ 44%. Well worth the extra plastic.</p></details>
+<details class="quiz"><summary>A tab breaks at a sharp inside corner. The part is PLA, the load is modest. What do you try first?</summary>
+<p>Add a 1–2 mm fillet at that corner (Kt falls sharply), check that the layers run along the tab, and only then think about material or thickness.</p></details>
+<details class="quiz"><summary>A block on a plastic ramp starts to slide at 25°. What is μₛ?</summary>
+<p>μₛ = tan 25° ≈ <strong>0.47</strong>.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const G = 9.81;
+
+/* ---------- Sim 1: lever ---------- */
+(function () {
+  const S = { W: 40, a: 60, F: 20 }; // load (N), fulcrum distance from load (mm), effort (N); bar is 200 mm
+  const LEN = 200;
+  const canvas = document.getElementById('lv-canvas'), out = document.getElementById('lv-out');
+  const net = () => S.W * S.a - S.F * (LEN - S.a); // positive: load side goes down
+  const view = Sim.make(canvas, 0.42, (c, w, h, col) => {
+    const sc = (w - 80) / LEN, fx = 40 + S.a * sc, fy = h * 0.62;
+    const n = net(), tilt = Math.max(-0.3, Math.min(0.3, n / (Math.abs(S.W * S.a) + Math.abs(S.F * (LEN - S.a)) + 1) * 0.9));
+    const P = u => [fx + (u - S.a) * sc * Math.cos(tilt), fy - (u - S.a) * sc * Math.sin(tilt)]; // u = mm from load end
+    const L = P(0), R = P(LEN);
+    Sim.ground(c, fx, fy + 4, col.muted, 12);
+    Sim.line(c, L[0], L[1], R[0], R[1], col.accent, 9);
+    Sim.dot(c, fx, fy, 6, col.surface, col.ink);
+    const down = (p, len, color, label) => {
+      const y2 = p[1] + 14 + len; Sim.line(c, p[0], p[1] + 6, p[0], y2, color, 3);
+      c.fillStyle = color; c.beginPath(); c.moveTo(p[0], y2 + 8); c.lineTo(p[0] - 6, y2 - 2); c.lineTo(p[0] + 6, y2 - 2); c.fill();
+      c.font = '13px system-ui'; c.textAlign = 'center'; c.fillText(label, p[0], y2 + 24);
+    };
+    down(L, S.W * 0.7, col.warn, 'load ' + S.W + ' N');
+    down(R, S.F * 0.7, col.good, 'effort ' + S.F + ' N');
+  });
+  function refresh() {
+    const b = LEN - S.a, need = S.W * S.a / b, n = net();
+    const ma = b / S.a;
+    out.innerHTML = 'Load arm <strong>' + S.a + ' mm</strong>, effort arm <strong>' + b + ' mm</strong> → mechanical advantage <strong>' + ma.toFixed(2) + '</strong>. ' +
+      'Balance needs <strong>' + need.toFixed(1) + ' N</strong> of effort. Net moment: ' + (Math.abs(n) < 0.5 ? '<strong>balanced</strong>' : (n > 0 ? 'load side wins' : 'effort side wins')) + ' (' + n.toFixed(0) + ' N·mm). ' +
+      'Your hand travels <strong>' + ma.toFixed(2) + '×</strong> as far as the load.';
+    view.redraw();
+  }
+  const h = document.getElementById('lv-ctl');
+  Sim.slider(h, { label: 'Load', min: 5, max: 100, value: S.W, unit: ' N', onInput: v => { S.W = v; refresh(); } });
+  Sim.slider(h, { label: 'Fulcrum from load', min: 20, max: 180, value: S.a, unit: ' mm', onInput: v => { S.a = v; refresh(); } });
+  Sim.slider(h, { label: 'Effort', min: 0, max: 100, value: S.F, unit: ' N', onInput: v => { S.F = v; refresh(); } });
+  const t = document.getElementById('tq-t'), r = document.getElementById('tq-r'), o = document.getElementById('tq-out');
+  const up = () => { const T = +t.value * 0.0981, F = T / (+r.value / 1000); o.innerHTML = '= ' + T.toFixed(2) + ' N·m → <strong>' + F.toFixed(1) + ' N</strong> (' + (F / G).toFixed(1) + ' kgf) at the arm end'; };
+  t.oninput = r.oninput = up; up(); refresh();
+})();
+
+/* ---------- Sim 2: friction slope ---------- */
+(function () {
+  const S = { th: 20, mu: 0.45, x: 0, v: 0 };
+  const canvas = document.getElementById('fr-canvas'), out = document.getElementById('fr-out');
+  const slips = () => Math.tan(S.th * Math.PI / 180) > S.mu;
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const th = S.th * Math.PI / 180, len = Math.min(w * 0.85, h * 1.5), x0 = w * 0.08, y0 = h * 0.9;
+    const x1 = x0 + len * Math.cos(th), y1 = y0 - len * Math.sin(th);
+    c.fillStyle = col.line + '55'; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.lineTo(x1, y0); c.closePath(); c.fill();
+    Sim.line(c, x0, y0, x1, y1, col.muted, 4); Sim.line(c, x0, y0, x1, y0, col.line, 2);
+    c.strokeStyle = col.muted; c.lineWidth = 1.5; c.beginPath(); c.arc(x0 + 70, y0, 70, -th, 0); c.stroke();
+    c.fillStyle = col.ink; c.font = '13px system-ui'; c.textAlign = 'left'; c.fillText(S.th.toFixed(0) + '°', x0 + 80, y0 - 6);
+    const pos = Math.max(0.1, 0.78 - S.x), bs = 40, sx = x0 + pos * len * Math.cos(th), sy = y0 - pos * len * Math.sin(th);
+    c.save(); c.translate(sx, sy); c.rotate(-th); c.fillStyle = col.accent; c.fillRect(-bs / 2, -bs, bs, bs); c.restore();
+    const nx = -Math.sin(th), ny = -Math.cos(th), cx = sx + nx * bs / 2, cy = sy + ny * bs / 2; // block centre
+    const arrow = (dx, dy, color, t) => {
+      const ex = cx + dx, ey = cy + dy, a = Math.atan2(dy, dx);
+      Sim.line(c, cx, cy, ex, ey, color, 3); c.fillStyle = color; c.beginPath(); c.moveTo(ex, ey);
+      c.lineTo(ex - 9 * Math.cos(a - 0.4), ey - 9 * Math.sin(a - 0.4)); c.lineTo(ex - 9 * Math.cos(a + 0.4), ey - 9 * Math.sin(a + 0.4)); c.fill();
+      c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText(t, ex + 14 * Math.cos(a), ey + 14 * Math.sin(a) + 4);
+    };
+    const Wf = 60, Nf = Wf * Math.cos(th), Ff = slips() ? Wf * S.mu * 0.8 * Math.cos(th) : Wf * Math.sin(th);
+    arrow(0, Wf, col.warn, 'W');
+    arrow(nx * Nf, ny * Nf, col.good, 'N');
+    arrow(Math.cos(th) * Ff, -Math.sin(th) * Ff, col.accent2, 'friction');
+  });
+  const tick = () => {
+    if (slips()) { const a = G * (Math.sin(S.th * Math.PI / 180) - S.mu * 0.8 * Math.cos(S.th * Math.PI / 180)); S.v += a * 0.016 * 0.4; S.x += S.v * 0.016 * 0.4; if (S.x > 0.65) { S.x = 0; S.v = 0; } }
+    else { S.x = 0; S.v = 0; }
+    view.redraw(); requestAnimationFrame(tick);
+  };
+  function refresh() {
+    const th = S.th * Math.PI / 180, crit = Math.atan(S.mu) * 180 / Math.PI;
+    const Ff = G * Math.sin(th), cap = S.mu * G * Math.cos(th);
+    out.innerHTML = 'Critical angle <strong>arctan μ = ' + crit.toFixed(1) + '°</strong>. At ' + S.th + '°, needed friction ' + Ff.toFixed(2) + ' N vs available ' + cap.toFixed(2) + ' N → ' +
+      (slips() ? '<strong style="color:var(--warn)">it slides</strong> (μₖ taken as 0.8·μₛ).' : '<strong style="color:var(--good)">it holds</strong>.');
+  }
+  const h = document.getElementById('fr-ctl');
+  Sim.slider(h, { label: 'Slope angle', min: 0, max: 60, value: S.th, unit: '°', onInput: v => { S.th = v; S.x = 0; S.v = 0; refresh(); } });
+  Sim.slider(h, { label: 'Friction μₛ', min: 0.05, max: 1, step: 0.01, dec: 2, value: S.mu, onInput: v => { S.mu = v; S.x = 0; S.v = 0; refresh(); } });
+  refresh(); requestAnimationFrame(tick);
+})();
+
+/* ---------- Sim 3: cantilever ---------- */
+(function () {
+  // E in GPa, S = tensile strength along layers (MPa), kz = factor across layers, kc = sustained-load factor (rule of thumb)
+  const MAT = { 'PLA': { E: 3.0, S: 45, kz: 0.5, kc: 0.4 }, 'PETG': { E: 2.0, S: 40, kz: 0.6, kc: 0.5 }, 'ASA / ABS': { E: 2.0, S: 35, kz: 0.55, kc: 0.5 }, 'PA-CF (nylon carbon)': { E: 5.0, S: 60, kz: 0.4, kc: 0.6 } };
+  const S = { L: 60, b: 12, h: 4, F: 10 };
+  const mat = document.getElementById('bm-mat'), or = document.getElementById('bm-or'), lt = document.getElementById('bm-lt');
+  Object.keys(MAT).forEach(k => mat.add(new Option(k, k)));
+  const canvas = document.getElementById('bm-canvas'), out = document.getElementById('bm-out');
+  let res = {};
+  const calc = () => {
+    const m = MAT[mat.value], E = m.E * 1000, I = S.b * Math.pow(S.h, 3) / 12;
+    const kE = or.value === 'upright' ? 0.85 : 1;
+    const delta = S.F * Math.pow(S.L, 3) / (3 * E * kE * I);
+    const sigma = 6 * S.F * S.L / (S.b * S.h * S.h);
+    const allow = m.S * (or.value === 'upright' ? m.kz : 1) * (lt.checked ? m.kc : 1);
+    res = { delta, sigma, allow, sf: allow / sigma, amp: 1 };
+  };
+  const view = Sim.make(canvas, 0.45, (c, w, h, col) => {
+    const sc = Math.min((w - 80) / S.L, (h - 100) / (S.h * 3)), x0 = 50, y0 = h * 0.4;
+    const amp = Math.max(1, Math.min(30, (h * 0.35 / sc) / Math.max(res.delta, 1e-6)));
+    res.amp = amp;
+    const color = res.sf >= 3 ? col.good : res.sf >= 1.5 ? col.accent2 : col.warn;
+    c.fillStyle = col.muted; c.fillRect(x0 - 14, y0 - 40, 14, 80 + S.h * sc);
+    // deflected centreline y(x)
+    const N = 40, top = [], bot = [];
+    for (let i = 0; i <= N; i++) {
+      const x = S.L * i / N, y = res.delta * amp * (3 * S.L * x * x - x * x * x) / (2 * S.L * S.L * S.L);
+      top.push([x0 + x * sc, y0 + y * sc]); bot.push([x0 + x * sc, y0 + y * sc + S.h * sc]);
+    }
+    c.fillStyle = color + '66'; c.strokeStyle = color; c.lineWidth = 2; c.beginPath();
+    top.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); bot.reverse().forEach(p => c.lineTo(p[0], p[1])); c.closePath(); c.fill(); c.stroke();
+    const tip = top[N]; Sim.line(c, tip[0], tip[1] - 46, tip[0], tip[1] - 4, col.warn, 3);
+    c.fillStyle = col.warn; c.beginPath(); c.moveTo(tip[0], tip[1] - 2); c.lineTo(tip[0] - 6, tip[1] - 12); c.lineTo(tip[0] + 6, tip[1] - 12); c.fill();
+    c.font = '13px system-ui'; c.textAlign = 'center'; c.fillText(S.F + ' N', tip[0], tip[1] - 52);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('shape exaggerated ×' + amp.toFixed(1), 12, h - 12);
+  });
+  function refresh() {
+    calc();
+    const r = res, verdict = r.sf >= 3 ? ['good', 'comfortable'] : r.sf >= 1.5 ? ['accent2', 'marginal: a test print is a must'] : ['warn', 'will likely fail'];
+    out.innerHTML = 'Tip deflection <strong>' + r.delta.toFixed(2) + ' mm</strong> · peak stress <strong>' + r.sigma.toFixed(1) + ' MPa</strong> vs allowable <strong>' + r.allow.toFixed(1) +
+      ' MPa</strong> → safety factor <strong style="color:var(--' + verdict[0] + ')">' + r.sf.toFixed(1) + '</strong> (' + verdict[1] + '). Stress concentrations at the root are not included: add fillets.';
+    view.redraw();
+  }
+  const h = document.getElementById('bm-ctl');
+  Sim.slider(h, { label: 'Length L', min: 20, max: 150, value: S.L, unit: ' mm', onInput: v => { S.L = v; refresh(); } });
+  Sim.slider(h, { label: 'Width b', min: 4, max: 40, value: S.b, unit: ' mm', onInput: v => { S.b = v; refresh(); } });
+  Sim.slider(h, { label: 'Thickness h', min: 1, max: 15, step: 0.2, dec: 1, value: S.h, unit: ' mm', onInput: v => { S.h = v; refresh(); } });
+  Sim.slider(h, { label: 'Tip load F', min: 1, max: 100, value: S.F, unit: ' N', onInput: v => { S.F = v; refresh(); } });
+  [mat, or, lt].forEach(e => e.addEventListener('change', refresh));
+  refresh();
+})();
+
+/* ---------- Sim 4: notch ---------- */
+(function () {
+  const S = { d: 4, r: 0.4, F: 1000 }, W = 20, T = 5, ALLOW = 22;
+  const kt = (d, r) => 1 + 2 * Math.sqrt(d / r);
+  const canvas = document.getElementById('kt-canvas'), out = document.getElementById('kt-out');
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const top = h * 0.46, sc = Math.min((w - 40) / 60, (top - 30) / W), bx = (w - 60 * sc) / 2, by = 18;
+    const net = (W - S.d) * T, nom = S.F / net, peak = nom * kt(S.d, S.r);
+    const cx = bx + 30 * sc, rv = Math.min(S.r, S.d), ok = peak <= ALLOW;
+    c.fillStyle = col.accent + '55'; c.strokeStyle = col.accent; c.lineWidth = 2; c.beginPath();
+    c.moveTo(bx, by); c.lineTo(cx - rv * sc, by); c.lineTo(cx - rv * sc, by + (S.d - rv) * sc);
+    c.arc(cx, by + (S.d - rv) * sc, rv * sc, Math.PI, 0, true);
+    c.lineTo(cx + rv * sc, by); c.lineTo(bx + 60 * sc, by); c.lineTo(bx + 60 * sc, by + W * sc); c.lineTo(bx, by + W * sc); c.closePath(); c.fill(); c.stroke();
+    Sim.dot(c, cx, by + S.d * sc + 4, 5, ok ? col.good : col.warn);
+    c.font = '13px system-ui'; c.textAlign = 'center'; c.fillStyle = col.warn;
+    Sim.line(c, bx - 2, by + W * sc / 2, bx - 26, by + W * sc / 2, col.warn, 3); Sim.line(c, bx + 60 * sc + 2, by + W * sc / 2, bx + 60 * sc + 26, by + W * sc / 2, col.warn, 3);
+    c.fillText(S.F + ' N', bx - 22, by + W * sc / 2 - 8); c.fillText(S.F + ' N', bx + 60 * sc + 22, by + W * sc / 2 - 8);
+    c.fillStyle = col.muted; c.fillText('root radius ' + S.r.toFixed(1) + ' mm, notch depth ' + S.d + ' mm', w / 2, by + W * sc + 18);
+    // Kt vs r plot
+    const l = 48, rr = 14, pt = top + 34, pb = h - 28, pw = w - l - rr, ph = pb - pt, rmax = 6, kmax = 12;
+    const X = r => l + (r - 0.2) / (rmax - 0.2) * pw, Y = k => pb - Math.min(k, kmax) / kmax * ph;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.textAlign = 'right';
+    [1, 4, 8, 12].forEach(k => { c.beginPath(); c.moveTo(l, Y(k)); c.lineTo(l + pw, Y(k)); c.stroke(); c.fillText('Kt ' + k, l - 4, Y(k) + 4); });
+    c.textAlign = 'center'; [0.2, 2, 4, 6].forEach(r => c.fillText(r + ' mm', X(r), h - 10));
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath();
+    for (let r = 0.2; r <= rmax; r += 0.05) { const px = X(r), py = Y(kt(S.d, r)); r === 0.2 ? c.moveTo(px, py) : c.lineTo(px, py); } c.stroke();
+    Sim.dot(c, X(S.r), Y(kt(S.d, S.r)), 6, peak > ALLOW ? col.warn : col.good, col.surface);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('stress concentration vs root radius', l + 6, pt + 12);
+  });
+  function refresh() {
+    const net = (W - S.d) * T, nom = S.F / net, k = kt(S.d, S.r), peak = nom * k;
+    out.innerHTML = 'Net section ' + (W - S.d) + ' × ' + T + ' mm → nominal stress <strong>' + nom.toFixed(1) + ' MPa</strong>; Kt ≈ <strong>' + k.toFixed(1) + '</strong> → peak <strong>' + peak.toFixed(1) +
+      ' MPa</strong> vs ~' + ALLOW + ' MPa allowable: ' + (peak > ALLOW ? '<strong style="color:var(--warn)">cracks here.</strong>' : '<strong style="color:var(--good)">survives.</strong>') +
+      ' Without the notch effect it would be ' + (nom > ALLOW ? 'over' : 'under') + ' the limit anyway.';
+    view.redraw();
+  }
+  const h = document.getElementById('kt-ctl');
+  Sim.slider(h, { label: 'Notch depth', min: 1, max: 8, step: 0.5, dec: 1, value: S.d, unit: ' mm', onInput: v => { S.d = v; refresh(); } });
+  Sim.slider(h, { label: 'Root radius', min: 0.2, max: 6, step: 0.1, dec: 1, value: S.r, unit: ' mm', onInput: v => { S.r = v; refresh(); } });
+  Sim.slider(h, { label: 'Load', min: 100, max: 2000, step: 50, value: S.F, unit: ' N', onInput: v => { S.F = v; refresh(); } });
+  refresh();
+})();
+</script>
+</body>
+</html>

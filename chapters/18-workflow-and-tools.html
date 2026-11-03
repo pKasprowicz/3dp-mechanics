@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 18 · Design workflow and tools</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 4px 14px; margin: 10px 0; }
+.grid2 label { font-size: 14px; display: flex; gap: 6px; align-items: center; }
+textarea.out { width: 100%; min-height: 130px; font: 12.5px/1.45 ui-monospace, Consolas, monospace; background: var(--code-bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+</style>
+</head>
+<body data-root="../" data-ch="18">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part C · Putting it together · Chapter 18</p>
+<h1>Design workflow and tools</h1>
+<p class="lead">You now know the parts of the toolbox. This chapter is about the order of using them: a repeatable process from idea to working mechanism, the software worth learning, the habits (parameters, coupons, logs) that make each print teach you something, and two tools here to keep your measurements and your checklists in one place.</p>
+
+<h2>18.1 The workflow</h2>
+<ol>
+  <li><strong>Requirements.</strong> Write down what it must do, how far, how fast, how often, against what loads and in what conditions (18.2).</li>
+  <li><strong>Concept.</strong> Sketch two or three ways to do it as stick diagrams and pick the simplest. Count degrees of freedom (chapter 1). Check it kinematically: range of motion, dead centres, transmission angle (chapter 5).</li>
+  <li><strong>Loads and sizing.</strong> Estimate forces and torques, choose the actuator (chapter 16), and size the critical parts with the hand formulas (chapters 2, 7, 9, 10, 12, 13).</li>
+  <li><strong>Material and process.</strong> Pick the material for each part from load, heat and wear (chapter 3). Decide what's printed and what's bought (chapter 15).</li>
+  <li><strong>Interface coupons.</strong> Print tiny test pieces for every critical fit: bearing seat, hinge, gear mesh, snap-fit, insert hole (chapter 4). Record the results.</li>
+  <li><strong>Detailed CAD.</strong> Model the parts parametrically around the bought parts, with orientation and print-ability designed in (18.4).</li>
+  <li><strong>Assembly and test.</strong> Print, assemble, and run the test plan (18.8). Free motion by hand first, then under power.</li>
+  <li><strong>Iterate.</strong> Change one thing at a time, measure, record. Go back to whichever stage the problem came from.</li>
+  <li><strong>Document.</strong> Parameters, bill of materials, print settings, lessons (18.7).</li>
+</ol>
+<p>Two principles carry the whole process: <strong>make the cheapest possible test of every risk before committing to the expensive print</strong>, and <strong>change only one variable at a time</strong>.</p>
+
+<h2>18.2 The requirements sheet</h2>
+<p>Ten lines that prevent a lot of re-prints. Answer them before opening CAD:</p>
+<table>
+  <tr><th>Question</th><th>Example</th></tr>
+  <tr><td>Function: what does it do?</td><td>Opens a lid by 90° with one push</td></tr>
+  <tr><td>Motion: type, range, speed</td><td>Rotation 0–90°, 1 s</td></tr>
+  <tr><td>Loads: forces, torques, shocks</td><td>Lid 80 g at 120 mm, 5 N push</td></tr>
+  <tr><td>Life: cycles, hours</td><td>10 000 cycles</td></tr>
+  <tr><td>Environment: temperature, wet, UV, chemicals</td><td>Indoor, up to 45 °C</td></tr>
+  <tr><td>Size and weight limits</td><td>Fits in 80 × 60 × 40 mm</td></tr>
+  <tr><td>Accuracy and play allowed</td><td>±0.5 mm</td></tr>
+  <tr><td>How is it driven or operated?</td><td>Finger, 10 N maximum</td></tr>
+  <tr><td>What is printed, what is bought, which printer/material</td><td>Printed PETG body, steel pin, M3 inserts</td></tr>
+  <tr><td>Safety and failure mode</td><td>Must not pinch fingers; fail open</td></tr>
+</table>
+
+<h2>18.3 Concept and motion checking</h2>
+<ul>
+  <li><strong>Stick diagrams</strong> on paper: links as lines, joints as circles, ground hatched. Move it by hand with a cardboard model: a 10-minute cardboard mock-up catches interferences that a CAD view hides.</li>
+  <li><strong>Kinematic simulation</strong>: Fusion's joints and motion study, FreeCAD's assembly workbenches, Onshape's mates, a web linkage simulator (such as the PMKS+ planar mechanism tool), or a few lines of Python or JavaScript like those behind the simulations on this site. Check range, interference, speeds and the loads on each link.</li>
+  <li><strong>Hand calculations</strong> before FEA: the formulas in this book get you within 20–30%, and force you to understand what matters.</li>
+  <li><strong>Animate in CAD</strong>: a parametric model driven by one parameter (an angle) with the interference check on shows whether the full range works.</li>
+</ul>
+
+<h2>18.4 CAD: tools and habits</h2>
+<table>
+  <tr><th>Tool</th><th>Style</th><th>Good for</th><th>Note</th></tr>
+  <tr><td><strong>Fusion</strong></td><td>Parametric, assemblies, motion, simple FEA</td><td>Mechanisms and enclosures, one environment for CAD/CAM</td><td>Cloud-based; the free hobby licence has terms that change, so check them</td></tr>
+  <tr><td><strong>Onshape</strong></td><td>Parametric, browser, version control built in</td><td>Collaboration, assemblies with mates</td><td>Free plan for non-commercial use, public documents</td></tr>
+  <tr><td><strong>FreeCAD</strong></td><td>Parametric, open source, extensible</td><td>Offline, scripted workflows, assemblies via workbenches</td><td>Steeper learning curve; very capable</td></tr>
+  <tr><td><strong>OpenSCAD</strong></td><td>Code-based CSG</td><td>Gears, cams, parametric generators, loops</td><td>Great for generated geometry; weak for freeform fillets</td></tr>
+  <tr><td>SolidWorks, Inventor, etc.</td><td>Professional parametric</td><td>If you have access through work or school</td><td>—</td></tr>
+  <tr><td>Blender, Plasticity</td><td>Mesh / surface modelling</td><td>Organic shapes, covers</td><td>Not for dimension-driven mechanisms</td></tr>
+</table>
+<p>Pick <strong>one</strong> parametric CAD system and learn it properly: sketch constraints, parameters, assemblies and joints. Use OpenSCAD alongside it for things you want generated from numbers (the gear and cam SVGs on this site are examples).</p>
+<h3>Habits that pay off</h3>
+<ul>
+  <li><strong>Named parameters for everything that matters</strong>: clearances, hole shrink, wall thickness, bearing sizes, fastener sizes. Never type a number into a sketch that should be a parameter. Section 18.5's profile card gives you the list.</li>
+  <li><strong>Fully constrain sketches.</strong> An under-constrained sketch moves when you change something else.</li>
+  <li><strong>One body per printed part</strong>, named with a part number and orientation (<code>arm_v03_flat</code>).</li>
+  <li><strong>Skeleton sketches</strong> for mechanisms: draw the linkage, gear centres and shafts in one master sketch; build parts around it, so a change in the skeleton propagates.</li>
+  <li><strong>Bought parts as reference bodies</strong> (STEP files or simple blocks) so collisions and screw lengths show up.</li>
+  <li><strong>Design with print orientation in mind from the start</strong>: flat bottom faces, chamfers instead of overhangs, fillets on loaded corners (chapter 4).</li>
+  <li><strong>Export STEP and STL</strong> and keep the source files; STL alone can't be edited.</li>
+</ul>
+
+<h2>18.5 Your printer profile</h2>
+<p>The numbers you measure from coupons (hole shrink, clearances, backlash) belong in one place, per material. This card stores them in your browser (it stays on your computer, nothing is sent anywhere) and turns them into a parameter block you can paste into CAD or OpenSCAD. Defaults are the generic starting points from chapter 4. Replace them with your own as you measure.</p>
+
+<div class="sim">
+  <h4>Tool 1 · Printer and material profile</h4>
+  <div class="row"><label>Material <select id="pf-mat"></select></label><label>Printer note <input type="text" id="pf-note" value="Bambu Lab X2D, 0.4 mm" style="width:230px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)"></label><button id="pf-reset">Reset this material</button></div>
+  <div class="controls" id="pf-ctl"></div>
+  <div class="row"><button id="pf-scad">As OpenSCAD</button><button id="pf-fusion">As plain list</button><button id="pf-copy">Copy</button></div>
+  <textarea class="out" id="pf-out" readonly></textarea>
+</div>
+
+<h2>18.6 Slicer and printer workflow</h2>
+<ul>
+  <li><strong>Make a "mechanical" process profile</strong> (3–4 walls, 4–5 top/bottom layers, 15–30% gyroid or cubic, 0.16–0.2 mm layers, seam to the back) and a "prototype" profile (faster). Switch deliberately (chapter 4).</li>
+  <li><strong>Calibrate before you tune your design</strong>: flow ratio, pressure advance, temperature, max volumetric speed. A badly calibrated printer ruins every clearance you measure. Bambu Studio and OrcaSlicer both include calibration routines.</li>
+  <li><strong>Per-object settings and modifiers</strong> for local reinforcement (extra walls around screw bosses and hinges) and for fine features.</li>
+  <li><strong>Dry your filament</strong> (chapter 3). Keep one spool of each critical material and don't change brands in the middle of a project.</li>
+  <li><strong>Multi-material (AMS, dual nozzle):</strong> use the second material for soluble or breakaway supports at functional interfaces, or a soft TPU pad on a rigid frame.</li>
+  <li><strong>Keep a print log</strong>: file, material, settings, result, time. When a part works, you know how to print another one.</li>
+</ul>
+
+<h2>18.7 Iteration and documentation</h2>
+<ul>
+  <li><strong>Print the risky interface first</strong>, not the whole assembly.</li>
+  <li><strong>Number your versions</strong> (<code>v001</code>, <code>v002</code>) and write one line of what changed and what you learned.</li>
+  <li><strong>Use version control for text sources</strong> (OpenSCAD files, scripts, parameter lists) with git. For CAD files, use the CAD system's own version history plus an exported STEP at each milestone.</li>
+  <li><strong>Photograph</strong> failures: the picture of a cracked part is worth a paragraph.</li>
+  <li><strong>A bill of materials</strong> with columns: item, size/spec, quantity, source, price, notes. Keep it with the project.</li>
+  <li><strong>An assembly sheet</strong>: order of assembly, torques ("snug only"), where lubricant goes, what to check.</li>
+  <li><strong>A parameters sheet</strong> of the key dimensions and fits you settled on.</li>
+</ul>
+
+<h2>18.8 A simple test plan</h2>
+<ol>
+  <li><strong>By hand, unpowered:</strong> the mechanism should move through its full range with no tight spots. Anything that binds now will stall the motor.</li>
+  <li><strong>Backlash and play:</strong> push and pull; measure with a dial indicator or calipers.</li>
+  <li><strong>Load test:</strong> add weights or pull with a luggage scale to 1.5× the working load.</li>
+  <li><strong>Cycle test:</strong> run it a few hundred or thousand cycles (a motor with a counter); look for wear dust, loosening, heat.</li>
+  <li><strong>Environment:</strong> warm (a hot day), cold, humidity as relevant.</li>
+  <li><strong>Failure test:</strong> what breaks first, and is it the part you intended (a slip clutch, a sacrificial pin)?</li>
+</ol>
+
+<h2>18.9 Pick what applies: a checklist generator</h2>
+<p>Tick the mechanisms and joints in your project. The generator gathers the matching checklist items from the chapters (always including the general ones) into one list you can copy.</p>
+
+<div class="sim">
+  <h4>Tool 2 · Project checklist</h4>
+  <div class="grid2" id="ck-opts"></div>
+  <textarea class="out" id="ck-out" readonly style="min-height:240px"></textarea>
+  <div class="row"><button id="ck-copy">Copy checklist</button></div>
+</div>
+
+<h2>18.10 Common mistakes in the process</h2>
+<ul>
+  <li>Opening CAD before the requirements are written.</li>
+  <li>Printing a whole assembly to test one interface.</li>
+  <li>Changing several things between prints, then not knowing what worked.</li>
+  <li>Hard-coding clearances in a sketch instead of a named parameter.</li>
+  <li>Keeping only the STL.</li>
+  <li>Skipping the free-motion test and fitting the motor to a mechanism that binds.</li>
+  <li>Not writing down what you measured.</li>
+</ul>
+
+<h2>18.11 Check yourself</h2>
+<details class="quiz"><summary>A 6-hour print of a gearbox housing might not fit its bearings. What do you do first?</summary>
+<p>Print a 5–10 minute coupon containing only the bearing seats (and shaft holes) with the same material, orientation and settings, test the bearings in it, and update the parameters. Then print the housing.</p></details>
+<details class="quiz"><summary>You change the wall count, the infill and the material in one reprint and the part gets stronger. What did you learn?</summary>
+<p>Almost nothing: you don't know which change mattered. Change one variable per print, or you can't build knowledge.</p></details>
+<details class="quiz"><summary>Why do named parameters matter more for 3D printing than for machined parts?</summary>
+<p>Because the numbers you need (hole shrink, clearance, backlash) depend on the material and the printer and will change. If they are named parameters, one value update fixes every hole in every part; if they are typed into sketches, you will redo the model.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+/* ---------- Tool 1: profile ---------- */
+(function () {
+  const KEY = 'm3dp_profile_v1';
+  const FIELDS = [['hole_shrink', 'Hole shrink', 0.15, 'mm', 'how much smaller printed holes come out'], ['pin_swell', 'Pin / outside swell', 0.05, 'mm', 'how much larger printed pins/outsides come out'], ['clear_slide', 'Sliding clearance', 0.25, 'mm', 'diametral gap for a free-turning pin'], ['clear_press', 'Press-fit offset', -0.08, 'mm', 'negative = interference'], ['clear_pip', 'Print-in-place gap', 0.4, 'mm', 'gap that does not fuse'], ['backlash', 'Gear backlash', 0.15, 'mm', 'at the pitch circle'], ['min_wall', 'Minimum wall', 1.2, 'mm', 'functional walls'], ['layer', 'Layer height', 0.2, 'mm', 'for Z dimensions']];
+  const MATS = ['PLA', 'PETG', 'ABS / ASA', 'Nylon (PA)', 'PA-CF', 'TPU'];
+  let store = {}; try { store = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { store = {}; }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* storage unavailable: values live only for this visit */ } };
+  const mat = document.getElementById('pf-mat'), note = document.getElementById('pf-note'), out = document.getElementById('pf-out'), host = document.getElementById('pf-ctl');
+  MATS.forEach(m => mat.add(new Option(m, m)));
+  if (store._note) note.value = store._note;
+  const cur = () => store[mat.value] || (store[mat.value] = {});
+  const val = k => { const c = cur(); return c[k] !== undefined ? c[k] : FIELDS.find(f => f[0] === k)[2]; };
+  let fmt = 'scad';
+  const inputs = {};
+  FIELDS.forEach(f => {
+    const d = document.createElement('label'); d.className = 'ctl'; d.style.gridTemplateColumns = '150px 1fr 70px';
+    const s = document.createElement('span'); s.textContent = f[1]; s.title = f[4]; const i = document.createElement('input'); i.type = 'number'; i.step = '0.01'; i.style.width = '90px'; const u = document.createElement('output'); u.textContent = f[3];
+    i.oninput = () => { cur()[f[0]] = +i.value; save(); render(); }; d.append(s, i, u); host.append(d); inputs[f[0]] = i;
+  });
+  function load() { FIELDS.forEach(f => { inputs[f[0]].value = val(f[0]); }); render(); }
+  function render() {
+    const m = mat.value, id = m.replace(/[^A-Za-z0-9]+/g, '_').toLowerCase();
+    if (fmt === 'scad') out.value = '// ' + note.value + ', material: ' + m + '\n' + FIELDS.map(f => f[0] + ' = ' + val(f[0]) + '; // ' + f[4]).join('\n') + '\n';
+    else out.value = note.value + ' | ' + m + '\n' + FIELDS.map(f => f[1] + ': ' + val(f[0]) + ' ' + f[3]).join('\n') + '\n';
+  }
+  mat.onchange = load; note.oninput = () => { store._note = note.value; save(); render(); };
+  document.getElementById('pf-reset').onclick = () => { delete store[mat.value]; save(); load(); };
+  document.getElementById('pf-scad').onclick = () => { fmt = 'scad'; render(); }; document.getElementById('pf-fusion').onclick = () => { fmt = 'list'; render(); };
+  document.getElementById('pf-copy').onclick = e => { out.select(); try { navigator.clipboard.writeText(out.value); e.target.textContent = 'Copied'; setTimeout(() => e.target.textContent = 'Copy', 1200); } catch (x) { /* user can copy manually */ } };
+  load();
+})();
+
+/* ---------- Tool 2: checklist ---------- */
+(function () {
+  const C = [
+    ['gen', 'General (always)', 2, [['Requirements sheet written (function, loads, life, environment)', 18], ['Parts sorted into print and buy; bought parts measured', 15], ['Parameters named; fit coupons printed for critical interfaces', 4], ['Orientation planned: loads along layers, round features vertical', 4], ['Fillets on loaded corners; chamfer on first-layer edges', 2], ['Free motion by hand before fitting the motor', 18]]],
+    ['dof', 'Linkages and joints', 5, [['Degrees of freedom counted; over-constraint checked', 1], ['Grashof and transmission angle > 40° checked', 5], ['Dead centres avoided or stopped; links in separate planes', 5]]],
+    ['gear', 'Gears', 7, [['Same module and pressure angle; z ≥ 17 at 20°; contact ratio ≥ 1.2', 7], ['Backlash 0.1–0.3 mm; centre distance exact to ±0.1; mounts in one part', 7], ['Torque capacity estimated with a conservative stress', 7]]],
+    ['belt', 'Belts, chains, cables', 8, [['Profile matches; small pulley ≥ 16T (GT2); ≥ 6 teeth in mesh', 8], ['Tensioning method built in; pulleys aligned in one plane', 8], ['Frame stiff enough for belt pull', 8]]],
+    ['screw', 'Screws and linear guides', 9, [['Lead chosen for speed vs force; locking vs efficiency decided', 9], ['Nut floats; guides guide; thrust on a proper bearing', 9], ['Guide span L > 2μ·a; critical speed checked', 9]]],
+    ['bear', 'Bearings, shafts, couplings', 10, [['Plain-bearing PV checked, or use ball bearings', 10], ['Bearing seat from measured shrink; shoulder + cover; inner ring clamped', 10], ['Span ≥ 2× overhang; flexible coupling between separately supported shafts', 10], ['Torque into hubs via flat, pin or hex, not friction', 10]]],
+    ['cam', 'Cams and followers', 6, [['Motion law chosen; pressure angle ≤ 30°; no undercut', 6], ['Spring covers inertia at top speed; roller on a bearing', 6]]],
+    ['ind', 'Intermittent motion', 11, [['Ratchet stroke > pitch + pawl gap; pawls in tension', 11], ['Geneva centre distance ±0.2 mm; pin on a bearing', 11]]],
+    ['flex', 'Compliant parts, snap-fits', 12, [['Strain checked against the cyclic limit; printed flat', 12], ['Fillets at flexure roots; seam away from the hinge; printed at rest position', 12]]],
+    ['fast', 'Fasteners and springs', 13, [['Inserts or captive nuts for anything opened > 2×', 13], ['Washers, snug torque, sleeve through plastic for clamping', 13], ['Bought spring, guided, 30–70% travel', 13]]],
+    ['lat', 'Latches, locks, clutches', 14, [['Hook face angle gives P_open > 0 under load; positive hold for safety', 14], ['Torque limiter window: running × 1.3 < slip < weakest part ÷ 1.5', 14]]],
+    ['act', 'Motors and actuators', 16, [['Load torque incl. acceleration × 1.5–2 margin; motor within continuous range', 16], ['Supply sized for peak current; heat and stops checked', 16]]],
+    ['hyb', 'Hybrid / electronics / enclosure', 15, [['Strain relief, airflow and cable routing modelled', 15], ['Metal skeleton or plate behind loaded brackets', 15]]],
+    ['pip', 'Print-in-place', 4, [['Gaps 0.3–0.5 mm, no supports in gaps, break-free feature', 4]]],
+    ['heat', 'Heat or outdoor use', 3, [['Material chosen for the worst temperature (≥ 20% margin); UV material outdoors', 3]]]
+  ];
+  const slug = { 2: '02-mechanics-you-need', 3: '03-materials-and-technologies', 4: '04-design-for-3d-printing', 5: '05-linkages', 6: '06-cams-and-followers', 7: '07-gears', 8: '08-belts-chains-cables', 9: '09-screws-and-linear-motion', 10: '10-bearings-shafts-joints', 11: '11-intermittent-motion', 12: '12-compliant-mechanisms', 13: '13-fasteners-joints-springs', 14: '14-latching-locking-clutching', 15: '15-hybrid-builds', 16: '16-actuation', 17: '17-problems-and-solutions', 18: '18-workflow-and-tools', 1: '01-thinking-about-mechanisms' };
+  const host = document.getElementById('ck-opts'), out = document.getElementById('ck-out'); const on = {};
+  C.forEach(c => { if (c[0] === 'gen') return; const l = document.createElement('label'), i = document.createElement('input'); i.type = 'checkbox'; i.onchange = () => { on[c[0]] = i.checked; render(); }; l.append(i, document.createTextNode(c[1])); host.append(l); });
+  function render() {
+    let t = '', n = 0;
+    C.forEach(c => { if (c[0] !== 'gen' && !on[c[0]]) return; t += '## ' + c[1] + '\n'; c[3].forEach(it => { t += '[ ] ' + it[0] + '  (chapter ' + it[1] + ')\n'; n++; }); t += '\n'; });
+    out.value = t.trim() + '\n';
+  }
+  document.getElementById('ck-copy').onclick = e => { out.select(); try { navigator.clipboard.writeText(out.value); e.target.textContent = 'Copied'; setTimeout(() => e.target.textContent = 'Copy checklist', 1200); } catch (x) { /* manual copy */ } };
+  render();
+})();
+</script>
+</body>
+</html>

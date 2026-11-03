@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 9 · Screws and linear motion</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="9">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part B · Mechanism catalog · Chapter 9</p>
+<h1>Screws and linear motion</h1>
+<p class="lead">Two things make a straight-line mechanism work: something that <em>pushes</em> (a screw, a belt, a rack) and something that <em>guides</em> (a rod, a rail, a slot). Most failed printed sliders fail at the guide, not at the drive: they bind, they wobble, or they jam when pushed off-centre. This chapter covers both halves, with the one rule that prevents most sliding jams.</p>
+
+<h2>9.1 Threads and power screws</h2>
+<p>A screw converts rotation to linear motion because a nut on a thread must advance when it turns. Four numbers describe a thread:</p>
+<table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td><strong>Pitch, P</strong></td><td>Distance between adjacent thread crests.</td></tr>
+  <tr><td><strong>Starts, n</strong></td><td>Number of independent threads wound in parallel (1, 2, 4...).</td></tr>
+  <tr><td><strong>Lead, l</strong></td><td>Distance the nut moves per turn: <code>l = n · P</code>. This is what sets the speed.</td></tr>
+  <tr><td><strong>Lead angle, λ</strong></td><td><code>λ = atan( l / (π · d_m) )</code> where d<sub>m</sub> is the mean (pitch) diameter. Steeper λ means faster, less friction-dominated, and not self-locking.</td></tr>
+</table>
+<p>A common hobby leadscrew, <strong>T8×8</strong>, is a 8 mm trapezoidal screw with lead 8 mm: four starts of 2 mm pitch. The same size with <strong>T8×2</strong> has a single start and lead 2 mm: four times slower, four times more force from the same torque, and it holds position by itself.</p>
+<h3>Thread forms</h3>
+<table>
+  <tr><th>Form</th><th>Flank angle</th><th>Use</th></tr>
+  <tr><td>ISO metric (M-thread)</td><td>60°</td><td>Fasteners. Efficient at locking, poor at moving loads (more friction from the steep flanks).</td></tr>
+  <tr><td>Trapezoidal / ACME</td><td>29–30°</td><td>The standard leadscrew thread: strong, easy to make, wear can be taken up by a nut.</td></tr>
+  <tr><td>Square</td><td>0°</td><td>Lowest friction; hard to make with metal tools; <strong>great for printing</strong> (no overhangs on one side).</td></tr>
+  <tr><td>Buttress</td><td>Asymmetric</td><td>Loads in one direction only: jar lids, clamps.</td></tr>
+  <tr><td>Ball screw</td><td>Rolling balls</td><td>~90% efficient, precise, expensive; does not self-lock.</td></tr>
+</table>
+
+<h3>Force, efficiency and self-locking</h3>
+<p>Friction in the thread decides everything. With friction coefficient μ on a flank of half-angle β, define an effective <code>μ′ = μ / cos β</code>. Then:</p>
+<div class="eq">Forward efficiency   η = tan λ · (1 − μ′·tan λ) / (tan λ + μ′)<br>
+Axial force from torque  F = 2π · η · T / l<br>
+Self-locking             when tan λ ≤ μ′   (the load cannot turn the screw back)<br>
+Speed                    v = l · rpm / 60</div>
+<p>Self-locking and high efficiency are <strong>opposites</strong>: a screw that holds its load by itself (shallow λ) spends most of the motor's torque fighting friction (η typically 20–35%), while a steep screw is efficient (60–80%) but can be back-driven by the load. For a vertical axis, either use a self-locking screw, or a motor brake, or a counterweight.</p>
+
+<div class="sim">
+  <h4>Simulation 1 · Leadscrew calculator</h4>
+  <p class="desc">Set the screw size, lead, thread form and friction. The curve shows efficiency against lead angle; the shaded region is where the screw locks. The dot is your screw. Printed or plastic nuts on steel have μ around 0.1–0.25 when lubricated or nylon, higher dry.</p>
+  <canvas id="ls-canvas"></canvas>
+  <div class="row"><label>Thread form <select id="ls-form"><option value="15">Trapezoidal / ACME (30°)</option><option value="30">ISO metric (60°)</option><option value="0">Square (0°)</option></select></label></div>
+  <div class="controls" id="ls-ctl"></div>
+  <div class="readout" id="ls-out"></div>
+</div>
+
+<h3>Backlash and anti-backlash nuts</h3>
+<p>A nut needs clearance to turn on the screw. That clearance is <strong>backlash</strong>: the axial free play when you reverse. Printers and CNCs fix it by preloading the nut so that one flank is always in contact:</p>
+<ul>
+  <li><strong>Spring-loaded split nut</strong>: two half-nuts pushed apart by a spring.</li>
+  <li><strong>Two nuts with a spring or a spacer</strong> between them.</li>
+  <li><strong>Flexible/compliant nut</strong>: a printed nut with a slit and a screw-tightened clamp, or flexures that squeeze the thread.</li>
+  <li><strong>Vertical axes</strong> use gravity as the preload: no anti-backlash needed.</li>
+</ul>
+<h3>Mounting a leadscrew</h3>
+<ul>
+  <li><strong>The screw drives; the guides guide.</strong> If the screw also tries to guide the carriage, the two fight (over-constraint, chapter 1) and you get binding and "Z wobble" ripples. Let the nut <strong>float</strong> in its carrier (a slot or a loose-fitting mount that allows sideways movement but takes the axial load), and keep the screw straight and aligned to the rails.</li>
+  <li><strong>Support the end</strong> with a thrust-capable bearing. The motor shaft bearings are not designed to carry the full axial load of a screw. A small angular-contact or a flat thrust bearing at the free end is cheap.</li>
+  <li><strong>Use a flexible coupler</strong> (helical, bellows or Oldham) between the motor and the screw to absorb shaft misalignment. A rigid coupler wobbles the screw.</li>
+  <li><strong>Critical speed:</strong> a long thin screw whips like a skipping rope at high rpm. Simulation 3 calculates the limit.</li>
+</ul>
+
+<h3>Printed threads</h3>
+<ul>
+  <li><strong>Where they make sense:</strong> screw caps, jar lids, adjusters, clamps, vices, light-duty jacks, hand-turned knobs, and levelling feet. Not high-speed drives.</li>
+  <li><strong>Print vertically</strong> (axis along Z) so the thread is round and the layers wrap around the screw. A horizontal thread prints oval and fuses badly.</li>
+  <li>Use <strong>coarse pitch</strong> (2–4 mm) and a <strong>square or trapezoidal form</strong>; fine ISO threads below 1.5 mm pitch are mostly noise at 0.4 mm nozzle resolution.</li>
+  <li>Give <strong>0.2–0.4 mm of radial clearance</strong> between mating threads, chamfer the entry, and test with a coupon (chapter 4).</li>
+  <li><strong>Multi-start threads</strong> (2–4 starts) give quick opening and closing with the same pitch, like a jar lid.</li>
+  <li><strong>For anything that matters, buy the screw</strong> (a T8 leadscrew is a few euros) and print only the housing. A printed nut on a steel screw works for light duty if it is nylon or lubricated; brass or POM nuts last far longer.</li>
+  <li>For bolted joints, use metal fasteners with heat-set inserts or captive nuts (chapter 13). Don't rely on a printed internal thread for anything that will be tightened repeatedly.</li>
+</ul>
+
+<h2>9.2 Guiding linear motion</h2>
+<p>A sliding carriage must be allowed one degree of freedom (along the track) and have the other five removed. Choose a guide by load, precision and cost:</p>
+<table>
+  <tr><th>Guide</th><th>Strength</th><th>Weakness</th><th>Printing notes</th></tr>
+  <tr><td><strong>Printed rod-in-bore or dovetail/T-slot</strong></td><td>Free, no parts</td><td>Friction, play, wear, stick-slip</td><td>OK for light, slow, rarely used parts. Nylon + a little lubricant; one printed part sliding in another is a classic jam.</td></tr>
+  <tr><td><strong>Round rod + bronze/polymer bushing</strong></td><td>Cheap, quiet, smooth</td><td>Friction; needs parallel alignment</td><td>Press bushings into a printed bore. Keep the span between bushings long.</td></tr>
+  <tr><td><strong>Round rod + linear ball bearing (LM8UU etc.)</strong></td><td>Low friction, cheap</td><td>Rods must be parallel; bearings dislike side loads and rods sag</td><td>The classic printer solution; mount in printed pockets with a zip tie or clamp.</td></tr>
+  <tr><td><strong>Supported rail (SBR)</strong></td><td>Handles long spans</td><td>Heavier, costs more</td><td>Screw to a rigid base, not a printed flexible one.</td></tr>
+  <tr><td><strong>Profile rail (MGN, HGR)</strong></td><td>Stiff, precise, smooth</td><td>Cost; needs a flat, rigid mounting surface</td><td>Print the carriage plate, buy the rail and block.</td></tr>
+  <tr><td><strong>V-wheels on aluminium extrusion</strong></td><td>Easy, adjustable, rugged</td><td>Moderate precision, wheels flatten</td><td>Print the plates; use eccentric nuts for preload.</td></tr>
+  <tr><td><strong>Skate bearings on a track</strong></td><td>Very cheap, quiet</td><td>Small contact, only light loads</td><td>Great for lids, drawers, camera sliders.</td></tr>
+</table>
+
+<h3>The rule that prevents jamming</h3>
+<p>A carriage pushed with a force F applied at distance <em>a</em> from the guide's axis tries to tilt. It is held by two contact points at the ends of its guide span <em>L</em>, so the normal force at each is N = F·a/L. Friction at both contacts is 2μN. The carriage <em>jams</em> (the friction exceeds the push) when</p>
+<div class="eq">2 · μ · F · a / L ≥ F        →        a ≥ L / (2μ)</div>
+<p>In words: <strong>the span must be longer than 2μ times the push offset</strong> (L &gt; 2μ·a). With μ = 0.3 the span must exceed 0.6× the offset; with a sticky μ = 0.6 it must exceed 1.2×. The cure is always the same: <strong>push close to the guide axis, make the guide span long, or reduce μ</strong>. This is why a drawer pushed at one corner binds while the same drawer pushed in the middle glides, why a short printed bushing on a long arm jams, and why leadscrew nuts should push centrally.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · Guide span, play and jamming</h4>
+  <p class="desc">A carriage slides on a rod with a span L between its bearing points and is pushed with a force at distance a above the rod. Tilt from play grows as clearance/span; jamming appears when a exceeds L/(2μ). The tilt is drawn exaggerated.</p>
+  <canvas id="gd-canvas"></canvas>
+  <div class="controls" id="gd-ctl"></div>
+  <div class="readout" id="gd-out"></div>
+</div>
+
+<h3>Over-constraint in linear guides</h3>
+<p>Remember chapter 1: two parallel rods each fix the carriage's tilt and position. If they're not exactly parallel (and printed frames never are), the carriage binds. Cures:</p>
+<ul>
+  <li>Use <strong>one precise guide</strong> (a rod/rail) plus a second, <strong>loose or compliant</strong> support (a slot, a free-floating bearing, a flat surface).</li>
+  <li><strong>Print both rod mounts in one part</strong>, so the parallelism comes from the print, not from separate brackets.</li>
+  <li>If using two rods with ball bearings, mount one bearing on a <strong>flexure</strong> or a slightly loose holder.</li>
+  <li><strong>Check by hand</strong>: the carriage should move by a fingertip with no power and no "tight spots" along the stroke before you add the drive.</li>
+</ul>
+
+<h2>9.3 Critical speed and long screws</h2>
+<p>A long, slender screw has a natural bending frequency, and spinning near it makes it whip violently. For a steel screw with root diameter d and unsupported length L (both in mm):</p>
+<div class="eq">n_critical ≈ 1.22 × 10⁸ · k · d / L²     [rpm]<br>
+k = 0.36 (fixed–free), 1.0 (pinned–pinned), 1.56 (fixed–pinned), 2.27 (fixed–fixed)<br>
+Run at ≤ 80% of this value.</div>
+
+<div class="sim">
+  <h4>Simulation 3 · Leadscrew critical speed</h4>
+  <p class="desc">Root diameter, unsupported length and how the ends are held. The maximum safe speed and the matching linear speed follow.</p>
+  <div class="row"><label>Supports <select id="cs-k"><option value="0.36">Fixed–free (motor end only)</option><option value="1" selected>Pinned–pinned (a bearing at each end)</option><option value="1.56">Fixed–pinned</option><option value="2.27">Fixed–fixed</option></select></label></div>
+  <div class="controls" id="cs-ctl"></div>
+  <div class="readout" id="cs-out"></div>
+</div>
+<p>Fixes for a screw that whips: shorten the unsupported length, support the free end with a bearing, use a larger diameter, or slow it down. A leadscrew with a <em>bent</em> shaft wobbles at every speed, so check straightness by rolling it on a flat surface.</p>
+
+<h2>9.4 Vertical axes and holding loads</h2>
+<ul>
+  <li>A belt or a high-lead (non-self-locking) screw <strong>lets the load fall</strong> when the motor loses power. A stepper motor's holding torque disappears with the power.</li>
+  <li>Options: a <strong>self-locking low-lead screw</strong>; a <strong>brake</strong> on the motor; a <strong>counterweight or gas/constant-force spring</strong> that cancels most of the weight; a <strong>worm drive</strong> (chapter 7).</li>
+  <li>For a Z axis carrying a heavy printed head, a counterweight or spring both saves motor torque and avoids crashing on power loss.</li>
+</ul>
+
+<h2>9.5 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Carriage binds partway along</td><td>Rods not parallel (over-constraint); a bent rod</td><td>One fixed + one floating guide; print rod mounts in one part; shim</td></tr>
+  <tr><td>Jams when pushed from one side</td><td>Push offset a too big for the span L (a ≥ L/2μ)</td><td>Push at the centre; longer span; lower μ; add a second guide</td></tr>
+  <tr><td>Z banding (ripples on prints) / wobble</td><td>Bent or misaligned leadscrew, rigidly constrained nut</td><td>Floating nut, flexible coupler, straight screw</td></tr>
+  <tr><td>Slop in the axis</td><td>Nut backlash, bushing play</td><td>Anti-backlash nut, tighter fit, preload</td></tr>
+  <tr><td>Stick-slip, juddering motion</td><td>Static friction &gt; kinetic friction; dry plastic</td><td>Lubricant, different materials, smoother surfaces, stiffer drive</td></tr>
+  <tr><td>Screw whips or sings</td><td>Critical speed; loose end</td><td>Support the end, shorten the span, slow down</td></tr>
+  <tr><td>Nut wears or melts</td><td>High friction, PLA, heat</td><td>Brass or POM nut; lubricate; reduce the preload</td></tr>
+  <tr><td>Axis creeps down when unpowered</td><td>Non-self-locking drive</td><td>Counterweight, brake, lower lead</td></tr>
+  <tr><td>Rod bows under the load</td><td>Unsupported long rod, thin rod</td><td>Thicker rod, supported rail, shorter span</td></tr>
+</table>
+
+<h2>9.6 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Screw: lead chosen for speed and force (use Simulation 1); locking vs efficiency decided on purpose.</li>
+  <li>☐ Thrust is carried by a proper axial bearing, not the motor shaft.</li>
+  <li>☐ Nut floats; the guides do the guiding.</li>
+  <li>☐ Guide span L &gt; 2μ·a; the load is pushed close to the guide axis.</li>
+  <li>☐ Not two rigid, separately aligned parallel guides.</li>
+  <li>☐ Critical speed checked for long screws; vertical axis has a brake or counterweight.</li>
+  <li>☐ Free-motion check by hand before the motor goes on.</li>
+</ul>
+<ul>
+  <li>Printing a long thread horizontally and wondering why it's oval and tight.</li>
+  <li>Using a rigid coupler on a screw that is not perfectly aligned with the motor.</li>
+  <li>Mounting a single short bushing at the end of a long arm and pushing at the tip.</li>
+  <li>Choosing a leadscrew for speed (high lead) and then wanting it to hold position without power.</li>
+</ul>
+
+<h2>9.7 Check yourself</h2>
+<details class="quiz"><summary>A T8×2 screw (lead 2 mm) and a T8×8 (lead 8 mm) use the same 0.3 N·m motor. Compare their ideal thrust (ignoring friction).</summary>
+<p>F = 2π·T/l. For lead 2 mm: 2π·0.3/0.002 ≈ 940 N. For lead 8 mm: ≈ 235 N. Four times less thrust but four times the speed. (Real thrust is further reduced by efficiency: much more so for the low-lead screw.)</p></details>
+<details class="quiz"><summary>A carriage with a 30 mm guide span is pushed from 25 mm off the rod's axis. With μ = 0.3, does it jam?</summary>
+<p>Jam if a ≥ L/(2μ) = 30 / 0.6 = 50 mm. Here a = 25 mm &lt; 50 mm, so it slides (but with high friction: at 25 mm you are halfway to the limit). Halve the span or double the offset and it jams.</p></details>
+<details class="quiz"><summary>Why can't you simply tighten two parallel rods and bearings to remove the play?</summary>
+<p>Because two rigid guides fix the same degrees of freedom twice. Any slight non-parallelism makes the carriage bind. Use one precise guide and let the other float or flex.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2, R2D = 180 / Math.PI;
+
+/* ---------- Sim 1: leadscrew ---------- */
+(function () {
+  const S = { d: 8, lead: 8, mu: 0.2, T: 0.3, rpm: 600 };
+  const formSel = document.getElementById('ls-form'), canvas = document.getElementById('ls-canvas'), out = document.getElementById('ls-out');
+  const mup = () => S.mu / Math.cos(+formSel.value * Math.PI / 180);
+  const eta = lam => { const t = Math.tan(lam), m = mup(); return t * (1 - m * t) / (t + m); };
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const l = 44, r = 12, t = 14, b = h - 28, pw = w - l - r, ph = b - t, X = a => l + a / 45 * pw, Y = e => b - Math.max(0, Math.min(1, e)) * ph;
+    const lock = Math.atan(mup()) * R2D, dm = 0.875 * S.d, lam = Math.atan(S.lead / (Math.PI * dm));
+    c.fillStyle = col.warn + '22'; c.fillRect(l, t, X(Math.min(45, lock)) - l, ph);
+    c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'right';
+    [0, 0.25, 0.5, 0.75, 1].forEach(e => { c.beginPath(); c.moveTo(l, Y(e)); c.lineTo(l + pw, Y(e)); c.stroke(); c.fillText(Math.round(e * 100) + '%', l - 4, Y(e) + 4); });
+    c.textAlign = 'center'; [0, 10, 20, 30, 40].forEach(a => c.fillText(a + '°', X(a), h - 10));
+    c.strokeStyle = col.accent; c.lineWidth = 2.5; c.beginPath(); for (let a = 0.2; a <= 45; a += 0.2) { const e = eta(a / R2D); a === 0.2 ? c.moveTo(X(a), Y(e)) : c.lineTo(X(a), Y(e)); } c.stroke();
+    Sim.dot(c, X(Math.min(45, lam * R2D)), Y(eta(lam)), 7, col.accent2, col.surface);
+    c.textAlign = 'left'; c.fillStyle = col.warn; c.fillText('self-locking', l + 6, t + 14); c.fillStyle = col.muted; c.fillText('forward efficiency vs lead angle', l + 6 + 80, t + 14);
+  });
+  function info() {
+    const dm = 0.875 * S.d, lam = Math.atan(S.lead / (Math.PI * dm)), e = eta(lam), locks = Math.tan(lam) <= mup(), F = e * TAU * S.T / (S.lead / 1000), v = S.lead * S.rpm / 60 / 1000;
+    out.innerHTML = 'Lead angle <strong>' + (lam * R2D).toFixed(1) + '°</strong> (mean Ø ≈ ' + dm.toFixed(1) + ' mm) · efficiency <strong>' + (e * 100).toFixed(0) + '%</strong> · <strong style="color:var(--' + (locks ? 'warn' : 'good') + ')">' + (locks ? 'self-locking: the load cannot back-drive it' : 'not self-locking: the load can turn the screw') + '</strong>.<br>' +
+      'At ' + S.T.toFixed(2) + ' N·m: thrust ≈ <strong>' + F.toFixed(0) + ' N</strong> (' + (F / 9.81).toFixed(0) + ' kgf); at ' + S.rpm + ' rpm: speed <strong>' + v.toFixed(3) + ' m/s</strong> (' + (v * 1000).toFixed(0) + ' mm/s).';
+  }
+  const refresh = () => { view.redraw(); info(); };
+  const hs = document.getElementById('ls-ctl');
+  [['d', 'Screw Ø', 6, 20, 1, 0, ' mm'], ['lead', 'Lead', 1, 20, 1, 0, ' mm'], ['mu', 'Friction μ', 0.05, 0.4, 0.01, 2, ''], ['T', 'Torque', 0.05, 1.5, 0.05, 2, ' N·m'], ['rpm', 'Speed', 60, 1500, 30, 0, ' rpm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; refresh(); } }));
+  formSel.onchange = refresh; refresh();
+})();
+
+/* ---------- Sim 2: guide span ---------- */
+(function () {
+  const S = { L: 40, c: 0.3, a: 30, mu: 0.3 };
+  const canvas = document.getElementById('gd-canvas'), out = document.getElementById('gd-out');
+  const view = Sim.make(canvas, 0.5, (c, w, h, col) => {
+    const jam = S.a >= S.L / (2 * S.mu), sc = Math.min((w - 60) / 200, (h - 40) / 140), cx = w * 0.45, cy = h * 0.72, tilt = Math.min(0.18, S.c / S.L * 6);
+    const color = jam ? col.warn : S.a >= S.L / (2 * S.mu) * 0.6 ? col.accent2 : col.good;
+    Sim.line(c, 20, cy, w - 20, cy, col.muted, 5);
+    c.save(); c.translate(cx, cy); c.rotate(-tilt);
+    const Lp = S.L * sc, ap = S.a * sc;
+    c.fillStyle = color + '55'; c.strokeStyle = color; c.lineWidth = 2; c.fillRect(-Lp / 2, -14, Lp, 28); c.strokeRect(-Lp / 2, -14, Lp, 28);
+    Sim.line(c, 0, -14, 0, -ap, color, 5); Sim.dot(c, 0, -ap, 5, col.surface, col.ink);
+    Sim.dot(c, -Lp / 2, 14, 4, col.ink); Sim.dot(c, Lp / 2, -14, 4, col.ink);
+    c.restore();
+    // push force arrow at height a, pointing right
+    const px = cx - 6, py = cy - ap * Math.cos(tilt);
+    Sim.line(c, px - 60, py, px - 6, py, col.accent2, 3); c.fillStyle = col.accent2; c.beginPath(); c.moveTo(px, py); c.lineTo(px - 12, py - 6); c.lineTo(px - 12, py + 6); c.fill();
+    c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText('push F', px - 36, py - 10);
+    c.fillText('span L = ' + S.L + ' mm', cx, cy + 30); c.fillText(jam ? 'JAMMED: friction > push' : 'a / (L/2μ) = ' + (S.a / (S.L / (2 * S.mu))).toFixed(2), cx, cy + 46);
+  });
+  function info() {
+    const lim = S.L / (2 * S.mu), jam = S.a >= lim, tilt = S.c / S.L, play = tilt * S.a;
+    out.innerHTML = 'Jam limit: a &lt; L/(2μ) = <strong>' + lim.toFixed(0) + ' mm</strong>; your offset a = ' + S.a + ' mm → <strong style="color:var(--' + (jam ? 'warn' : S.a > lim * 0.6 ? 'accent2' : 'good') + ')">' + (jam ? 'it jams' : S.a > lim * 0.6 ? 'sliding but heavy (close to the jam limit)' : 'slides freely') + '</strong>. ' +
+      'Free play: tilt ≈ clearance/span = <strong>' + (tilt * R2D).toFixed(2) + '°</strong> → <strong>' + play.toFixed(2) + ' mm</strong> of rattle at the tip.' + (jam || S.a > lim * 0.6 ? ' Fix: push closer to the guide, lengthen the span, or lower μ.' : '');
+    view.redraw();
+  }
+  const hs = document.getElementById('gd-ctl');
+  [['L', 'Guide span L', 10, 120, 1, 0, ' mm'], ['a', 'Push offset a', 5, 150, 1, 0, ' mm'], ['c', 'Clearance', 0.05, 0.6, 0.05, 2, ' mm'], ['mu', 'Friction μ', 0.05, 0.8, 0.05, 2, '']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
+})();
+
+/* ---------- Sim 3: critical speed ---------- */
+(function () {
+  const S = { d: 6, L: 300, lead: 8 }, sel = document.getElementById('cs-k'), out = document.getElementById('cs-out');
+  function info() {
+    const ncr = 1.22e8 * +sel.value * S.d / (S.L * S.L), nmax = 0.8 * ncr, v = S.lead * nmax / 60;
+    out.innerHTML = 'Critical speed ≈ <strong>' + Math.round(ncr) + ' rpm</strong>; keep below <strong>' + Math.round(nmax) + ' rpm</strong> → with lead ' + S.lead + ' mm the fastest safe linear speed is <strong>' + v.toFixed(0) + ' mm/s</strong>.' + (nmax < 600 ? ' <strong style="color:var(--warn)">Low: support the end, shorten, or use a thicker screw.</strong>' : '');
+  }
+  const hs = document.getElementById('cs-ctl');
+  [['d', 'Root Ø', 3, 20, 0.5, 1, ' mm'], ['L', 'Unsupported length', 100, 1200, 10, 0, ' mm'], ['lead', 'Lead', 1, 20, 1, 0, ' mm']].forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  sel.onchange = info; info();
+})();
+</script>
+</body>
+</html>

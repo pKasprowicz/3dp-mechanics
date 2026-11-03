@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 15 · Hybrid builds: printed + off-the-shelf</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-ch="15">
+<div class="layout">
+<aside id="nav"></aside>
+<main>
+<p class="kicker">Part C · Putting it together · Chapter 15</p>
+<h1>Hybrid builds: printed + off-the-shelf</h1>
+<p class="lead">The best printed mechanisms are not fully printed. They are a few printed parts that carry the shape, wrapped around a small set of bought parts that carry the precision and the load. This chapter is about drawing that line: what to print, what to buy, which standard sizes to design around, and how to make printed parts fit parts you didn't make.</p>
+
+<h2>15.1 The rule of thumb</h2>
+<p>A 3D printer is brilliant at <strong>custom shapes</strong>, <strong>one-offs</strong>, <strong>complicated geometry</strong> and <strong>quick iteration</strong>. It is poor at <strong>precision</strong>, <strong>hardness</strong>, <strong>wear resistance</strong>, <strong>stiffness</strong> and <strong>consistent material properties</strong>. Mass-produced standard parts are exactly the opposite: cheap, hard, precise, available in any size. So:</p>
+<table>
+  <tr><th>Print it</th><th>Buy it</th></tr>
+  <tr><td>Housings, frames, brackets, mounts, covers</td><td>Shafts and rods (ground steel, precise diameter)</td></tr>
+  <tr><td>Links, levers, arms, cams (profile unique to you)</td><td>Bearings (ball, linear, needle)</td></tr>
+  <tr><td>Knobs, handles, clips, cable guides, jigs</td><td>Screws, nuts, washers, heat-set inserts, dowels</td></tr>
+  <tr><td>Light gears, pulleys for large pitches (HTD 5M), snap-fits</td><td>Springs, GT2 pulleys, belts, chains, cables</td></tr>
+  <tr><td>Complex ducts, enclosures, organic shapes</td><td>Motors, servos, sensors, electronics, fans</td></tr>
+  <tr><td>Standoffs, spacers, alignment features</td><td>Linear rails, V-wheels, extrusion, plates</td></tr>
+  <tr><td>Sleeves and housings around metal parts</td><td>High-torque gears, keys, couplers, shaft collars</td></tr>
+  <tr><td>Magnet pockets, nut traps, bearing seats</td><td>Magnets, nuts, balls, rollers</td></tr>
+</table>
+<p>A useful test for each part: <em>Will its failure cost me more than a bought one would?</em> A bracket you can reprint in an hour: print it. A bearing that must run smooth for years: buy it.</p>
+
+<h3>Deciding quickly: five questions</h3>
+<ol>
+  <li><strong>Does it need exact dimensions or a smooth, hard surface?</strong> → buy (or finish: ream, sand, sleeve).</li>
+  <li><strong>Does it rub, roll or slide continuously?</strong> → bearing, bushing or a metal contact surface.</li>
+  <li><strong>Is it highly loaded or critical?</strong> → metal, or at least a metal insert, pin or sleeve.</li>
+  <li><strong>Is the shape unique to this project?</strong> → print.</li>
+  <li><strong>Does a standard version exist for a few euros?</strong> → buy; your time is worth more than the saving.</li>
+</ol>
+
+<h2>15.2 Standards to design around</h2>
+<p>Standardised sizes are a gift: every bolt pattern and diameter listed here is a fixed point your design can hang off. <strong>Always verify with calipers</strong>, since budget parts vary from the datasheet.</p>
+
+<h3>Stepper motors (NEMA)</h3>
+<table>
+  <tr><th>Frame</th><th>Face (mm)</th><th>Bolt square (mm)</th><th>Screws</th><th>Pilot boss Ø (mm)</th><th>Typical shaft Ø (mm)</th></tr>
+  <tr><td>NEMA 11</td><td>28.2</td><td>23.0</td><td>M2.5</td><td>22</td><td>5</td></tr>
+  <tr><td>NEMA 14</td><td>35.2</td><td>26.0</td><td>M3</td><td>22</td><td>5</td></tr>
+  <tr><td><strong>NEMA 17</strong></td><td>42.3</td><td>31.0</td><td>M3</td><td>22</td><td>5</td></tr>
+  <tr><td>NEMA 23</td><td>56.4</td><td>47.14</td><td>M5 (or M4)</td><td>38.1</td><td>6.35 or 8</td></tr>
+</table>
+<p>NEMA 17 is the universal printed-mechanism motor: body lengths of 34–48 mm (the length matters for torque, not for the mounting pattern), 1.8° per full step, and a 5 mm shaft, often with a flat. The <strong>pilot boss</strong> centres the motor on a hole: bore it to the pilot diameter + 0.3–0.5 mm. Screws go through the plate from outside into the motor's tapped holes: <strong>check the screw length</strong> so it doesn't bottom in the motor (typically no more than 3–4 mm of thread into a NEMA 17).</p>
+
+<h3>Other common standards</h3>
+<table>
+  <tr><th>Part</th><th>Standard dimensions</th><th>Note</th></tr>
+  <tr><td>Aluminium extrusion 2020</td><td>20 × 20 mm; slot opening ≈ 6.2 mm; T-nuts for M5; 5 mm centre bore</td><td>Printed brackets bolt on with M5 and T-nuts; 3030 and 2040 are siblings</td></tr>
+  <tr><td>Linear bearings LM6/8/10/12UU</td><td>OD × length: 12×19, 15×24, 19×29, 21×30 mm for 6/8/10/12 mm rods</td><td>Press into pockets with a zip tie or clamp; lengths vary by maker</td></tr>
+  <tr><td>Steel rod (ground)</td><td>Ø 3, 4, 5, 6, 8, 10, 12 mm</td><td>Cut with a hacksaw, deburr; hardened rods resist cutting</td></tr>
+  <tr><td>GT2 pulleys</td><td>16 or 20 teeth; bore 5 or 8 mm</td><td>Chapter 8</td></tr>
+  <tr><td>Fans</td><td>40, 60, 80, 120 mm; hole spacing 32, 50, 71.5, 105 mm</td><td>Hole spacing is the same square pattern on each; M3 for 40 mm, M4 for larger</td></tr>
+  <tr><td>Disc magnets</td><td>Ø 6×3, 8×3, 10×3, 12×3 mm (typical neodymium)</td><td>Pocket = diameter + 0.1–0.2 mm (press fit) and glue; mind polarity; below ~80 °C</td></tr>
+  <tr><td>Raspberry Pi boards</td><td>Mounting holes 58 × 49 mm, M2.5</td><td>Use standoffs; leave airflow</td></tr>
+  <tr><td>Batteries</td><td>18650: Ø18.6 × 65.3 mm max; AA: Ø14.5 × 50.5 mm</td><td>Allow +0.5 mm clearance and contact springs; ventilate; never print in a way that traps a hot cell</td></tr>
+</table>
+
+<div class="sim">
+  <h4>Simulation 1 · Motor mount plate generator</h4>
+  <p class="desc">Pick the motor frame and your printer's hole shrink. It draws a mounting plate with the correct bolt pattern, the pilot-boss opening, and optional slots for belt tensioning, then exports the outline as an SVG, plus a ready-made OpenSCAD snippet.</p>
+  <canvas id="mm-canvas"></canvas>
+  <div class="row"><label>Motor <select id="mm-motor"></select></label><button id="mm-svg">Download SVG</button><button id="mm-copy">Copy OpenSCAD</button></div>
+  <div class="controls" id="mm-ctl"></div>
+  <div class="readout" id="mm-out"></div>
+  <pre id="mm-scad" style="max-height:170px;overflow:auto;font-size:12px;background:var(--code-bg);padding:10px;border-radius:8px;margin-top:8px"></pre>
+</div>
+
+<h2>15.3 Designing around parts you bought</h2>
+<ul>
+  <li><strong>Buy first, design second.</strong> Get the motor, bearings, rods and magnets in hand and measure them with calipers before modelling the parts that hold them. Datasheet values for cheap parts are only nominal.</li>
+  <li><strong>Add a reference model.</strong> Put simple solid models of the bought parts in your CAD assembly so you can see collisions, check screw lengths and verify the stack-up (a bearing 0.3 mm thicker than expected will jam a cover).</li>
+  <li><strong>Parametric pockets.</strong> Make every seat a parameter (<code>bearing_od = 22; fit = 0.0; shrink = 0.15</code>), so adjusting for a new filament is a number change. Simulation 2 gives these.</li>
+  <li><strong>Test the interface alone.</strong> Before a 6-hour print, print a 5-minute <em>fit coupon</em> containing only the pockets and holes: bearing seat, motor pilot, nut trap. It saves whole prints.</li>
+  <li><strong>Make wear parts replaceable.</strong> Mount bearings, bushings and pads in a way that lets you swap them without re-printing.</li>
+  <li><strong>Over-constraint again:</strong> where several bought parts must align (two rods, two bearings, a motor and a leadscrew) print the mounts in one piece, or give one a slot (chapters 1, 9, 10).</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 2 · Pocket calculator for standard parts</h4>
+  <p class="desc">Choose the bought part, the fit you want and your measured hole shrink. It gives the pocket size to model.</p>
+  <div class="row"><label>Part <select id="pk-part"></select></label><label>Fit <select id="pk-fit"><option value="-0.08">Press fit (−0.08)</option><option value="-0.02" selected>Snug (−0.02)</option><option value="0.1">Slip (+0.10)</option><option value="0.25">Free (+0.25)</option></select></label></div>
+  <div class="controls" id="pk-ctl"></div>
+  <div class="readout" id="pk-out"></div>
+</div>
+
+<h2>15.4 Interface patterns that work</h2>
+<h3>Printed parts on a metal skeleton</h3>
+<p>Aluminium extrusion (2020) or a rigid plate carries the structure; printed parts are the <em>brackets</em>, mounts and moving pieces. The metal provides stiffness and alignment and the print provides the custom shapes. A printed bracket bolts to a T-slot with M5 screws and T-nuts; give the bolt hole 5.4–5.6 mm, add a pocket for the nut, and make the bracket 4–6 mm thick with ribs. Do not use printed parts as the main structure for large loads.</p>
+<h3>Reinforcing printed parts with metal</h3>
+<ul>
+  <li><strong>Steel or carbon-fibre rods through arms</strong>: embed a rod or tube in a long printed arm (drill or print a channel, glue it) to multiply the stiffness. An arm that bends under load becomes rigid.</li>
+  <li><strong>Brass or steel sleeves</strong> through bolt holes carry the clamp load (chapter 13).</li>
+  <li><strong>Metal pins</strong> in hinges and latches; <strong>steel inserts</strong> in threaded holes.</li>
+  <li><strong>Plywood, acrylic or aluminium plates</strong> as bases, with printed standoffs and feet.</li>
+</ul>
+<h3>Shafts and hubs</h3>
+<p>Steel shaft, bearings in the housing, and a printed hub fixed to the shaft with a D-flat and grub screw: the standard hybrid rotary axis (chapter 10).</p>
+<h3>Electronics</h3>
+<ul>
+  <li>Mount boards on <strong>standoffs</strong> (printed or brass) with the right screw size (M2.5 for Pi-type boards, M3 for many others) and allow for connector access and cable bend radius.</li>
+  <li><strong>Strain relief</strong> for every cable that moves or can be tugged: a clamp, a tie-down point, a loop.</li>
+  <li>Motors and drivers get hot. Leave ventilation or a heatsink; keep PLA away from heat sources (chapter 3).</li>
+  <li>Keep wiring channels in the model: a part that "has room for the wires" on paper usually doesn't.</li>
+</ul>
+
+<h2>15.5 Sourcing and a first shopping list</h2>
+<p>Buy in <strong>assortments</strong> first, then replace with exact sizes once you know what you use. Prefer reputable suppliers for bearings, linear rails and motors; cheap ones are fine for screws, nuts and magnets.</p>
+<ul>
+  <li>☐ <strong>Digital calipers</strong> (the most important tool you will buy).</li>
+  <li>☐ M2, M2.5, M3, M4 socket-head screw assortment (6–40 mm), nuts, washers, and thread-forming screws.</li>
+  <li>☐ <strong>Heat-set inserts</strong> (M2, M3, M4) and a soldering iron with insert tips.</li>
+  <li>☐ <strong>Bearings:</strong> 623, 624, 625, 608 (and 688); a few LM8UU if you plan linear axes.</li>
+  <li>☐ <strong>Steel rods:</strong> 3, 4, 5, 6, 8 mm, 300–500 mm lengths; a hacksaw and file.</li>
+  <li>☐ <strong>Springs:</strong> a compression-spring assortment; extension and torsion for specific jobs.</li>
+  <li>☐ <strong>Motion:</strong> a NEMA 17 + driver (A4988/TMC2209-class), a few hobby servos, GT2 belt and 16/20T pulleys, a T8 leadscrew + nut, flexible couplers (5→8 mm).</li>
+  <li>☐ <strong>Structure:</strong> a few lengths of 2020 extrusion, T-nuts, M5 bolts, corner brackets.</li>
+  <li>☐ <strong>Misc:</strong> disc magnets (6×3, 8×3, 10×3), steel balls (6 mm), D-shaft keys or grub screws, silicone and PTFE grease, cyanoacrylate + epoxy, zip ties, heat-shrink, hex keys, small drill bits (3, 4, 5, 8 mm) for reaming.</li>
+</ul>
+
+<h3>Print vs buy: a quick cost check</h3>
+<p>Printed parts are almost never free: filament, machine time, failed prints and your time all count. For small standard parts the bought one is often cheaper, and always more consistent.</p>
+<div class="sim">
+  <h4>Simulation 3 · Print-or-buy cost check</h4>
+  <p class="desc">Rough cost of a printed part against the bought equivalent. Prices are examples; change them to your own.</p>
+  <div class="controls" id="pb-ctl"></div>
+  <div class="readout" id="pb-out"></div>
+</div>
+
+<h2>15.6 Common problems and fixes</h2>
+<table>
+  <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Bought part doesn't fit the pocket</td><td>Datasheet vs real dimension; printer shrink forgotten</td><td>Measure; add shrink; fit coupon first</td></tr>
+  <tr><td>Cover won't close over bearings</td><td>Stack-up of bearing width, seat depth and tolerances</td><td>Reference model in CAD; 0.2–0.3 mm slack in depth</td></tr>
+  <tr><td>Screw too long, hits the motor or bottoms out</td><td>Not checked against bought-part depth</td><td>Specify length from the model; washer or shorter screw</td></tr>
+  <tr><td>Wrong thread (M3 vs #6-32, M5 vs ¼″)</td><td>Metric/imperial mix-up</td><td>Check with a gauge or nut; buy one family</td></tr>
+  <tr><td>Rods or rails not parallel; carriage binds</td><td>Separate mounts, printed frame flex</td><td>Print both mounts in one part; floating bearing; shims</td></tr>
+  <tr><td>Bracket flexes or creeps</td><td>Thin printed part loaded</td><td>Ribs, thicker, metal plate or extrusion behind it</td></tr>
+  <tr><td>Magnet falls out or is the wrong polarity</td><td>Loose pocket, no marking</td><td>Glue; mark polarity on the model; test with a spare</td></tr>
+  <tr><td>Motor or driver overheats in the case</td><td>Enclosed, no airflow</td><td>Vents, a fan, a heatsink, or mount the motor on a metal plate</td></tr>
+  <tr><td>Cheap bearing is rough or sticky</td><td>Quality varies</td><td>Buy better, or test by hand; wash and re-grease</td></tr>
+</table>
+
+<h2>15.7 Checklist and common mistakes</h2>
+<ul>
+  <li>☐ Every part sorted into print or buy by the five questions.</li>
+  <li>☐ Bought parts measured with calipers; models in the CAD assembly.</li>
+  <li>☐ All pockets and holes parametric, compensated for shrink; a fit coupon printed.</li>
+  <li>☐ Metal skeleton or plate behind loaded printed brackets.</li>
+  <li>☐ Heat, cables and airflow planned.</li>
+  <li>☐ A BoM kept: item, size, quantity, supplier, price.</li>
+</ul>
+<ul>
+  <li>Printing a bearing seat from the datasheet number and finding it won't press in.</li>
+  <li>Printing everything, including things a 20-cent part does better.</li>
+  <li>Building with no calipers.</li>
+  <li>Putting electronics in a sealed printed box with a motor.</li>
+</ul>
+
+<h2>15.8 Check yourself</h2>
+<details class="quiz"><summary>You need to mount a NEMA 17 on a printed plate. Where do the four screw holes go and how big are the holes?</summary>
+<p>A 31 mm square pattern: holes at (±15.5, ±15.5) mm from the shaft axis, M3 clearance (3.4 mm nominal, plus your shrink). The pilot opening at the centre is Ø22 mm + 0.3–0.5 mm clearance + shrink. Cut the screw holes as slots if the motor must move to tension a belt.</p></details>
+<details class="quiz"><summary>You measure a 608 bearing at 22.02 mm OD and your printer shrinks holes 0.18 mm. What do you model for a snug fit (−0.02)?</summary>
+<p>22.02 − 0.02 + 0.18 = <strong>22.18 mm</strong>. Check it on a fit coupon; add a shoulder and cover so the bearing is captured regardless.</p></details>
+<details class="quiz"><summary>A printed gear costs €0.40 in filament and 40 minutes of machine time. A bought equivalent costs €2. Which should you use for a one-off prototype and which for a production part?</summary>
+<p>Prototype: print it. It is cheaper and shaped exactly as needed; the test tells you whether it works. Production or load-bearing: consider buying: the €2 part is harder, more consistent and will not wear out or creep.</p></details>
+
+<div class="pager" id="pager"></div>
+</main>
+</div>
+<script src="../assets/chapters.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/sim.js"></script>
+<script>
+const TAU = Math.PI * 2;
+
+/* ---------- Sim 1: motor mount plate ---------- */
+(function () {
+  const M = { 'NEMA 11': [28.2, 23, 22, 2.5, 2.9], 'NEMA 14': [35.2, 26, 22, 3, 3.4], 'NEMA 17': [42.3, 31, 22, 3, 3.4], 'NEMA 23': [56.4, 47.14, 38.1, 5, 5.5] };
+  const S = { shrink: 0.15, margin: 8, slot: 4, th: 6 }, sel = document.getElementById('mm-motor'); Object.keys(M).forEach(k => sel.add(new Option(k, k))); sel.value = 'NEMA 17';
+  const dims = () => { const [face, pitch, boss, , clr] = M[sel.value]; return { face, pitch, boss, clr, W: face + 2 * S.margin, pilot: boss + 0.4 + S.shrink, sd: clr + S.shrink }; };
+  const canvas = document.getElementById('mm-canvas'), out = document.getElementById('mm-out'), pre = document.getElementById('mm-scad');
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const k = dims(), sc = Math.min((w * 0.62) / (k.W + S.slot), (h - 24) / k.W), cx = w * 0.36, cy = h / 2;
+    c.fillStyle = col.accent + '55'; c.strokeStyle = col.accent; c.lineWidth = 2; const r = 3 * sc, x0 = cx - k.W * sc / 2, y0 = cy - k.W * sc / 2, ww = k.W * sc;
+    c.beginPath(); c.moveTo(x0 + r, y0); c.arcTo(x0 + ww, y0, x0 + ww, y0 + ww, r); c.arcTo(x0 + ww, y0 + ww, x0, y0 + ww, r); c.arcTo(x0, y0 + ww, x0, y0, r); c.arcTo(x0, y0, x0 + ww, y0, r); c.closePath(); c.fill(); c.stroke();
+    const slot = (x, y, d) => { const sl = S.slot * sc, dd = d * sc; c.fillStyle = col.bg; c.strokeStyle = col.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect ? c.roundRect(x - (sl + dd) / 2, y - dd / 2, sl + dd, dd, dd / 2) : c.rect(x - (sl + dd) / 2, y - dd / 2, sl + dd, dd); c.fill(); c.stroke(); };
+    slot(cx, cy, k.pilot); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(q => slot(cx + q[0] * k.pitch / 2 * sc, cy + q[1] * k.pitch / 2 * sc, k.sd));
+    c.setLineDash([4, 4]); c.strokeStyle = col.muted; c.lineWidth = 1; c.strokeRect(cx - k.face * sc / 2, cy - k.face * sc / 2, k.face * sc, k.face * sc); c.setLineDash([]);
+    c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'left'; const tx = x0 + ww + 14, rows = ['plate ' + k.W.toFixed(1) + ' × ' + k.W.toFixed(1) + ' × ' + S.th, 'bolt square ' + k.pitch + ' mm', 'pilot opening Ø ' + k.pilot.toFixed(2), 'screw holes Ø ' + k.sd.toFixed(2), 'slot length ' + S.slot + ' mm'];
+    rows.forEach((t, i) => c.fillText(t, tx, 24 + i * 18)); c.fillStyle = col.muted; c.fillText('dashed = motor face', tx, 24 + rows.length * 18 + 6);
+  });
+  const scad = () => { const k = dims(); return '$fn = 64;\nW = ' + k.W.toFixed(2) + '; t = ' + S.th + '; p = ' + k.pitch + '; screw_d = ' + k.sd.toFixed(2) + '; pilot_d = ' + k.pilot.toFixed(2) + '; slot = ' + S.slot + ';\nmodule slot(d, l) { hull() { translate([-l/2, 0]) circle(d = d); translate([l/2, 0]) circle(d = d); } }\ndifference() {\n  linear_extrude(t) offset(r = 3) square(W - 6, center = true);\n  translate([0, 0, -1]) linear_extrude(t + 2) {\n    slot(pilot_d, slot);\n    for (x = [-1, 1], y = [-1, 1]) translate([x * p / 2, y * p / 2]) slot(screw_d, slot);\n  }\n}\n'; };
+  const svg = () => { const k = dims(), R = k.W / 2 + 2, sh = (x, y, d) => '<rect x="' + (x - (S.slot + d) / 2).toFixed(3) + '" y="' + (y - d / 2).toFixed(3) + '" width="' + (S.slot + d).toFixed(3) + '" height="' + d.toFixed(3) + '" rx="' + (d / 2).toFixed(3) + '" fill="none" stroke="#000" stroke-width="0.1"/>';
+    let s = '<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="' + (2 * R).toFixed(2) + 'mm" height="' + (2 * R).toFixed(2) + 'mm" viewBox="' + (-R).toFixed(2) + ' ' + (-R).toFixed(2) + ' ' + (2 * R).toFixed(2) + ' ' + (2 * R).toFixed(2) + '">\n<!-- ' + sel.value + ' mount plate, units mm, shaft at the origin -->\n';
+    s += '<rect x="' + (-k.W / 2) + '" y="' + (-k.W / 2) + '" width="' + k.W + '" height="' + k.W + '" rx="3" fill="none" stroke="#000" stroke-width="0.1"/>\n' + sh(0, 0, k.pilot) + '\n';
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(q => { s += sh(q[0] * k.pitch / 2, q[1] * k.pitch / 2, k.sd) + '\n'; }); return s + '</svg>\n'; };
+  function info() { const k = dims(); out.innerHTML = '<strong>' + sel.value + '</strong>: M' + M[sel.value][3] + ' screws in a <strong>' + k.pitch + ' mm</strong> square (holes at ±' + (k.pitch / 2).toFixed(2) + ' mm), pilot boss Ø' + k.boss + ' → opening <strong>Ø' + k.pilot.toFixed(2) + ' mm</strong>, screw holes <strong>Ø' + k.sd.toFixed(2) + ' mm</strong>' + (S.slot > 0 ? ', slotted ' + S.slot + ' mm for belt tension' : '') + '. Plate thickness ≥ 5–6 mm; counterbore the screw heads on the outside (chapter 13). Verify on a fit coupon.'; pre.textContent = scad(); view.redraw(); }
+  const hs = document.getElementById('mm-ctl');
+  [['shrink', 'Hole shrink', 0, 0.4, 0.01, 2, ' mm'], ['margin', 'Plate margin', 4, 20, 1, 0, ' mm'], ['slot', 'Tension slot', 0, 12, 1, 0, ' mm'], ['th', 'Plate thickness', 3, 12, 1, 0, ' mm']].forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  sel.onchange = info;
+  document.getElementById('mm-svg').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([svg()], { type: 'image/svg+xml' })); a.download = sel.value.replace(' ', '_').toLowerCase() + '_plate.svg'; a.click(); };
+  document.getElementById('mm-copy').onclick = e => { try { navigator.clipboard.writeText(scad()); e.target.textContent = 'Copied'; setTimeout(() => e.target.textContent = 'Copy OpenSCAD', 1200); } catch (x) { pre.focus(); } };
+  info();
+})();
+
+/* ---------- Sim 2: pocket calculator ---------- */
+(function () {
+  // name: [diameter or width, depth/length, kind, note]
+  const P = {
+    'Bearing 608 (Ø22 × 7)': [22, 7, 'round', 'Shoulder one side and a cover on the other; lip overlap 1.5 mm on the outer ring only.'],
+    'Bearing 623 (Ø10 × 4)': [10, 4, 'round', 'Wall ≥ 3 mm around the pocket.'],
+    'Bearing 624 (Ø13 × 5)': [13, 5, 'round', 'Wall ≥ 3 mm around the pocket.'],
+    'Bearing 625 (Ø16 × 5)': [16, 5, 'round', 'Wall ≥ 3.2 mm around the pocket.'],
+    'Linear bearing LM8UU (Ø15 × 24)': [15, 24, 'round', 'Retain with a zip tie slot or a clamp; one end open for the rod.'],
+    'Linear bearing LM6UU (Ø12 × 19)': [12, 19, 'round', 'Retain with a zip tie slot or a clamp.'],
+    'Linear bearing LM10UU (Ø19 × 29)': [19, 29, 'round', 'Retain with a zip tie slot or a clamp.'],
+    'Disc magnet Ø6 × 3': [6, 3, 'round', 'Glue in; mark polarity; leave 0.3–0.5 mm of plastic in front, or flush.'],
+    'Disc magnet Ø8 × 3': [8, 3, 'round', 'Glue in; mark polarity.'],
+    'Disc magnet Ø10 × 3': [10, 3, 'round', 'Glue in; mark polarity.'],
+    'Steel rod Ø8 (through hole)': [8, 0, 'hole', 'For a sliding fit choose Slip or Free; for a fixed rod choose Snug and add a grub screw or glue.'],
+    'Steel rod Ø6 (through hole)': [6, 0, 'hole', 'As above.'],
+    'Steel rod Ø5 (through hole)': [5, 0, 'hole', 'As above.'],
+    '18650 cell (Ø18.6 × 65.3)': [18.6, 65.3, 'round', 'Add contact springs/strips; ventilate; keep clear of sharp edges.'],
+    'AA cell (Ø14.5 × 50.5)': [14.5, 50.5, 'round', 'Add contact springs; polarity marked.']
+  };
+  const S = { shrink: 0.15 }, sel = document.getElementById('pk-part'), fit = document.getElementById('pk-fit'), out = document.getElementById('pk-out'); Object.keys(P).forEach(k => sel.add(new Option(k, k)));
+  function info() {
+    const [d, l, kind, note] = P[sel.value], f = +fit.value, md = d + f + S.shrink;
+    out.innerHTML = 'Model the pocket <strong>Ø' + md.toFixed(2) + ' mm</strong> (' + d + ' nominal ' + (f >= 0 ? '+ ' : '− ') + Math.abs(f).toFixed(2) + ' fit + ' + S.shrink.toFixed(2) + ' shrink)' + (kind === 'round' ? ', depth <strong>' + (l + 0.2).toFixed(1) + ' mm</strong> (part length ' + l + ' + 0.2 allowance)' : '') + '. ' + note;
+  }
+  Sim.slider(document.getElementById('pk-ctl'), { label: 'Hole shrink', min: 0, max: 0.4, step: 0.01, dec: 2, value: S.shrink, unit: ' mm', onInput: v => { S.shrink = v; info(); } });
+  sel.onchange = fit.onchange = info; info();
+})();
+
+/* ---------- Sim 3: print vs buy ---------- */
+(function () {
+  const S = { price: 22, mass: 30, hours: 1.5, rate: 0.3, fail: 10, buy: 3 }, out = document.getElementById('pb-out');
+  function info() {
+    const fil = S.mass * S.price / 1000, mach = S.hours * S.rate, base = fil + mach, cost = base * (1 + S.fail / 100), ratio = cost / S.buy;
+    out.innerHTML = 'Printed: filament ' + fil.toFixed(2) + ' + machine ' + mach.toFixed(2) + ' = ' + base.toFixed(2) + ', with ' + S.fail + '% failures <strong>' + cost.toFixed(2) + '</strong> vs bought <strong>' + S.buy.toFixed(2) + '</strong> → printing is ' + (ratio <= 1 ? '<strong style="color:var(--good)">' + (100 - ratio * 100).toFixed(0) + '% cheaper</strong>' : '<strong style="color:var(--warn)">' + (ratio * 100 - 100).toFixed(0) + '% more expensive</strong>') + '. Counting ' + (S.hours * 60).toFixed(0) + ' min of print time you could spend on something else, and the consistency of a manufactured part, a bought version wins for standard items unless a custom shape is the point.';
+  }
+  const hs = document.getElementById('pb-ctl');
+  [['price', 'Filament price', 10, 60, 1, 0, ' /kg'], ['mass', 'Part mass', 2, 300, 1, 0, ' g'], ['hours', 'Print time', 0.1, 12, 0.1, 1, ' h'], ['rate', 'Machine cost', 0.05, 1.5, 0.05, 2, ' /h'], ['fail', 'Failure rate', 0, 50, 1, 0, '%'], ['buy', 'Bought price', 0.2, 40, 0.1, 1, '']].forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
+})();
+</script>
+</body>
+</html>
