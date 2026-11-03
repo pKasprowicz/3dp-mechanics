@@ -1,11 +1,17 @@
-// Renders the sidebar and prev/next pager. Pages set <body data-ch="N" data-root="../"> (home: data-root="").
+// Renders the sidebar (with the release badge) and prev/next pager. Pages set <body data-ch="N" data-root="../"> (home: data-root="").
 (function () {
+  // Release badge: links to the matching GitHub release. Falls back to nothing if version.js is missing.
+  function versionBadge() {
+    const v = window.SITE && SITE.version;
+    return v ? '<a class="ver" href="' + SITE.repo + '/releases/tag/v' + v + '" title="Released ' + SITE.date + '">v' + v + '</a>' : '';
+  }
+  window.versionBadge = versionBadge;
   const root = document.body.dataset.root || '';
   const cur = +document.body.dataset.ch || 0;
   const nav = document.getElementById('nav');
   if (nav) {
     let h = '<details' + (innerWidth > 900 ? ' open' : '') + '><summary>Contents</summary>';
-    h += '<a class="site" href="' + root + 'index.html">3D-Printed Mechanics</a>';
+    h += '<div class="brand"><a class="site" href="' + root + 'index.html">3D-Printed Mechanics</a>' + versionBadge() + '</div>';
     CHAPTERS.forEach(c => {
       if (c.part) { h += '<div class="part">' + c.part + '</div>'; return; }
       const label = c.n + '. ' + c.title;

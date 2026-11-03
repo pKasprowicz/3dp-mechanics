@@ -10,13 +10,14 @@
 <div class="layout">
   <aside id="nav"></aside>
   <main>
-    <h1>3D-Printed Mechanics</h1>
+    <h1>3D-Printed Mechanics<span id="home-ver"></span></h1>
     <p class="lead">A hands-on compendium of mechanisms, mechanical concepts and the practical craft of making them work in FDM-printed parts and hybrid builds. Written for a workshop-minded maker with a Bambu Lab X2D + AMS 2 Pro.</p>
     <p>Every chapter has interactive simulations: drag, slide and break things to build intuition, then read the printing notes and the checklist at the end. Start at chapter 1 and read in order, or jump to the <a href="chapters/17-problems-and-solutions.html">troubleshooter</a>, the <a href="chapters/18-workflow-and-tools.html">workflow and printer profile</a>, or the <a href="chapters/20-reference-appendix.html">reference appendix</a>.</p>
     <h2>Chapters</h2>
     <div id="cards" class="cards"></div>
   </main>
 </div>
+<script src="assets/version.js"></script>
 <script src="assets/chapters.js"></script>
 <script src="assets/site.js"></script>
 <script>
@@ -28,6 +29,7 @@
                     : '<div class="card soon">' + inner + '<br><span class="num">coming soon</span></div>';
   });
   document.getElementById('cards').innerHTML = html;
+  document.getElementById('home-ver').innerHTML = window.versionBadge ? versionBadge() : '';
 </script>
 </body>
 </html>

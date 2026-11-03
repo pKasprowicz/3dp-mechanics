@@ -87,3 +87,11 @@ figure { margin: 18px 0; }
   main { padding: 20px 16px 60px; }
   .ctl { grid-template-columns: 100px 1fr 56px; }
 }
+
+.ver { display: inline-block; vertical-align: middle; margin-left: 8px; padding: 1px 9px; border: 1px solid var(--line); border-radius: 999px;
+  font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--muted); text-decoration: none; background: var(--surface); }
+a.ver:hover { border-color: var(--accent); color: var(--accent); }
+h1 .ver { font-size: 14px; position: relative; top: -2px; }
+.brand { display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+aside#nav .brand .site { margin-bottom: 0; }
+.brand .ver { margin-left: 8px; }
