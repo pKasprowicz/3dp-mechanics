@@ -42,6 +42,12 @@
 
 <h2>16.3 DC motors and gearmotors</h2>
 <p>A brushed DC motor has a nearly straight torque–speed line: <strong>maximum speed at zero torque (no-load speed)</strong> and <strong>maximum torque at zero speed (stall)</strong>. Current is proportional to torque, so stall draws a large current and heats the windings. The motor is happy at about <strong>20–30% of stall torque</strong> continuously; above that it runs hot, and at stall for more than a few seconds it can burn out.</p>
+<p><strong>Why the line is straight.</strong> Two effects, both from the same magnet and coil. Current in the coil produces torque in proportion, <code>T = k·I</code>. And a coil spinning in the magnet's field acts as a generator, producing a <em>back-EMF</em> that opposes the supply in proportion to speed, <code>E = k·ω</code> (the same k). The supply voltage is shared between that back-EMF and the coil's resistance: <code>V = I·R + k·ω</code>. Standing still, there is no back-EMF, so the full voltage drives current through the small resistance: maximum current, maximum torque (stall). Spinning freely, the back-EMF almost equals the supply, so very little current flows: maximum speed, almost no torque. In between, speed falls in a straight line as the load torque rises.</p>
+<ul>
+  <li><strong>Voltage moves the line</strong>: double the voltage and both the no-load speed and the stall torque double. PWM speed control works by lowering the <em>average</em> voltage.</li>
+  <li><strong>The load sets the speed</strong>: the motor settles where the load torque meets the line, which is what Simulation 1 shows.</li>
+  <li><strong>Peak mechanical power</strong> is at half the stall torque and half the no-load speed, but the losses there are high; run lighter for efficiency and life.</li>
+</ul>
 <p>A gearmotor puts a gearbox in front: output torque ≈ motor torque × ratio × efficiency, output speed ≈ motor speed ÷ ratio. Small gearmotors (N20, TT, 37D) have plastic or metal gears and a ratio from 10:1 to 1000:1; <strong>pick the ratio from the speed you need</strong>, then check the torque.</p>
 
 <div class="sim">
@@ -53,7 +59,20 @@
 </div>
 
 <h2>16.4 Stepper motors</h2>
-<p>A stepper moves in fixed increments (typically 1.8° = 200 steps per revolution); a driver sequences the coils. Microstepping (÷ 16, ÷ 32...) smooths the motion and gives finer commanded steps. Features and traps:</p>
+<p>A stepper moves in fixed increments (typically 1.8° = 200 steps per revolution); a driver sequences the coils. Microstepping (÷ 16, ÷ 32...) smooths the motion and gives finer commanded steps.</p>
+<p><strong>How it steps.</strong> A hybrid stepper has two coils (phases A and B) wound on the stator poles, and a permanent-magnet rotor. Whatever currents flow in A and B add up to a magnetic field pointing in one direction, and the rotor turns until it lines up with that field, like a compass needle. The driver moves the field by changing the two currents: full steps switch them between +I and −I in a fixed sequence, and microstepping sets them to sine and cosine values (I·cos φ in A, I·sin φ in B), which points the field at any angle φ in between. A real 1.8° motor has 50 small teeth on its rotor, so the rotor turns only 1/50 of the field's rotation: one full electrical turn of the field moves the shaft 7.2°, four full steps.</p>
+<p>A load on the shaft pulls the rotor slightly behind the field, like stretching a spring. The restoring torque grows as the rotor lags, up to the <strong>holding torque</strong> at a lag of one full step. Beyond that, the rotor cannot hold and falls back to the next stable position, a whole rotor tooth (four full steps) behind: a lost step, which an open-loop driver never notices. Microstepping divides the commanded position finely, but under load the rotor still lags by the same angle, so the real <em>accuracy</em> of a microstep is much coarser than its size.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · Inside a stepper motor</h4>
+  <p class="desc">A simplified two-phase stepper with a two-pole rotor (a real 1.8° motor repeats this pattern 50 times around its rotor, so its shaft moves 1/50 as far). The coil currents (bars and lower plot) set the field direction (dashed arrow); the rotor (orange) follows. Choose the stepping mode and step it, then add load torque and see the rotor lag behind the field, and slip once the load exceeds the holding torque.</p>
+  <canvas id="sm-canvas"></canvas>
+  <div class="row"><label>Mode <select id="sm-mode"><option value="1">Full step (2 phases on)</option><option value="2">Half step</option><option value="16" selected>Microstep 1/16</option></select></label><button id="sm-step">Step</button><button id="sm-run" class="on">Pause</button></div>
+  <div class="controls" id="sm-ctl"></div>
+  <div class="readout" id="sm-out"></div>
+</div>
+
+<p>Features and traps:</p>
 <ul>
   <li><strong>Open loop</strong>: no feedback. If the load torque exceeds the motor torque, it silently <em>loses steps</em> and your position is wrong.</li>
   <li><strong>Torque falls with speed.</strong> At low speed the motor delivers its holding torque, but the coils' inductance stops the current from rising fast enough at high step rates, so the pull-out torque drops. Higher supply voltage and lower inductance raise the usable speed. The curve is on the motor datasheet.</li>
@@ -63,7 +82,7 @@
 </ul>
 
 <div class="sim">
-  <h4>Simulation 2 · Stepper torque vs speed</h4>
+  <h4>Simulation 3 · Stepper torque vs speed</h4>
   <p class="desc">An illustrative pull-out curve built from the supply voltage, coil inductance and current (the real curve is on your motor's datasheet and varies by driver). Set your load; the readout gives the fastest speed that still leaves a 2× torque margin.</p>
   <canvas id="st-canvas"></canvas>
   <div class="controls" id="st-ctl"></div>
@@ -71,7 +90,9 @@
 </div>
 
 <h2>16.5 Servos</h2>
-<p>A hobby servo contains a DC motor, a gearbox, a potentiometer and a control board. You send a pulse (1–2 ms every 20 ms) and it goes to the corresponding angle (usually 0–180°) and holds. Cheap, compact and perfect for small arms, grippers and flaps, with traps:</p>
+<p>A hobby servo contains a DC motor, a gearbox, a potentiometer and a control board. You send a pulse (1–2 ms every 20 ms) and it goes to the corresponding angle (usually 0–180°) and holds.</p>
+<p><strong>How it holds an angle: a feedback loop.</strong> The potentiometer is geared to the output shaft and measures where it actually is. The control board compares that with the angle the pulse asks for, and drives the motor in the direction that reduces the difference, harder the bigger the difference (proportional control). As the output approaches the target, the error and the drive fall to zero and it stops. Push on the arm and it is pushed off target; the error grows and the motor pushes back. Three consequences: a servo holding a load is always slightly off target (it needs some error to produce torque); it draws current the whole time it resists a load; and if the loop is tuned too aggressively, or the load is springy or has backlash, it overshoots back and forth around the target, which you hear as buzzing or see as jitter. A small dead band around the target stops it chasing tiny errors.</p>
+<p>Cheap, compact and perfect for small arms, grippers and flaps, with traps:</p>
 <ul>
   <li><strong>The stall torque in the specification is not usable torque.</strong> Derate to <strong>50%</strong> for continuous holding; the gears are small and the motor heats.</li>
   <li>Torque is quoted in <strong>kg·cm</strong>: the weight in kilograms that the servo can hold on a horn of 1 cm (convert: 1 kg·cm = 0.098 N·m).</li>
@@ -81,7 +102,7 @@
 </ul>
 
 <div class="sim">
-  <h4>Simulation 3 · Servo arm torque check</h4>
+  <h4>Simulation 4 · Servo arm torque check</h4>
   <p class="desc">An arm of length L carries a mass at its tip. The torque needed grows with the cosine of the arm's angle from vertical. Servos are compared at 50% of their stall torque.</p>
   <canvas id="sv-canvas"></canvas>
   <div class="controls" id="sv-ctl"></div>
@@ -266,6 +287,57 @@ const TAU = Math.PI * 2;
   [['L', 'Arm length', 2, 30, 1, 0, ' cm'], ['m', 'Tip mass', 5, 1000, 5, 0, ' g'], ['ma', 'Arm mass', 0, 300, 5, 0, ' g'], ['ang', 'Angle from horizontal', 0, 90, 1, 0, '°']]
     .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
   info();
+})();
+/* ---------- inside a stepper ---------- */
+(function () {
+  const S = { k: 0, load: 0, rate: 4, rot: 0, slips: 0 }, mode = document.getElementById('sm-mode');
+  const canvas = document.getElementById('sm-canvas'), out = document.getElementById('sm-out');
+  const per = () => +mode.value;                       // microsteps per full step
+  const field = k => { const n = per(); if (n === 1) return (Math.floor(k) * 90 + 45) * Math.PI / 180; return k * (Math.PI / 2) / n; };
+  const currents = k => { const n = per(), f = field(k); if (n === 1) return [Math.sign(Math.cos(f)), Math.sign(Math.sin(f))]; if (n === 2) { const r = v => Math.abs(v) < 1e-9 ? 0 : Math.sign(v); return [r(Math.cos(f)), r(Math.sin(f))]; } return [Math.cos(f), Math.sin(f)]; };
+  // rotor settles at field - lag, lag = asin(load / hold) in electrical degrees (hold torque = 1 at 90° electrical = one full step)
+  function settle() {
+    const f = field(S.k), L = S.load;
+    if (L >= 1) { S.slips++; S.rot = f - Math.PI / 2 - S.slips * 0.6; } // cannot hold: the load drags it backwards
+    else S.rot = f - Math.asin(L);
+  }
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const R = Math.min(h * 0.28, w * 0.14), cx = Math.max(w * 0.22, R + 52), cy = h * 0.45, [ia, ib] = currents(S.k), f = field(S.k);
+    // stator poles: A at 0/180, B at 90/270
+    [[0, ia, 'A+'], [Math.PI, -ia, 'A−'], [Math.PI / 2, ib, 'B+'], [3 * Math.PI / 2, -ib, 'B−']].forEach(([a, v, lab]) => {
+      const x = cx + R * Math.cos(a), y = cy - R * Math.sin(a), on = Math.max(0, v);
+      c.save(); c.translate(x, y); c.rotate(-a); c.fillStyle = (on > 0.02 ? col.accent : col.muted) + (on > 0.02 ? Math.round(60 + 195 * on).toString(16).padStart(2, '0') : '44'); c.fillRect(-10, -16, 34, 32); c.strokeStyle = col.muted; c.lineWidth = 1.5; c.strokeRect(-10, -16, 34, 32); c.restore();
+      c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText(lab, cx + (R + 34) * Math.cos(a), cy - (R + 34) * Math.sin(a) + 4);
+    });
+    c.beginPath(); c.arc(cx, cy, R * 0.62, 0, TAU); c.strokeStyle = col.line; c.lineWidth = 1; c.stroke();
+    c.setLineDash([5, 4]); Sim.line(c, cx, cy, cx + R * 0.8 * Math.cos(f), cy - R * 0.8 * Math.sin(f), col.accent, 2); c.setLineDash([]);
+    const rx = Math.cos(S.rot), ry = Math.sin(S.rot);
+    Sim.line(c, cx - R * 0.55 * rx, cy + R * 0.55 * ry, cx + R * 0.55 * rx, cy - R * 0.55 * ry, col.accent2, 12);
+    c.fillStyle = col.surface; c.font = 'bold 11px system-ui'; c.textAlign = 'center'; c.fillText('N', cx + R * 0.42 * rx, cy - R * 0.42 * ry + 4);
+    Sim.dot(c, cx, cy, 4, col.ink);
+    // current bars
+    const bx = w * 0.56, bw = w * 0.16, by0 = 26;
+    [['coil A', ia], ['coil B', ib]].forEach(([lab, v], i) => { const y = by0 + i * 34, mid = bx + bw; c.fillStyle = col.muted; c.textAlign = 'right'; c.font = '12px system-ui'; c.fillText(lab, bx - 6, y + 12); c.strokeStyle = col.line; c.lineWidth = 1; c.strokeRect(bx, y, 2 * bw, 16); c.fillStyle = col.accent; c.fillRect(Math.min(mid, mid + v * bw), y, Math.abs(v) * bw, 16); Sim.line(c, mid, y - 2, mid, y + 18, col.ink, 1); });
+    // current staircase over one electrical turn
+    const l = w * 0.5, r = 10, pt = h * 0.36, pb = h - 22, pw = w - l - r, ph = pb - pt, n = per(), steps = 4 * n, X = j => l + j / steps * pw, Y = v => pt + ph / 2 - v * ph / 2.4;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.beginPath(); c.moveTo(l, Y(0)); c.lineTo(l + pw, Y(0)); c.stroke();
+    [[0, col.accent], [1, col.accent2]].forEach(([q, colr]) => { c.strokeStyle = colr; c.lineWidth = 2; c.beginPath(); for (let j = 0; j < steps; j++) { const v = currents(j)[q]; j ? c.lineTo(X(j), Y(v)) : c.moveTo(X(j), Y(v)); c.lineTo(X(j + 1), Y(v)); } c.stroke(); });
+    const j0 = ((Math.floor(S.k) % steps) + steps) % steps; c.fillStyle = col.ink + '22'; c.fillRect(X(j0), pt, pw / steps, ph);
+    c.fillStyle = col.muted; c.textAlign = 'left'; c.fillText(w > 620 ? 'coil currents over one electrical turn (A blue, B orange)' : 'currents: A blue, B orange', l, pt - 6);
+  });
+  function info() {
+    const n = per(), lagE = S.load < 1 ? Math.asin(S.load) * 180 / Math.PI : null, mech = 1.8 / n;
+    out.innerHTML = 'Each step turns the field ' + (90 / n).toFixed(n > 2 ? 2 : 0) + '° electrical = <strong>' + mech.toFixed(n > 2 ? 4 : 2) + '°</strong> of shaft on a 1.8° motor. ' +
+      (lagE === null ? '<strong style="color:var(--warn)">Load above holding torque: the rotor slips a whole tooth (4 full steps = 7.2° of shaft) each time. Lost-step events: ' + S.slips + '.</strong>'
+        : 'Load ' + (S.load * 100).toFixed(0) + '% of holding torque → rotor lags the field by <strong>' + lagE.toFixed(0) + '° electrical</strong> = ' + (lagE / 90 * 1.8).toFixed(2) + '° of shaft' + (n > 1 && lagE / 90 * 1.8 > mech ? ', more than one microstep: the extra resolution is not real accuracy under this load' : '') + '.');
+  }
+  const step = () => { S.k += 1; settle(); info(); view.redraw(); };
+  Sim.slider(document.getElementById('sm-ctl'), { label: 'Load torque', min: 0, max: 1.1, step: 0.01, dec: 2, value: 0, unit: ' × holding', onInput: v => { S.load = v; settle(); info(); view.redraw(); } });
+  mode.onchange = () => { S.k = 0; settle(); info(); view.redraw(); };
+  document.getElementById('sm-step').onclick = step;
+  let acc = 0;
+  const loop = Sim.loop(dt => { acc += dt * (per() === 1 ? 2 : per() === 2 ? 4 : 24); while (acc >= 1) { acc -= 1; S.k += 1; settle(); } info(); view.redraw(); });
+  document.getElementById('sm-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('sm-run')); settle(); info();
 })();
 </script>
 </body>

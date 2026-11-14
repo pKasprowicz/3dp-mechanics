@@ -73,6 +73,17 @@ Teeth in mesh   z₁ · θ / 2π     (want ≥ 6 for a loaded small pulley)</div
   <li><strong>Stiff frame</strong>: belt tension is a continuous force on your printed parts. A 6 mm GT2 belt at printer tension pulls with tens of newtons on each pulley; a thin PLA bracket will bow over a few weeks (creep, chapter 2). Use thick walls, ribs and PETG or nylon.</li>
 </ul>
 
+<h3>How friction belts grip</h3>
+<p>A friction belt (flat, round, V or a rubber band) carries torque only because its two runs are at different tensions. The <strong>tight side</strong> T₁ pulls harder than the <strong>slack side</strong> T₂, and the difference, acting at the pulley radius, is the torque: <code>T = (T₁ − T₂) · r</code>. How big that difference can get before the belt slips is the capstan law of 8.6 applied to the arc of contact:</p>
+<div class="eq">No slip while   T₁ / T₂ ≤ e^(μ·θ)       (θ = wrap angle on the smaller pulley, radians)<br>
+V-groove of included angle 2β:   μ_eff = μ / sin β        (a 40° groove: μ_eff ≈ 2.9·μ)</div>
+<ul>
+  <li><strong>Pre-tension sets the level; friction and wrap set the ratio.</strong> Tightening the belt raises both T₁ and T₂ and so the torque you can transmit; a larger wrap angle on the small pulley (wider centre distance, an idler pressing the slack side) raises the allowed ratio.</li>
+  <li><strong>The V-groove is a wedge.</strong> Pulling a belt into a V presses it against both flanks with a normal force much larger than the belt tension, so the friction is multiplied. That is why a round O-ring belt in a V-groove drives far better than the same belt on a flat pulley.</li>
+  <li><strong>Crowning steers the belt.</strong> A flat belt running onto a slightly conical surface is bent sideways, and the part of the belt that wraps first is carried toward the larger diameter. On a crowned pulley (two shallow cones back to back), both halves push the belt toward the middle, so it centres itself.</li>
+  <li><strong>Friction belts creep.</strong> The belt stretches more on the tight side than on the slack side, so it slips very slightly over the pulley as it relaxes: the speed ratio is 1–2% off the diameter ratio, and it changes with load. Use a timing belt where the ratio must be exact.</li>
+</ul>
+
 <h2>8.4 Linear belt drives</h2>
 <p>A belt over a pair of pulleys, clamped to a carriage, turns motor rotation into long travel. The key numbers:</p>
 <div class="eq">Travel per revolution = z · p            (e.g. 20 teeth × 2 mm = 40 mm)<br>
@@ -133,7 +144,7 @@ Chain length (links)     L ≈ 2C/p + (z₁ + z₂)/2 + ((z₂ − z₁) / 2π)�
 <p>A cable can only pull, never push, but it is light, flexible, and can route around corners through pulleys or a Bowden sleeve. Used for camera sliders, cable-driven robots, mechanical hands (tendons), winches, and curtain/blind mechanisms.</p>
 <ul>
   <li><strong>Fixed-drum drive:</strong> the cable is anchored to a drum and wound around it in a groove. Positive, no slip, precise: one turn of the drum moves the cable by the circumference. The cable has to be wound on and off in the same groove: use a helical groove for multi-turn travel.</li>
-  <li><strong>Capstan (friction) drive:</strong> the cable wraps a smooth drum a few turns and is pulled by friction, with no anchor. The held tension and the pulling tension are related by <code>T_load = T_hold · e^(μθ)</code> (θ in radians), so a small hold force controls a large load, which is why a sailor can hold a boat with a few turns on a cleat.</li>
+  <li><strong>Capstan (friction) drive:</strong> the cable wraps a smooth drum a few turns and is pulled by friction, with no anchor. The held tension and the pulling tension are related by <code>T_load = T_hold · e^(μθ)</code> (θ in radians), so a small hold force controls a large load, which is why a sailor can hold a boat with a few turns on a cleat. The exponential comes from compounding: each small piece of wrap dθ lets the tension grow by the friction it creates, μ·T·dθ, which is proportional to the tension already there, so the tension multiplies by the same factor for every extra bit of wrap, exactly like compound interest. One full turn at μ = 0.3 multiplies by 6.6; three turns by 285.</li>
   <li><strong>Return:</strong> a cable can't push back, so use a second cable on an opposing drum (antagonistic pair), a spring, or a loop (a closed cable loop around two pulleys).</li>
   <li><strong>Stretch and creep:</strong> use low-stretch line (braided Dyneema/UHMWPE, steel wire) for precision; avoid nylon or cotton for precise drives. Drum and pulley diameters should be large: &gt; 10–20× the cable diameter for fibre, much more for steel wire.</li>
   <li><strong>Anchor:</strong> cables slip out of knots in smooth plastic. Pass the cable through a hole, tie a knot larger than the hole, or use a crimp or a clamp plate. Chamfer the exit edge to stop it fraying.</li>

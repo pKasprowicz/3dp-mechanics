@@ -24,6 +24,23 @@
   <tr><td><strong>Lead angle, λ</strong></td><td><code>λ = atan( l / (π · d_m) )</code> where d<sub>m</sub> is the mean (pitch) diameter. Steeper λ means faster, less friction-dominated, and not self-locking.</td></tr>
 </table>
 <p>A common hobby leadscrew, <strong>T8×8</strong>, is a 8 mm trapezoidal screw with lead 8 mm: four starts of 2 mm pitch. The same size with <strong>T8×2</strong> has a single start and lead 2 mm: four times slower, four times more force from the same torque, and it holds position by itself.</p>
+<h3>Why a screw works: a wedge wrapped round a rod</h3>
+<p>Cut a paper right triangle with a base of π·d (one circumference) and a height of one lead, and wrap it round a pencil: the sloping edge becomes a helix, one turn of the thread. A screw is therefore an <strong>inclined plane wrapped round a cylinder</strong>, and the nut is a block sliding up that slope. Turning the screw pushes the nut sideways along the slope (the push P at the thread's mean radius comes from the torque, <code>P = 2T / d_m</code>); the slope converts that push into axial motion, exactly as pushing a load up a ramp lifts it. Everything about screws follows from the ramp of chapter 2:</p>
+<ul>
+  <li><strong>Force multiplication</strong> is the ramp's: the push travels π·d<sub>m</sub> while the load rises one lead, so a shallow lead gives a big force.</li>
+  <li><strong>Friction</strong> acts along the slope against the motion. Raising, it adds to the push; lowering, it resists the load sliding back down. With the friction angle φ = atan μ′, the push needed is <code>P = W · tan(λ + φ)</code> to raise and <code>P = W · tan(φ − λ)</code> to lower.</li>
+  <li><strong>Self-locking</strong> is a block that stays put on a ramp: if the slope is shallower than the friction angle (λ ≤ φ), the load cannot slide down by itself, and the "lowering" push is positive: you have to drive it down.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 1 · The screw unwrapped</h4>
+  <p class="desc">One turn of the thread unrolled into a ramp of base π·d<sub>m</sub> and height one lead, with the nut as a block on it. The arrows show the load W, the push P you must apply at the thread (from the motor's torque) and the reaction from the thread surface, which leans by the friction angle against the motion. Switch between raising and lowering, and make the lead steeper than the friction angle to see the load run down by itself.</p>
+  <canvas id="su-canvas"></canvas>
+  <div class="row"><label><input type="radio" name="su-dir" value="up" checked> raising the load</label><label><input type="radio" name="su-dir" value="down"> lowering the load</label></div>
+  <div class="controls" id="su-ctl"></div>
+  <div class="readout" id="su-out"></div>
+</div>
+
 <h3>Thread forms</h3>
 <table>
   <tr><th>Form</th><th>Flank angle</th><th>Use</th></tr>
@@ -31,7 +48,7 @@
   <tr><td>Trapezoidal / ACME</td><td>29–30°</td><td>The standard leadscrew thread: strong, easy to make, wear can be taken up by a nut.</td></tr>
   <tr><td>Square</td><td>0°</td><td>Lowest friction; hard to make with metal tools; <strong>great for printing</strong> (no overhangs on one side).</td></tr>
   <tr><td>Buttress</td><td>Asymmetric</td><td>Loads in one direction only: jar lids, clamps.</td></tr>
-  <tr><td>Ball screw</td><td>Rolling balls</td><td>~90% efficient, precise, expensive; does not self-lock.</td></tr>
+  <tr><td>Ball screw</td><td>Rolling balls</td><td>Steel balls roll in matching grooves in screw and nut and are fed back to the start through a return channel in the nut. Rolling replaces sliding, so μ′ is tiny: ~90% efficient, precise, expensive, and it never self-locks (the load will back-drive it).</td></tr>
 </table>
 
 <h3>Force, efficiency and self-locking</h3>
@@ -43,7 +60,7 @@ Speed                    v = l · rpm / 60</div>
 <p>Self-locking and high efficiency are <strong>opposites</strong>: a screw that holds its load by itself (shallow λ) spends most of the motor's torque fighting friction (η typically 20–35%), while a steep screw is efficient (60–80%) but can be back-driven by the load. For a vertical axis, either use a self-locking screw, or a motor brake, or a counterweight.</p>
 
 <div class="sim">
-  <h4>Simulation 1 · Leadscrew calculator</h4>
+  <h4>Simulation 2 · Leadscrew calculator</h4>
   <p class="desc">Set the screw size, lead, thread form and friction. The curve shows efficiency against lead angle; the shaded region is where the screw locks. The dot is your screw. Printed or plastic nuts on steel have μ around 0.1–0.25 when lubricated or nylon, higher dry.</p>
   <canvas id="ls-canvas"></canvas>
   <div class="row"><label>Thread form <select id="ls-form"><option value="15">Trapezoidal / ACME (30°)</option><option value="30">ISO metric (60°)</option><option value="0">Square (0°)</option></select></label></div>
@@ -64,7 +81,7 @@ Speed                    v = l · rpm / 60</div>
   <li><strong>The screw drives; the guides guide.</strong> If the screw also tries to guide the carriage, the two fight (over-constraint, chapter 1) and you get binding and "Z wobble" ripples. Let the nut <strong>float</strong> in its carrier (a slot or a loose-fitting mount that allows sideways movement but takes the axial load), and keep the screw straight and aligned to the rails.</li>
   <li><strong>Support the end</strong> with a thrust-capable bearing. The motor shaft bearings are not designed to carry the full axial load of a screw. A small angular-contact or a flat thrust bearing at the free end is cheap.</li>
   <li><strong>Use a flexible coupler</strong> (helical, bellows or Oldham) between the motor and the screw to absorb shaft misalignment. A rigid coupler wobbles the screw.</li>
-  <li><strong>Critical speed:</strong> a long thin screw whips like a skipping rope at high rpm. Simulation 3 calculates the limit.</li>
+  <li><strong>Critical speed:</strong> a long thin screw whips like a skipping rope at high rpm. Simulation 4 calculates the limit.</li>
 </ul>
 
 <h3>Printed threads</h3>
@@ -97,7 +114,7 @@ Speed                    v = l · rpm / 60</div>
 <p>In words: <strong>the span must be longer than 2μ times the push offset</strong> (L &gt; 2μ·a). With μ = 0.3 the span must exceed 0.6× the offset; with a sticky μ = 0.6 it must exceed 1.2×. The cure is always the same: <strong>push close to the guide axis, make the guide span long, or reduce μ</strong>. This is why a drawer pushed at one corner binds while the same drawer pushed in the middle glides, why a short printed bushing on a long arm jams, and why leadscrew nuts should push centrally.</p>
 
 <div class="sim">
-  <h4>Simulation 2 · Guide span, play and jamming</h4>
+  <h4>Simulation 3 · Guide span, play and jamming</h4>
   <p class="desc">A carriage slides on a rod with a span L between its bearing points and is pushed with a force at distance a above the rod. Tilt from play grows as clearance/span; jamming appears when a exceeds L/(2μ). The tilt is drawn exaggerated.</p>
   <canvas id="gd-canvas"></canvas>
   <div class="controls" id="gd-ctl"></div>
@@ -120,7 +137,7 @@ k = 0.36 (fixed–free), 1.0 (pinned–pinned), 1.56 (fixed–pinned), 2.27 (fix
 Run at ≤ 80% of this value.</div>
 
 <div class="sim">
-  <h4>Simulation 3 · Leadscrew critical speed</h4>
+  <h4>Simulation 4 · Leadscrew critical speed</h4>
   <p class="desc">Root diameter, unsupported length and how the ends are held. The maximum safe speed and the matching linear speed follow, and, if the screw pushes, the compressive load at which it buckles.</p>
   <div class="row"><label>Supports <select id="cs-k"><option value="0.36">Fixed–free (motor end only)</option><option value="1" selected>Pinned–pinned (a bearing at each end)</option><option value="1.56">Fixed–pinned</option><option value="2.27">Fixed–fixed</option></select></label></div>
   <div class="controls" id="cs-ctl"></div>
@@ -158,7 +175,7 @@ Torque the load applies T_back = F · l · η_back / (2π)                  (mus
 <p>Add up the torques at the screw or pulley: lifting the unbalanced weight (T<sub>up</sub> above), friction in the guides, and acceleration of the moving mass (F = m·a, plus the screw's own inertia for fast moves). Then apply the 1.5–2× margin of chapter 16. A stepper loses torque with speed, so check at the fastest speed you will run, not at standstill.</p>
 
 <div class="sim">
-  <h4>Simulation 4 · Vertical axis: lift, hold and fall</h4>
+  <h4>Simulation 5 · Vertical axis: lift, hold and fall</h4>
   <p class="desc">A screw-driven vertical axis carrying a mass. Set the screw, the friction and how much of the weight is balanced by a counterweight or spring. The readout tells you the lifting torque, whether the axis back-drives, and whether an unpowered stepper's detent torque holds it.</p>
   <div class="controls" id="va-ctl"></div>
   <div class="readout" id="va-out"></div>
@@ -180,7 +197,7 @@ Torque the load applies T_back = F · l · η_back / (2π)                  (mus
 
 <h2>9.6 Checklist and common mistakes</h2>
 <ul>
-  <li>☐ Screw: lead chosen for speed and force (use Simulation 1); locking vs efficiency decided on purpose.</li>
+  <li>☐ Screw: lead chosen for speed and force (use Simulation 2); locking vs efficiency decided on purpose.</li>
   <li>☐ Thrust is carried by a proper axial bearing, not the motor shaft.</li>
   <li>☐ Nut floats; the guides do the guiding.</li>
   <li>☐ Guide span L &gt; 2μ·a; the load is pushed close to the guide axis.</li>
@@ -304,6 +321,61 @@ const TAU = Math.PI * 2, R2D = 180 / Math.PI;
   [['m', 'Moving mass', 0.1, 20, 0.1, 1, ' kg'], ['bal', 'Balanced', 0, 100, 5, 0, ' %'], ['d', 'Screw Ø', 6, 16, 1, 0, ' mm'], ['lead', 'Lead', 1, 20, 1, 0, ' mm'], ['mu', 'Friction μ', 0.05, 0.4, 0.01, 2, ''], ['det', 'Detent torque', 0, 0.1, 0.005, 3, ' N·m']]
     .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
   info();
+})();
+/* ---------- screw unwrapped ---------- */
+(function () {
+  const S = { d: 8, lead: 2, mu: 0.15, W: 100 };
+  const canvas = document.getElementById('su-canvas'), out = document.getElementById('su-out');
+  const dir = () => document.querySelector('input[name="su-dir"]:checked').value;
+  const calc = () => { const lam = Math.atan(S.lead / (Math.PI * S.d)), phi = Math.atan(S.mu), up = dir() === 'up', P = S.W * Math.tan(up ? lam + phi : phi - lam); return { lam, phi, up, P, T: P * S.d / 2000 }; };
+  const arrow = (c, x, y, dx, dy, colr, label, w) => {
+    const L = Math.hypot(dx, dy); if (L < 2) return; const ux = dx / L, uy = dy / L;
+    Sim.line(c, x, y, x + dx, y + dy, colr, w || 3);
+    c.fillStyle = colr; c.beginPath(); c.moveTo(x + dx, y + dy); c.lineTo(x + dx - 10 * ux + 5 * uy, y + dy - 10 * uy - 5 * ux); c.lineTo(x + dx - 10 * ux - 5 * uy, y + dy - 10 * uy + 5 * ux); c.fill();
+    if (label) { c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText(label, x + dx + 6, y + dy + 4); }
+  };
+  const view = Sim.make(canvas, 0.55, (c, w, h, col) => {
+    const k = calc(), D = 180 / Math.PI;
+    // left: the unrolled ramp with the nut, true angle
+    const x0 = 14, X1 = w * 0.56, y0 = h - 34, Y1 = y0 - (X1 - x0) * Math.tan(k.lam);
+    c.fillStyle = col.muted + '33'; c.beginPath(); c.moveTo(x0, y0); c.lineTo(X1, y0); c.lineTo(X1, Y1); c.closePath(); c.fill();
+    Sim.line(c, x0, y0, X1, Y1, col.muted, 3);
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText('π·d_m = ' + (Math.PI * S.d).toFixed(1) + ' mm (one turn)', (x0 + X1) / 2, y0 + 18);
+    c.textAlign = 'right'; c.fillText('lead ' + S.lead + ' mm', X1 - 4, y0 - 6);
+    c.textAlign = 'left'; c.fillText('λ = ' + (k.lam * D).toFixed(1) + '°', x0 + 30, y0 - 6);
+    const f = 0.5, bx = x0 + (X1 - x0) * f, by = y0 + (Y1 - y0) * f, bs = 36;
+    c.save(); c.translate(bx, by); c.rotate(-k.lam); c.fillStyle = col.accent + '55'; c.fillRect(-bs / 2, -bs, bs, bs); c.strokeStyle = col.accent; c.lineWidth = 2; c.strokeRect(-bs / 2, -bs, bs, bs); c.fillStyle = col.accent; c.textAlign = 'center'; c.fillText('nut', 0, -bs / 2 + 4); c.restore();
+    const ccx = bx - Math.sin(k.lam) * bs / 2, ccy = by - Math.cos(k.lam) * bs / 2;
+    arrow(c, ccx, ccy - bs / 2 - 46, 0, 40, col.ink, 'W');
+    if (Math.abs(k.P) > 0.01) { const pr = (k.P > 0) === k.up; arrow(c, pr ? ccx - bs / 2 - 56 : ccx + bs / 2 + 56, ccy, pr ? 40 : -40, 0, col.accent2, 'P'); }
+    const ang = -Math.PI / 2 - k.lam - (k.up ? k.phi : -k.phi);
+    arrow(c, bx, by, Math.cos(ang) * 70, Math.sin(ang) * 70, col.good, 'R', 2.5);
+    c.setLineDash([3, 3]); Sim.line(c, bx, by, bx + Math.cos(-Math.PI / 2 - k.lam) * 80, by + Math.sin(-Math.PI / 2 - k.lam) * 80, col.line, 1); c.setLineDash([]);
+    c.fillStyle = col.muted; c.textAlign = 'left'; c.fillText(w > 620 ? (k.up ? 'raising: nut slides up the ramp' : 'lowering: nut slides down the ramp') : (k.up ? 'raising' : 'lowering'), x0, 16);
+    if (w > 620) c.fillText('dashed: normal to the ramp; R leans φ away from it, against the sliding', x0, 32);
+    // right: force triangle W + P + R = 0
+    const tx = w * 0.7, ty = 46, Hs = h - 100, sc = Hs / Math.max(S.W, 1), Px = k.P * sc * (k.up ? 1 : -1);
+    const A = [tx, ty], B = [tx, ty + S.W * sc], C = [tx + Px, ty + S.W * sc];
+    arrow(c, A[0], A[1], 0, B[1] - A[1], col.ink, '');
+    c.fillStyle = col.ink; c.textAlign = 'right'; c.fillText('W = ' + S.W + ' N', A[0] - 8, (A[1] + B[1]) / 2);
+    if (Math.abs(Px) > 2) arrow(c, B[0], B[1], C[0] - B[0], 0, col.accent2, ''); 
+    arrow(c, C[0], C[1], A[0] - C[0], A[1] - C[1], col.good, '', 2.5);
+    c.fillStyle = col.accent2; c.textAlign = 'center'; c.fillText('P = ' + Math.abs(k.P).toFixed(1) + ' N', (B[0] + C[0]) / 2, B[1] + 16);
+    c.fillStyle = col.good; c.textAlign = 'left'; c.fillText('R', (A[0] + C[0]) / 2 + 6, (A[1] + C[1]) / 2);
+    c.fillStyle = col.muted; c.textAlign = 'center'; c.fillText(w > 620 ? 'force triangle: W + P + R = 0' : 'W + P + R = 0', tx, 16);
+    c.fillText((w > 620 ? 'angle at top = ' : '') + (k.up ? 'λ + φ' : 'φ − λ') + ' = ' + ((k.up ? k.lam + k.phi : k.phi - k.lam) * D).toFixed(1) + '°', tx, 32);
+  });
+  function info() {
+    const k = calc(), lockd = k.lam <= k.phi, eta = Math.tan(k.lam) / Math.tan(k.lam + k.phi);
+    out.innerHTML = 'Lead angle λ = <strong>' + (k.lam * 180 / Math.PI).toFixed(1) + '°</strong>, friction angle φ = <strong>' + (k.phi * 180 / Math.PI).toFixed(1) + '°</strong> → ' + (lockd ? '<strong style="color:var(--good)">self-locking</strong> (λ ≤ φ)' : '<strong style="color:var(--warn)">not self-locking</strong> (λ > φ)') + '. ' +
+      (k.up ? 'Raising: push <strong>' + k.P.toFixed(1) + ' N</strong> at the thread = torque <strong>' + (k.T * 1000).toFixed(1) + ' N·mm</strong>; efficiency ' + (eta * 100).toFixed(0) + '% (ideal, frictionless push would be ' + (S.W * Math.tan(k.lam)).toFixed(1) + ' N).'
+        : (k.P >= 0 ? 'Lowering: you must still <strong>push ' + k.P.toFixed(1) + ' N</strong> to drive it down: the load stays put by itself.' : 'Lowering: the load slides down by itself; you must <strong>hold back ' + (-k.P).toFixed(1) + ' N</strong> to control it.'));
+    view.redraw();
+  }
+  const hs = document.getElementById('su-ctl');
+  [['d', 'Mean diameter d_m', 4, 20, 0.5, 1, ' mm'], ['lead', 'Lead', 0.5, 25, 0.5, 1, ' mm'], ['mu', 'Friction μ′', 0.02, 0.4, 0.01, 2, ''], ['W', 'Axial load W', 10, 300, 5, 0, ' N']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  document.querySelectorAll('input[name="su-dir"]').forEach(r => r.onchange = info); info();
 })();
 </script>
 </body>

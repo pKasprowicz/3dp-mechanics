@@ -69,6 +69,7 @@ Bending stiffness of a hinge strip:   M = E·I·θ / L</div>
 </ul>
 
 <h2>12.3 Flexure elements</h2>
+<p><strong>Why a thin section behaves like a joint.</strong> A flexure works because its stiffness is very different in different directions. A thin strip of thickness t and width b bends with a stiffness proportional to b·t³, but stretches with a stiffness proportional to b·t and bends sideways (in its wide direction) with a stiffness proportional to t·b³. Make t small compared with b and the length, and bending about one axis becomes hundreds or thousands of times easier than any other motion: the strip allows one rotation and resists everything else, which is the definition of a hinge. The art of flexure design is keeping that ratio large through the whole range of motion, while keeping the bending strain inside the material's limit (12.2).</p>
 <table>
   <tr><th>Element</th><th>What it does</th><th>Notes</th></tr>
   <tr><td><strong>Strip (leaf) hinge</strong></td><td>One rotation axis across a thin web</td><td>Simple and compact; the rotation axis shifts slightly as it bends</td></tr>
@@ -99,6 +100,24 @@ Parasitic shortening      ≈ 3·δ² / (5·L)     (the shuttle also moves a lit
   <div class="readout" id="pf-out"></div>
 </div>
 
+<h3>How a bistable element snaps</h3>
+<p>A click button, a toggle switch or a snap-through lid has two shapes it is happy in, and resists being held in between. The simplest model is two straight struts leaning against each other like a shallow roof, pinned at the outer ends (a <em>von Mises truss</em>; a printed version is a pre-curved beam or two strips with flexure hinges). Push the apex down: the struts have to get <em>shorter</em> to pass the flat position, so they are compressed, and the stored energy rises to a peak at the flat point. Past it, the struts can lengthen again by going down the other side, so the energy falls into a second valley, a mirror image of the first.</p>
+<ul>
+  <li><strong>Energy</strong> has two valleys (the stable states) separated by a hill (the unstable flat position).</li>
+  <li><strong>Force</strong> is the slope of the energy: it rises to a peak, falls through zero at the flat point and becomes <em>negative</em>. Over that stretch the element has negative stiffness: it pulls itself through. That is the snap, and the reason a finger push feels like a click: the force you have to give suddenly drops away.</li>
+  <li><strong>Steeper roof, bigger snap.</strong> The compression, and so the force and the strain, grows roughly with the square of the initial angle. A few degrees gives a light click; 15–20° gives a firm toggle, and a high strain.</li>
+  <li><strong>Anything springy in parallel fights it.</strong> If the button also has a return spring, or the flexure hinges are stiff, their force adds to the curve. Once that lifts the negative part above zero, the second state is no longer stable and the element springs back: bistable becomes monostable. Try the return spring in the simulation.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 3 · Bistable snap-through</h4>
+  <p class="desc">Two flexible struts pinned at their outer ends and joined at the apex, pushed down by d. Top: the shape. Bottom left: stored energy (two valleys = two stable states). Bottom right: the force needed to hold it at d. The red stretch is negative stiffness, where a push snaps through. Add a return spring at the apex and find the stiffness at which the second state disappears.</p>
+  <canvas id="bi-canvas"></canvas>
+  <div class="row"><label>Material <select id="bi-mat"></select></label></div>
+  <div class="controls" id="bi-ctl"></div>
+  <div class="readout" id="bi-out"></div>
+</div>
+
 <h2>12.4 Snap-fits</h2>
 <p>A snap-fit is a cantilever with a hook: it deflects as the mating part pushes past, then springs back and holds. The same strain rule decides the design. For a straight cantilever of constant thickness, the strain at the root for a hook that must deflect by <em>y</em> is</p>
 <div class="eq">ε = 1.5 · t · y / L²          (tapering the thickness to half at the tip: ε ≈ 0.92 · t · y / L²)<br>
@@ -114,7 +133,7 @@ Mating (push-on) force  W = F · (μ + tan α) / (1 − μ · tan α)       (α 
 </ul>
 
 <div class="sim">
-  <h4>Simulation 3 · Snap-fit cantilever</h4>
+  <h4>Simulation 4 · Snap-fit cantilever</h4>
   <p class="desc">A hook on a cantilever arm that deflects by y when mated. Adjust the arm's length and thickness, the undercut y and the lead-in angle. The readout reports strain, deflection force and push-on force (with friction 0.3) against the material's limits.</p>
   <canvas id="sf-canvas"></canvas>
   <div class="row"><label>Material <select id="sf-mat"></select></label><label><input type="checkbox" id="sf-taper"> thickness tapered to half at the tip</label></div>
@@ -141,7 +160,7 @@ Mating (push-on) force  W = F · (μ + tan α) / (1 − μ · tan α)       (α 
 <p>Design order: pick the material from the cyclic strain limit; choose the travel; choose L (or the number of legs n) long enough that the strain at full travel stays under the cyclic limit; then choose t and b for the force you need. Print the spring with its bending plane in XY so the layers run along the strip: a spring that bends across its layers delaminates.</p>
 
 <div class="sim">
-  <h4>Simulation 4 · Printed spring calculator</h4>
+  <h4>Simulation 5 · Printed spring calculator</h4>
   <p class="desc">Pick a spring shape and a material, then set its dimensions and the travel it must give. The readout gives the stiffness, the force (or torque) at full travel and the strain compared with the material's limits.</p>
   <div class="row"><label>Shape <select id="ps-type"><option value="leaf">Leaf (cantilever)</option><option value="serp" selected>Serpentine (zigzag)</option><option value="spiral">Spiral (clock spring)</option></select></label><label>Material <select id="ps-mat"></select></label></div>
   <div class="controls" id="ps-ctl"></div>
@@ -322,6 +341,48 @@ const verdict = (eps, m) => eps <= m.c ? ['good', 'within the cyclic limit: shou
   [['t', 'Thickness t', 0.4, 4, 0.1, 1, ' mm'], ['b', 'Width b', 2, 20, 0.5, 1, ' mm'], ['L', 'Length L (leg / strip)', 5, 300, 1, 0, ' mm'], ['n', 'Legs n (serpentine)', 2, 20, 1, 0, ''], ['d', 'Travel δ (leaf, serpentine)', 0.5, 40, 0.5, 1, ' mm'], ['th', 'Wind-up θ (spiral)', 5, 720, 5, 0, '°']]
     .forEach(([k, l, mn, mx, st, dec, u]) => { ctl[k] = Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }); });
   type.onchange = () => { if (type.value === 'spiral' && S.L < 100) { S.L = 150; ctl.L.set(150); } if (type.value !== 'spiral' && S.L > 60) { S.L = 15; ctl.L.set(15); } info(); };
+  sel.onchange = info; info();
+})();
+/* ---------- bistable snap-through ---------- */
+(function () {
+  const S = { a0: 8, L: 20, t: 0.8, b: 6, ks: 0, df: 0 }, sel = fillSel('bi-mat', 'PETG');
+  const canvas = document.getElementById('bi-canvas'), out = document.getElementById('bi-out');
+  const model = () => {
+    const m = MAT[sel.value], a = S.a0 * Math.PI / 180, B = S.L * Math.cos(a), h0 = S.L * Math.sin(a), EA = m.E * S.b * S.t;
+    const at = d => { const h = h0 - d, l = Math.hypot(B, h), N = EA * (S.L - l) / S.L; return { h, l, F: 2 * N * h / l + S.ks * d, U: EA * (S.L - l) ** 2 / S.L + S.ks * d * d / 2, eps: (S.L - l) / S.L * 100 }; };
+    return { m, a, B, h0, at };
+  };
+  const view = Sim.make(canvas, 0.66, (c, w, h, col) => {
+    const k = model(), topH = h * 0.4, sc = Math.min((w * 0.7) / (2 * k.B), (topH - 30) / (2.2 * k.h0)), cx = w / 2, by = topH / 2 + 6;
+    const dd = S.df * 2 * k.h0, cur = k.at(dd), ax = cx, ay = by - cur.h * sc;
+    c.setLineDash([3, 4]); Sim.line(c, cx - k.B * sc, by, cx, by - k.h0 * sc, col.line, 1); Sim.line(c, cx + k.B * sc, by, cx, by - k.h0 * sc, col.line, 1); Sim.line(c, cx - k.B * sc, by, cx, by + k.h0 * sc, col.line, 1); Sim.line(c, cx + k.B * sc, by, cx, by + k.h0 * sc, col.line, 1); c.setLineDash([]);
+    Sim.line(c, cx - k.B * sc, by, ax, ay, col.accent, 5); Sim.line(c, cx + k.B * sc, by, ax, ay, col.accent, 5);
+    Sim.ground(c, cx - k.B * sc, by, col.muted, 7); Sim.ground(c, cx + k.B * sc, by, col.muted, 7); Sim.dot(c, ax, ay, 6, col.accent2, col.surface);
+    if (S.ks > 0) { c.strokeStyle = col.good; c.lineWidth = 1.5; c.beginPath(); const y0 = by - k.h0 * sc - 34; c.moveTo(ax, y0); for (let i = 1; i <= 8; i++) c.lineTo(ax + (i % 2 ? 6 : -6), y0 + (ay - 6 - y0) * i / 9); c.lineTo(ax, ay - 6); c.stroke(); }
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('dashed: the two stable shapes', 8, 14);
+    // curves
+    const N = 160, D = 2 * k.h0, pts = []; for (let i = 0; i <= N; i++) { const d = i / N * D; pts.push([d, k.at(d)]); }
+    const Fs = pts.map(p => p[1].F), Us = pts.map(p => p[1].U), Fmax = Math.max(...Fs.map(Math.abs), 1e-6), Umax = Math.max(...Us, 1e-9);
+    const plot = (x0, x1, title, fn, ymin, ymax, neg) => {
+      const pt = topH + 22, pb = h - 22, X = d => x0 + d / D * (x1 - x0), Y = v => pb - (v - ymin) / (ymax - ymin) * (pb - pt);
+      c.strokeStyle = col.line; c.lineWidth = 1; c.beginPath(); c.moveTo(x0, Y(0)); c.lineTo(x1, Y(0)); c.stroke();
+      for (let i = 1; i <= N; i++) { const [d0, a0] = pts[i - 1], [d1, a1] = pts[i]; const slopeNeg = neg && (a1.F - a0.F) < 0; Sim.line(c, X(d0), Y(fn(a0)), X(d1), Y(fn(a1)), slopeNeg ? col.warn : col.accent, 2.5); }
+      Sim.dot(c, X(dd), Y(fn(cur)), 5, col.accent2, col.surface);
+      c.fillStyle = col.muted; c.textAlign = 'left'; c.fillText(title, x0, pt - 6); c.textAlign = 'center'; c.fillText('d = 0', x0 + 10, h - 6); c.fillText('2·h₀', x1 - 10, h - 6);
+    };
+    plot(30, w * 0.47, 'stored energy', p => p.U, 0, Umax * 1.1, false);
+    plot(w * 0.53, w - 10, (w > 620 ? 'force to hold (red: snaps through)' : 'force (red: snaps)'), p => p.F, -Fmax * 1.1, Fmax * 1.1, true);
+  });
+  function info() {
+    const k = model(); let Fpk = 0, dpk = 0, bist = false, d2 = null;
+    for (let i = 1; i <= 400; i++) { const d = i / 400 * 2 * k.h0, r = k.at(d); if (r.F > Fpk) { Fpk = r.F; dpk = d; } if (r.F < 0) bist = true; }
+    const em = k.at(k.h0).eps, v = verdict(em, k.m);
+    out.innerHTML = 'Rise h₀ = ' + k.h0.toFixed(2) + ' mm · snap-through force <strong>' + Fpk.toFixed(1) + ' N</strong> at d = ' + dpk.toFixed(2) + ' mm · ' + (bist ? '<strong style="color:var(--good)">bistable</strong>: it stays in the second state' : '<strong style="color:var(--warn)">monostable</strong>: the return spring pushes it back, so it only clicks and returns') + '.<br>Peak strut strain at the flat point <strong style="color:var(--' + v[0] + ')">' + em.toFixed(2) + '%</strong> (' + v[1] + '). Real flexure hinges add bending strain on top of this.';
+    view.redraw();
+  }
+  const hs = document.getElementById('bi-ctl');
+  [['d', 'Push d', 0, 1, 0.005, 2, ' × 2h₀'], ['a0', 'Initial angle', 2, 20, 0.5, 1, '°'], ['L', 'Strut length', 8, 50, 1, 0, ' mm'], ['t', 'Strut thickness', 0.4, 2, 0.05, 2, ' mm'], ['b', 'Width', 2, 15, 0.5, 1, ' mm'], ['ks', 'Return spring', 0, 40, 0.5, 1, ' N/mm']]
+    .forEach(([key, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: key === 'd' ? 0 : S[key], unit: u, onInput: v => { if (key === 'd') S.df = v; else S[key] = v; info(); } }));
   sel.onchange = info; info();
 })();
 </script>

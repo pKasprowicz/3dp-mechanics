@@ -6,6 +6,19 @@ All notable changes to this compendium are recorded here. The format follows
 
 ## Unreleased
 
+Reviewed every mechanism for how clearly its principle of operation is explained, and added interactive models where a picture in motion explains it better than words.
+
+### Added
+
+- Eight new simulations: Scotch yoke vs slider-crank (5), the crossed belt showing how involute teeth mesh (7), cycloidal drive (7), the screw unwrapped into a ramp with its force triangle (9), universal joint speed fluctuation (10), bistable snap-through (12), push-push heart-cam latch (14), and inside a stepper motor (16).
+- The pendulum calculator (11) is now an animated anchor escapement showing lock, unlock, impulse and drop.
+- Principle-of-operation explanations: law of gearing and the line of action; worm, cycloidal and strain-wave ratios; the Willis equation for planetary sets; the screw as a wrapped wedge; how friction belts grip (tension ratio, V-groove wedge, crowning, creep); why the capstan law is exponential; how ball screws, ball bearings, helical, jaw, Oldham and cardan couplings work; kinematic inversion for cam profiles; Peaucellier inversion, pantograph similarity and the toggle's force multiplication; intermittent gears; the four phases of an escapement; why a flexure acts as a hinge; bistable energy and negative stiffness; push-push latches, dog, sprag and wrap-spring clutches; back-EMF in DC motors, how a stepper steps and loses steps, and the servo's feedback loop.
+- Formula cheat-sheet rows and 16 glossary terms for the above.
+
+### Changed
+
+- Simulations renumbered in chapters 5, 7, 9, 10, 12, 14 and 16 to make room for the new ones; cross-references updated.
+
 ## 1.1.0 - 2026-11-14
 
 Expanded the thinnest sections across the compendium and filled topic gaps.

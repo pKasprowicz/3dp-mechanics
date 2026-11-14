@@ -49,6 +49,21 @@
 </div>
 <p>Things to try: drop z₁ to 10 and see the undercut warning and the pointed, weakened teeth. Raise the backlash to 0.5 mm and see the visible gap; drop it to zero and see the teeth touching on both sides (it would bind in real life). Note that the centre distance is fixed at <code>m(z₁+z₂)/2</code>: any placement error in your print has to be absorbed by the backlash.</p>
 
+<h3>Why involute teeth keep the ratio constant</h3>
+<p>Two teeth touch at one point, and they can only push each other along the <em>common normal</em>, the line perpendicular to both surfaces at that point. That line crosses the line of centres at a point P, and the speed ratio of the two gears at that instant is O₂P / O₁P. So the <strong>law of gearing</strong>: for a constant ratio, the common normal must cross the line of centres at the same point P, the <strong>pitch point</strong>, at every moment of the mesh. Almost any pair of shapes violates this; the involute satisfies it exactly.</p>
+<p>The easiest way to see why is the <strong>crossed belt</strong>. Wrap a taut belt from the base circle of one gear, across, and around the base circle of the other, like a figure-8. Turning one gear turns the other at the ratio of the base circles, and the belt always crosses the line of centres at the same point. Now fix a pen to the belt: as the gears turn, it draws a curve on each gear at the same time. Those two curves are involutes, and they are the tooth flanks. Because the pen (the contact point) always sits on the belt, and the belt is perpendicular to both curves where the pen is, the force between the teeth always acts along the belt. The belt is the <strong>line of action</strong>, its tilt is the <strong>pressure angle</strong>, and the spacing of the teeth along it is the <strong>base pitch</strong> <code>p_b = π·m·cos α</code>.</p>
+<p>Now move the gears apart a little, as a printed frame inevitably does. The belt tilts more steeply (the pressure angle grows) and crosses the centre line at a slightly different point, but that point still divides the centre distance in the ratio of the base circles, which have not changed. <strong>The ratio stays exactly the same</strong>; only the backlash and the contact ratio change. This is the property that makes involute gears forgiving to print.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · The crossed belt: how involute teeth mesh</h4>
+  <p class="desc">Two base circles (solid) joined by a crossed belt, the line of action (green). The coloured curves are the driving flanks of each gear's teeth; they touch only on the belt, and only inside the stretch where both gears have tooth material (the thicker green segment). Pull the gears apart with the centre-distance error: the belt tilts, the pressure angle changes, the contact stretch shortens, but the ratio does not change.</p>
+  <canvas id="ib-canvas"></canvas>
+  <div class="row"><label><input type="checkbox" id="ib-zoom" checked> zoom in on the mesh</label></div>
+  <div class="controls" id="ib-ctl"></div>
+  <div class="row"><button id="ib-run" class="on">Pause</button></div>
+  <div class="readout" id="ib-out"></div>
+</div>
+
 <h2>7.3 A catalog of gear types</h2>
 <table>
   <tr><th>Type</th><th>What it does</th><th>Printing notes</th></tr>
@@ -62,6 +77,20 @@
   <tr><td><strong>Strain-wave (harmonic)</strong></td><td>A flexing cup meshes with a ring: zero-backlash high reduction.</td><td>Very hard to print durably; mention only.</td></tr>
 </table>
 
+<h3>How the high-ratio drives work</h3>
+<p><strong>Worm and wheel.</strong> A worm is a screw, and the wheel is a nut that has been cut open and bent round. Each turn of a single-start worm advances the thread by one pitch, which pushes the wheel round by exactly one tooth, so the ratio is <code>i = z_wheel / starts</code>: a 30-tooth wheel on a single-start worm gives 30:1 in one stage. The price is that the teeth <em>slide</em> along each other instead of rolling, which is why efficiency is low and why the pair can be self-locking: like a screw (chapter 9), the wheel cannot drive the worm back if the worm's lead angle is smaller than the friction angle. Self-locking worms (single start, small lead angle) are typically under 50% efficient; multi-start worms are faster and more efficient but can be back-driven.</p>
+<p><strong>Cycloidal drive.</strong> An eccentric on the input shaft pushes a disc with N − 1 rounded lobes around inside a ring of N fixed pins. The disc does not spin with the input; it <em>wobbles</em>, rolling its lobes around the pins. Because it has one lobe fewer than there are pins, after one full wobble each lobe has moved on to the neighbouring gap: the disc has turned backwards by one lobe, 1/(N − 1) of a turn. The ratio is therefore <code>i = −(N − 1)</code>. The output is taken off by pins on the output shaft that pass through holes in the disc, each hole larger than its pin by twice the eccentricity, so the wobble is filtered out and only the slow rotation is passed on. Many lobes touch pins at once and they roll rather than slide, which gives high torque, low backlash and good efficiency in a small package, as long as the eccentric and the pins run on bearings.</p>
+<p><strong>Strain-wave (harmonic) drive.</strong> The same "one tooth fewer" idea with a flexible part. A thin, toothed cup (the flexspline) has two teeth fewer than the rigid ring around it. An elliptical cam inside the cup pushes it into mesh with the ring at two opposite places. As the cam turns once, the mesh zones travel once around, and the flexspline ends up two teeth behind: the ratio is <code>z_flex / (z_ring − z_flex)</code>, for example 100 / 2 = 50:1. The flexspline flexes on every revolution, so its material fatigue limit decides its life, which is why printed versions are demonstrations rather than workhorses.</p>
+
+<div class="sim">
+  <h4>Simulation 3 · Cycloidal drive</h4>
+  <p class="desc">The input eccentric (orange) turns quickly; the lobed disc (blue) wobbles around the ring of fixed pins and creeps slowly backwards. The output pins (green) sit in the disc's oversized holes and turn with the disc's slow rotation. Watch one lobe (marked) move to the next gap each input turn.</p>
+  <canvas id="cy-canvas"></canvas>
+  <div class="controls" id="cy-ctl"></div>
+  <div class="row"><button id="cy-run" class="on">Pause</button></div>
+  <div class="readout" id="cy-out"></div>
+</div>
+
 <h2>7.4 Ratios, torque, speed, and gear trains</h2>
 <p>For an ideal single stage with <code>i = z₂/z₁</code>: output speed = input speed ÷ i, output torque = input torque × i × η, where η is efficiency (assume ~0.9–0.95 per spur mesh for printed gears). Power in = power out (minus losses): <code>P = T·ω</code>.</p>
 <ul>
@@ -72,7 +101,7 @@
 </ul>
 
 <div class="sim">
-  <h4>Simulation 2 · Gear train builder</h4>
+  <h4>Simulation 4 · Gear train builder</h4>
   <p class="desc">Enter pinion and gear tooth counts for up to four stages (set a pinion to 0 to skip a stage). Compound gears share a shaft. Efficiency is assumed at 92% per mesh.</p>
   <canvas id="gt-canvas"></canvas>
   <div class="row" id="gt-presets"></div>
@@ -83,6 +112,9 @@
 
 <h2>7.5 Planetary gears and differentials</h2>
 <p>A planetary (epicyclic) set puts a <strong>sun</strong> gear in the middle, several <strong>planets</strong> orbiting it on a <strong>carrier</strong>, and an internal <strong>ring</strong> gear around the outside. It is compact, coaxial (input and output on the same axis), and shares the load between planets, so a small printed set can carry a lot of torque.</p>
+<p><strong>Where the ratios come from.</strong> Imagine riding on the carrier. From there, the planets just spin on fixed pins, and the set is an ordinary gear train: the sun drives the planets, which drive the ring the other way, with ratio −Z_r/Z_s. Back in the fixed frame, everything has the carrier's rotation added. That gives the <strong>Willis equation</strong>, which covers every way of using a planetary set:</p>
+<div class="eq">(ω_sun − ω_carrier) / (ω_ring − ω_carrier) = − Z_r / Z_s</div>
+<p>Hold the ring (ω_ring = 0) and it rearranges to ω_sun / ω_carrier = 1 + Z_r/Z_s: the planets roll around inside the fixed ring like wheels on a track, and the carrier follows them at a fraction of the sun's speed. Hold nothing, and you have a differential (below).</p>
 <p>Ratios depend on which member you hold still. With teeth <code>Z_r = Z_s + 2·Z_p</code> (ring = sun + two planets), the common setups are:</p>
 <table>
   <tr><th>Fixed</th><th>Input → output</th><th>Ratio</th></tr>
@@ -93,7 +125,7 @@
 <p><strong>Assembly condition:</strong> for N equally spaced planets to mesh simultaneously, <code>(Z_s + Z_r) / N</code> must be a whole number. Otherwise the planets cannot all be fitted without different tooth phasing.</p>
 
 <div class="sim">
-  <h4>Simulation 3 · Planetary gearset</h4>
+  <h4>Simulation 5 · Planetary gearset</h4>
   <p class="desc">Real tooth profiles. Pick the fixed member, set the teeth and number of planets. The readout gives the ratio and checks the assembly condition. Try 12 / 12 / 3 planets (ring = 36).</p>
   <canvas id="pl-canvas"></canvas>
   <div class="row"><label>Setup <select id="pl-mode"><option value="rf">Ring fixed: sun in, carrier out</option><option value="sf">Sun fixed: ring in, carrier out</option><option value="cf">Carrier fixed: sun in, ring out</option></select></label>
@@ -318,6 +350,107 @@ function polyPath(c, pts, cx, cy, rot, sc) {
   const loop = Sim.loop(dt => { S.phi += dt * 1.2; view.redraw(); });
   document.getElementById('pl-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('pl-run'));
   refresh();
+})();
+/* ---------- crossed belt: involute line of action ---------- */
+(function () {
+  const S = { z1: 12, z2: 20, da: 0, q: 0 }, m = 4, al = 20 * D2R, zoom = document.getElementById('ib-zoom');
+  const canvas = document.getElementById('ib-canvas'), out = document.getElementById('ib-out');
+  const geo = () => {
+    const rb1 = m * S.z1 * Math.cos(al) / 2, rb2 = m * S.z2 * Math.cos(al) / 2, ra1 = m * S.z1 / 2 + m, ra2 = m * S.z2 / 2 + m;
+    const a = m * (S.z1 + S.z2) / 2 + S.da * m, aw = Math.acos((rb1 + rb2) / a), L = Math.sqrt(a * a - (rb1 + rb2) ** 2);
+    const s0 = Math.max(0, L - Math.sqrt(ra2 * ra2 - rb2 * rb2)), s1 = Math.min(L, Math.sqrt(ra1 * ra1 - rb1 * rb1)), pb = Math.PI * m * Math.cos(al);
+    return { rb1, rb2, ra1, ra2, a, aw, L, s0, s1, pb, eps: (s1 - s0) / pb };
+  };
+  // involute leaving the base circle at angle g, unwinding in the +90° direction; t = roll angle
+  const inv = (rb, g, t) => [rb * (Math.cos(g - t) - t * Math.sin(g - t)), rb * (Math.sin(g - t) + t * Math.cos(g - t))];
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const k = geo(), xp0 = k.a * k.rb1 / (k.rb1 + k.rb2), z = zoom.checked; let sc = Math.min((w - 30) / (k.a + k.ra1 + k.ra2), (h - 40) / (2 * k.ra2)), ox = 15 + k.ra1 * sc, oy = h / 2 + 6;
+    if (z) { sc = (h - 40) / (5.5 * m); ox = w / 2 - xp0 * sc; oy = h / 2 + 6; }
+    const P = (x, y) => [ox + x * sc, oy - y * sc];
+    const nx = Math.cos(k.aw), ny = -Math.sin(k.aw), ux = Math.sin(k.aw), uy = Math.cos(k.aw);
+    const T1 = [k.rb1 * nx, k.rb1 * ny], T2 = [k.a - k.rb2 * nx, -k.rb2 * ny];
+    const circ = (x, r, colr, dash, lw) => { const [X, Y] = P(x, 0); c.beginPath(); c.arc(X, Y, r * sc, 0, TAU); c.strokeStyle = colr; c.lineWidth = lw || 1; c.setLineDash(dash || []); c.stroke(); c.setLineDash([]); };
+    circ(0, k.ra1, col.line, [2, 3]); circ(k.a, k.ra2, col.line, [2, 3]);
+    circ(0, k.rb1 / Math.cos(k.aw), col.muted, [5, 4]); circ(k.a, k.rb2 / Math.cos(k.aw), col.muted, [5, 4]);
+    circ(0, k.rb1, col.accent, null, 2); circ(k.a, k.rb2, col.accent2, null, 2);
+    Sim.line(c, ...P(0, 0), ...P(k.a, 0), col.line, 1);
+    // belt and the active stretch
+    Sim.line(c, ...P(...T1), ...P(...T2), col.good, 1.5);
+    Sim.line(c, ...P(T1[0] + k.s0 * ux, T1[1] + k.s0 * uy), ...P(T1[0] + k.s1 * ux, T1[1] + k.s1 * uy), col.good, 5);
+    Sim.line(c, ...P(0, 0), ...P(...T1), col.accent, 1); Sim.line(c, ...P(k.a, 0), ...P(...T2), col.accent2, 1);
+    const th1 = Math.atan2(T1[1], T1[0]), th2 = Math.atan2(-T2[1], k.a - T2[0]) + Math.PI;
+    const tmax1 = Math.sqrt((k.ra1 / k.rb1) ** 2 - 1), tmax2 = Math.sqrt((k.ra2 / k.rb2) ** 2 - 1);
+    const q = ((S.q % k.pb) + k.pb) % k.pb;
+    const flank = (cx, rb, g, tmax, colr) => { c.strokeStyle = colr; c.lineWidth = 2.2; c.beginPath(); for (let i = 0; i <= 24; i++) { const [x, y] = inv(rb, g, i / 24 * tmax); const [X, Y] = P(cx + x, y); i ? c.lineTo(X, Y) : c.moveTo(X, Y); } c.stroke(); };
+    for (let j = 0; j < S.z1; j++) flank(0, k.rb1, th1 + (q + j * k.pb) / k.rb1, tmax1, col.accent);
+    for (let j = 0; j < S.z2; j++) { const sj = q + j * k.pb; flank(k.a, k.rb2, th2 + (k.L - sj) / k.rb2, tmax2, col.accent2); }
+    for (let j = -2; j < 6; j++) { const sj = q + j * k.pb; if (sj >= k.s0 && sj <= k.s1) Sim.dot(c, ...P(T1[0] + sj * ux, T1[1] + sj * uy), 5, col.warn, col.surface); }
+    const xp = k.a * k.rb1 / (k.rb1 + k.rb2); Sim.dot(c, ...P(xp, 0), 4, col.ink); Sim.dot(c, ...P(0, 0), 3, col.ink); Sim.dot(c, ...P(k.a, 0), 3, col.ink);
+    c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'left'; const pp = P(xp, 0); c.fillText('P', pp[0] + 6, pp[1] + 14);
+    c.fillStyle = col.muted; c.fillText('solid: base circles · dashed: pitch circles (working) · dotted: tip circles · red: contact points', 10, 14);
+  });
+  function info() {
+    const k = geo(), nom = Math.acos((k.rb1 + k.rb2) / (m * (S.z1 + S.z2) / 2));
+    out.innerHTML = 'Ratio <strong>' + (S.z2 / S.z1).toFixed(3) + '</strong> = base-circle ratio, at any centre distance · working pressure angle <strong>' + (k.aw / D2R).toFixed(1) + '°</strong> (nominal ' + (nom / D2R).toFixed(0) + '°) · contact ratio <strong style="color:var(--' + (k.eps >= 1.2 ? 'good' : k.eps >= 1 ? 'accent2' : 'warn') + ')">' + k.eps.toFixed(2) + '</strong>' + (k.eps < 1 ? ' : the last pair lets go before the next pair touches, so the drive knocks or skips' : '') + ' · backlash ≈ ' + (2 * S.da * m * Math.tan(k.aw) / m).toFixed(2) + '·m from the centre error.';
+  }
+  const hs = document.getElementById('ib-ctl');
+  [['z1', 'Teeth z₁', 8, 30, 1, 0, ''], ['z2', 'Teeth z₂', 12, 50, 1, 0, ''], ['da', 'Centre-distance error', 0, 0.8, 0.02, 2, '·m']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); view.redraw(); } }));
+  const loop = Sim.loop(dt => { S.q += dt * (zoom.checked ? 1.5 : 3); view.redraw(); });
+  zoom.onchange = () => view.redraw();
+  document.getElementById('ib-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('ib-run')); info();
+})();
+
+/* ---------- cycloidal drive ---------- */
+(function () {
+  const S = { N: 12, e: 0.06, th: 0 };
+  const canvas = document.getElementById('cy-canvas'), out = document.getElementById('cy-out');
+  // disc profile (local coords, before rotation), pin circle radius R = 1, pin radius Rr, eccentricity E
+  const profile = (N, R, Rr, E) => {
+    const pts = [];
+    for (let i = 0; i <= 720; i++) {
+      const t = i / 720 * TAU, ps = Math.atan2(Math.sin((1 - N) * t), R / (E * N) - Math.cos((1 - N) * t));
+      pts.push([R * Math.cos(t) - Rr * Math.cos(t + ps) - E * Math.cos(N * t), -R * Math.sin(t) + Rr * Math.sin(t + ps) + E * Math.sin(N * t)]);
+    }
+    return pts;
+  };
+  let cache = null, key = '';
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const N = S.N, R = 1, Rr = Math.min(0.12, Math.PI / N * 0.45), E = Math.min(S.e, Rr * 0.9), sc = (h - 24) / (2 * (R + Rr) + 0.1), cx = w * 0.3, cy = h / 2;
+    if (key !== N + ':' + E) { cache = profile(N, R, Rr, E); key = N + ':' + E; }
+    const th = S.th, rot = -th / (N - 1), ex = E * Math.cos(th), ey = E * Math.sin(th);
+    const P = (x, y) => [cx + x * sc, cy - y * sc];
+    const tr = ([x, y]) => [x * Math.cos(rot) - y * Math.sin(rot) + ex, x * Math.sin(rot) + y * Math.cos(rot) + ey];
+    // housing ring and fixed pins
+    c.beginPath(); c.arc(cx, cy, (R + Rr + 0.08) * sc, 0, TAU); c.strokeStyle = col.muted; c.lineWidth = 3; c.stroke();
+    for (let j = 0; j < N; j++) { const a = j * TAU / N; Sim.dot(c, ...P(R * Math.cos(a), R * Math.sin(a)), Rr * sc, col.muted + '99', col.muted); }
+    // disc
+    c.beginPath(); cache.forEach((p, i) => { const [X, Y] = P(...tr(p)); i ? c.lineTo(X, Y) : c.moveTo(X, Y); }); c.closePath();
+    c.fillStyle = col.accent + '55'; c.fill(); c.strokeStyle = col.accent; c.lineWidth = 2; c.stroke();
+    // output holes and pins (4 holes on radius 0.5)
+    const ro = 0.5, rp = 0.09;
+    for (let j = 0; j < 4; j++) {
+      const a = rot + j * TAU / 4, hx = ro * Math.cos(a) + ex, hy = ro * Math.sin(a) + ey;
+      Sim.dot(c, ...P(hx, hy), (rp + E) * sc, col.bg, col.accent);
+      Sim.dot(c, ...P(ro * Math.cos(a), ro * Math.sin(a)), rp * sc, col.good, col.surface);
+    }
+    // marked lobe: the profile point nearest to local angle 0 at max radius
+    const mk = tr(cache[0]); Sim.dot(c, ...P(mk[0] * 0.93, mk[1] * 0.93), 5, col.warn);
+    // eccentric
+    Sim.dot(c, ...P(ex, ey), 0.2 * sc, col.accent2 + 'aa', col.accent2); Sim.line(c, ...P(0, 0), ...P(ex * 3, ey * 3), col.accent2, 3); Sim.dot(c, cx, cy, 4, col.ink);
+    // legend + dials
+    c.font = '12px system-ui'; c.textAlign = 'left';
+    const lx = w * 0.62, narrow = w < 560;
+    (narrow ? [['input: turn ' + (Math.floor(th / TAU) + 1), col.accent2], ['output: ' + (rot / D2R).toFixed(1) + '°', col.accent], [N + ' pins, ' + (N - 1) + ' lobes', col.muted]]
+      : [['input eccentric: ' + ((th / TAU) % 1 * 360).toFixed(0) + '° of turn ' + (Math.floor(th / TAU) + 1), col.accent2], ['disc / output: ' + (rot / D2R).toFixed(1) + '°', col.accent], ['fixed ring pins: ' + N, col.muted], ['disc lobes: ' + (N - 1), col.accent], ['output pins in oversize holes', col.good]])
+      .forEach((r, i) => { c.fillStyle = r[1]; c.font = (narrow ? 11 : 12) + 'px system-ui'; c.fillText(r[0], lx, cy - 40 + i * (narrow ? 16 : 22)); });
+  });
+  function info() { out.innerHTML = '<strong>' + S.N + ' pins, ' + (S.N - 1) + ' lobes</strong> → ratio <strong>' + (S.N - 1) + ':1</strong>, output reversed. Each input turn moves the disc back by one lobe (' + (360 / (S.N - 1)).toFixed(1) + '°). Output holes are pin Ø + 2 × eccentricity, so the output pins never feel the wobble.'; }
+  const hs = document.getElementById('cy-ctl');
+  Sim.slider(hs, { label: 'Ring pins N', min: 6, max: 24, value: S.N, onInput: v => { S.N = v; info(); view.redraw(); } });
+  Sim.slider(hs, { label: 'Eccentricity (× pin circle)', min: 0.02, max: 0.1, step: 0.005, dec: 3, value: S.e, onInput: v => { S.e = v; view.redraw(); } });
+  const loop = Sim.loop(dt => { S.th += dt * 2.2; view.redraw(); });
+  document.getElementById('cy-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('cy-run')); info();
 })();
 </script>
 </body>

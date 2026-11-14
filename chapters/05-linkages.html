@@ -73,6 +73,14 @@ Stroke ≈ 2r (exactly 2r when e = 0)</div>
   <tr><td>Wear</td><td>Two pin joints (rolling or pivoting)</td><td>A pin <em>sliding</em> in a slot: the wear point</td></tr>
   <tr><td>Quick return</td><td>Possible with offset</td><td>No (the strokes are symmetric)</td></tr>
 </table>
+<div class="sim">
+  <h4>Simulation 3 · Scotch yoke vs slider-crank</h4>
+  <p class="desc">Above: a Scotch yoke. The crank pin slides up and down in the slot while the slot carries the yoke left and right, so the yoke follows only the horizontal component of the pin's circle. Below: yoke position (blue, a pure sine) and a slider-crank of the same stroke (orange) over one crank turn. Shorten the connecting rod (l/r) and watch the slider-crank leave the sine: it rushes through the end of its stroke farthest from the crank and lingers at the end nearest it.</p>
+  <canvas id="sy-canvas"></canvas>
+  <div class="controls" id="sy-ctl"></div>
+  <div class="row"><button id="sy-run" class="on">Pause</button></div>
+  <div class="readout" id="sy-out"></div>
+</div>
 <p>For printing: put a ball bearing on the crank pin so it rolls along the slot instead of rubbing (623 or 624 on a shoulder bolt), give the slot 0.2–0.3 mm of clearance over the bearing, and guide the yoke on two rods or a long slot so the pin force does not twist it. Scotch yokes suit compact pumps, shakers, test rigs that need a clean sine wave, and toy engines where compactness matters more than wear.</p>
 
 <h2>5.4 Straight lines and paths</h2>
@@ -81,9 +89,10 @@ Stroke ≈ 2r (exactly 2r when e = 0)</div>
   <li><strong>Approximate straight line</strong> with a 4-bar: the path of a coupler point has a nearly straight section. <strong>Watt's linkage</strong> (two equal rockers) draws a figure-8 with a straight crossing. <strong>Hoeken's linkage</strong> (a crank-rocker with a coupler point extended to twice the coupler length) draws a D-shaped curve with a long straight edge. It is one of the best choices for a printable walking leg or a pick-and-place that needs a flat stroke.</li>
   <li><strong>Exact straight line</strong> with <strong>Peaucellier–Lipkin's</strong> seven-bar inversor: a clever rhombus of links that converts a circle into a perfect line. It needs 7 links and exact lengths; with printed slop the "perfect" line is lost, but it's a lovely illustration.</li>
 </ul>
+<p><strong>Why Peaucellier works.</strong> Two long equal links run from a fixed pivot O to opposite corners of a rhombus of four short equal links. Whatever the linkage's position, O and the other two corners, P and Q, stay on one straight line, and the product of their distances from O is constant: <code>OP · OQ = (long link)² − (rhombus side)²</code>. This is the geometric operation called <em>inversion</em>, and inversion maps any circle that passes through O onto a straight line. So a seventh link (a crank) makes P travel on a circle through O, and Q is forced to travel on an exact straight line. The four-bar linkages above can only approximate a line, because a coupler point of a four-bar traces a curve of the sixth degree that is never straight over a finite stretch.</p>
 
 <div class="sim">
-  <h4>Simulation 3 · Straight-line gallery</h4>
+  <h4>Simulation 4 · Straight-line gallery</h4>
   <p class="desc">Each linkage runs automatically. The orange curve is the path of the marked point; the green part of it is its straightest stretch. The readout measures how straight that stretch really is.</p>
   <canvas id="sl-canvas"></canvas>
   <div class="row" id="sl-presets"></div>
@@ -110,12 +119,12 @@ Stroke ≈ 2r (exactly 2r when e = 0)</div>
 </div>
 
 <h2>5.5 Toggles and over-centre linkages</h2>
-<p>When two links approach a straight line (a knee about to lock), a small force at the knee creates a very large force along the links. For a symmetric toggle with half-angle α measured from the line between the end pins:</p>
+<p>When two links approach a straight line (a knee about to lock), a small force at the knee creates a very large force along the links. The reason is a trade of distance for force. Near the straight position, a large sideways movement of the knee shortens the distance between the end pins by only a tiny amount. Work in equals work out (ignoring friction), so if the knee moves 20 times farther than the ends, the ends push 20 times harder. As the links straighten, the end movement per unit of knee movement falls toward zero, and the force ratio climbs without limit. For a symmetric toggle with half-angle α measured from the line between the end pins:</p>
 <div class="eq">F_out = F_in / (2·tan α)</div>
 <p>As α → 0, the ideal force goes to infinity. In reality it is limited by <strong>elastic stretch of the links and play in the pins</strong>, so printed toggles clamp by <em>flexing</em>, and the click you feel as it passes over centre is the elastic energy it stores. That click is a feature: <strong>an over-centre linkage locks itself</strong> because pushing it back requires passing through the dead centre again.</p>
 
 <div class="sim">
-  <h4>Simulation 4 · Toggle force multiplier</h4>
+  <h4>Simulation 5 · Toggle force multiplier</h4>
   <p class="desc">Push the knee down with a fixed force and see how much the ends push. Compare α = 30° (about 0.9× the input force) with α = 5° (about 5.7×) and α = 1° (about 29×).</p>
   <canvas id="tg-canvas"></canvas>
   <div class="controls" id="tg-ctl"></div>
@@ -130,7 +139,7 @@ Stroke ≈ 2r (exactly 2r when e = 0)</div>
 <h2>5.6 Parallelograms, pantographs and scissors</h2>
 <ul>
   <li><strong>Parallelogram linkage</strong>: two equal cranks and two equal links in a parallelogram keep the coupler <em>parallel to the base</em> as it moves along an arc. It's how a desk lamp keeps the head level, a drawer organiser tilts, and a robotic arm holds a platform flat. It is exact only if all four pin-to-pin lengths are exactly equal, and this is the mild over-constraint case we met in chapter 1. A <em>double</em> parallelogram (extra parallel link) adds stiffness against twisting. Beware the <strong>change point</strong>: when all four links line up, a parallelogram can flip into an anti-parallelogram. Keep it from reaching a straight line with an end stop.</li>
-  <li><strong>Pantograph</strong>: a parallelogram with an extended arm, so a tracing point moves a similar shape scaled up or down by a fixed ratio (the ratio of the arm lengths). Used for copying and engraving, and in some robot arms to keep the motors at the base.</li>
+  <li><strong>Pantograph</strong>: a parallelogram with an extended arm, so a tracing point moves a similar shape scaled up or down by a fixed ratio (the ratio of the arm lengths). It works because the fixed pivot, the stylus and the pen always lie on one straight line, and the parallelogram keeps the triangles they form similar in every position; the pen's distance from the pivot is therefore always the same multiple of the stylus's distance, in the same direction. Used for copying and engraving, and in some robot arms to keep the motors at the base.</li>
   <li><strong>Scissor and lazy-tongs mechanisms</strong>: crossed links pinned at their middles give a large extension from a compact base. Scissor lifts, extending arms, folding gates and expandable grilles all use them.</li>
 </ul>
 <h3>Scissor lifts: the forces</h3>
@@ -148,7 +157,7 @@ Pin forces    of the order of F at the bottom pins and the centre pins</div>
 </ul>
 
 <div class="sim">
-  <h4>Simulation 5 · Scissor lift</h4>
+  <h4>Simulation 6 · Scissor lift</h4>
   <p class="desc">Set the number of stages, the link length, the angle and the load. The drawing shows the lift; the readout gives the height, the push needed at the base slider and the force multiplication. Bring the angle down toward 5° and watch the force climb.</p>
   <canvas id="sx-canvas"></canvas>
   <div class="controls" id="sx-ctl"></div>
@@ -457,6 +466,46 @@ const TAU = Math.PI * 2;
   [['n', 'Stages', 1, 6, 1, 0, ''], ['L', 'Link length', 30, 200, 5, 0, ' mm'], ['th', 'Link angle θ', 3, 75, 1, 0, '°'], ['W', 'Load', 1, 200, 1, 0, ' N']]
     .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
   info();
+})();
+/* ---------- Scotch yoke vs slider-crank ---------- */
+(function () {
+  const S = { th: 0.6, lr: 2.5 };
+  const canvas = document.getElementById('sy-canvas'), out = document.getElementById('sy-out');
+  // positions normalised to r = 1, measured from the stroke centre
+  const yoke = t => Math.cos(t);
+  const view = Sim.make(canvas, 0.72, (c, w, h, col) => {
+    const topH = h * 0.5, R = Math.min(topH * 0.36, w * 0.12), cx = w * 0.22, cy = topH / 2 + 4, th = S.th;
+    const px = cx + R * Math.cos(th), py = cy - R * Math.sin(th), pinR = Math.max(4, R * 0.09);
+    c.strokeStyle = col.line; c.setLineDash([3, 4]); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke(); c.setLineDash([]);
+    // yoke: slotted frame + output rod and guide
+    const sh = R + 16, sw = pinR * 2 + 6;
+    c.fillStyle = col.accent + '33'; c.fillRect(px - sw / 2 - 6, cy - sh, sw + 12, 2 * sh);
+    c.fillStyle = col.bg; c.fillRect(px - sw / 2, cy - sh + 6, sw, 2 * sh - 12);
+    c.strokeStyle = col.accent; c.lineWidth = 2; c.strokeRect(px - sw / 2 - 6, cy - sh, sw + 12, 2 * sh);
+    Sim.line(c, px + sw / 2 + 6, cy, w * 0.92, cy, col.accent, 7);
+    c.fillStyle = col.muted; c.fillRect(cx + R + 40, cy - 14, 26, 6); c.fillRect(cx + R + 40, cy + 8, 26, 6);
+    Sim.line(c, cx, cy, px, py, col.accent2, 6); Sim.dot(c, cx, cy, 4, col.ink); Sim.dot(c, px, py, pinR, col.warn, col.surface);
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left';
+    c.fillText('pin moves on a circle; the slot passes on only its horizontal motion', w * 0.42, cy + sh + 2 > topH ? topH - 4 : cy + sh);
+    // plot
+    const l = 36, r = 10, pt = topH + 16, pb = h - 22, pw = w - l - r, ph = pb - pt, X = t => l + t / TAU * pw, Y = v => pt + ph / 2 - v / 1.15 * ph / 2;
+    c.strokeStyle = col.line; c.lineWidth = 1; [-1, 0, 1].forEach(v => { c.beginPath(); c.moveTo(l, Y(v)); c.lineTo(l + pw, Y(v)); c.stroke(); });
+    const curve = (f, colr) => { c.strokeStyle = colr; c.lineWidth = 2.5; c.beginPath(); for (let i = 0; i <= 360; i++) { const t = i / 360 * TAU; i ? c.lineTo(X(t), Y(f(t))) : c.moveTo(X(t), Y(f(t))); } c.stroke(); };
+    curve(crankN, col.accent2); curve(yoke, col.accent);
+    const t0 = ((th % TAU) + TAU) % TAU; c.strokeStyle = col.ink; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(X(t0), pt); c.lineTo(X(t0), pb); c.stroke(); c.setLineDash([]);
+    Sim.dot(c, X(t0), Y(yoke(t0)), 5, col.accent); Sim.dot(c, X(t0), Y(crankN(t0)), 5, col.accent2);
+    c.fillStyle = col.muted; c.textAlign = 'center'; [0, 90, 180, 270, 360].forEach(d => c.fillText(d + '°', X(d / 180 * Math.PI), h - 6));
+    c.textAlign = 'left'; c.fillText('position over one crank turn: yoke (blue) vs slider-crank, l/r = ' + S.lr.toFixed(1) + ' (orange)', l + 4, pt + 2);
+  });
+  // slider-crank position, re-centred so its two dead centres sit at +1 and -1 like the yoke
+  function crankN(t) { const l = S.lr, x = Math.cos(t) + Math.sqrt(l * l - Math.sin(t) ** 2); return x - l; }
+  function info() {
+    const l = S.lr, dev = l - Math.sqrt(l * l - 1);
+    out.innerHTML = 'At 90° of crank the yoke is exactly at mid-stroke; the slider-crank is still <strong>' + (dev / 2 * 100).toFixed(1) + '% of the stroke</strong> short of it (' + (dev).toFixed(3) + '·r), because the tilted rod pulls the slider back. Its motion is a sine plus a second harmonic of relative size about r/(4l) = <strong>' + (100 / (4 * l)).toFixed(0) + '%</strong>' + (l < 3 ? ', which you can see and feel as a lurch' : '') + '. Both strokes are exactly 2r.';
+  }
+  Sim.slider(document.getElementById('sy-ctl'), { label: 'Rod length l/r (slider-crank)', min: 1.2, max: 8, step: 0.1, dec: 1, value: S.lr, onInput: v => { S.lr = v; info(); view.redraw(); } });
+  const loop = Sim.loop(dt => { S.th += dt * 1.4; view.redraw(); });
+  document.getElementById('sy-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('sy-run')); info();
 })();
 </script>
 </body>

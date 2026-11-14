@@ -60,6 +60,24 @@
   <tr><td><strong>Hasp / hook and eye / padlock pins</strong></td><td>A loop over a staple, a pin through both</td><td>Strong and simple; the pin must be metal</td></tr>
 </table>
 
+<h3>How a push-push latch works</h3>
+<p>Press once and it stays in; press again and it comes out: the mechanism in click pens, cabinet catches and card slots. A pin on a small swinging arm (or a bent spring wire) is held against a plate with a closed, heart-shaped groove around a heart-shaped island, while a spring pushes the button out. The pin can only go round the groove in one direction, and the shape does the rest:</p>
+<ol>
+  <li><strong>First press:</strong> the pin climbs the right-hand side of the groove to the top-right corner (over-travel: you push a little past the latched position).</li>
+  <li><strong>Release:</strong> the spring pushes the button back out, and the sloping top of the groove steers the pin sideways into the notch at the top of the island. The notch catches it: <em>latched in</em>.</li>
+  <li><strong>Second press:</strong> the pin leaves the notch and is steered up to the top-left corner.</li>
+  <li><strong>Release:</strong> the pin runs down the left-hand side, back to the bottom: <em>released out</em>.</li>
+</ol>
+<p>Two things make it reliable. Small <strong>steps or ramps in the groove floor</strong> (the pin drops down a step it cannot climb back up) force the one-way circulation, so the pin can never take the wrong branch at the junctions. And the <strong>over-travel</strong> must be generous, so that the pin clears the top of the notch's walls on each press even with printing tolerance. When printing: make the groove at least 0.4 mm wider than the pin, the steps 0.5 mm or more, and let the arm swing freely with a light spring keeping the pin at the groove floor.</p>
+
+<div class="sim">
+  <h4>Simulation 2 · Push-push (heart-cam) latch</h4>
+  <p class="desc">Left: the cam plate with the groove (grey) around the heart-shaped island; the red pin is on the button's swinging arm. Right: the button. Press "Push" to press and release once, or Run to cycle. The pin always travels anticlockwise round the island, so successive pushes alternate between latched and released.</p>
+  <canvas id="pp-canvas"></canvas>
+  <div class="row"><button id="pp-push">Push</button><button id="pp-run">Run</button></div>
+  <div class="readout" id="pp-out"></div>
+</div>
+
 <h3>Human factors: how hard should it release?</h3>
 <p>A latch is operated by a hand. A comfortable fingertip push is about <strong>5–15 N</strong>, a thumb press 10–30 N, a firm squeeze or pull 30–60 N. A snap that needs more than ~30 N for a small latch feels stiff, and below ~3 N it rattles open. Design the release force and then check it (the beam formulas of chapter 12 for snap latches, the wedge formula above for hooks). Make the <strong>release motion different from the loading direction</strong> (slide or press, not just pull) so the latch can't be opened by the load itself.</p>
 
@@ -75,14 +93,14 @@
 </ul>
 
 <h2>14.5 Clutches and torque limiters</h2>
-<p>A clutch connects two shafts. <strong>Dog clutches</strong> (jaws that engage) are positive and can transmit large torque, but only engage at rest or low speed. <strong>Friction clutches</strong> (discs, cones, or a spring-loaded pad) engage smoothly and slip beyond a set torque. <strong>One-way clutches</strong> (chapter 11) slip in one direction only.</p>
+<p>A clutch connects two shafts. <strong>Dog clutches</strong> (jaws that engage) are positive and can transmit large torque, but only engage at rest or low speed: the jaws on one half slide axially into gaps between the jaws on the other, and square faces then push each other like gear teeth. If the faces are sloped instead of square, the torque pushes the halves apart along the shaft against a spring: that is a torque limiter (below), and with one face square and one sloped, a one-way ratchet clutch. <strong>Friction clutches</strong> (discs, cones, or a spring-loaded pad) engage smoothly and slip beyond a set torque. <strong>One-way clutches</strong> (chapter 11) slip in one direction only.</p>
 <p>A <strong>torque limiter</strong> is the most useful clutch in a printed gearbox: it slips at a set torque so a jam or stall doesn't strip the gears. Two common types:</p>
 <div class="eq">Friction disc:   T_slip = n · μ · F · r_mean          (n friction faces, spring force F)<br>
 Ball detent:     T_slip = N · r · F_ball · tan(φ + β)    (N balls on radius r, each pushed by F_ball into a flank ramp β)</div>
 <p>The slip torque must sit in a window: <strong>above the normal running torque</strong> (with margin for acceleration and friction), and <strong>below what the weakest part can take</strong> (a gear tooth, a hub screw, a printed shaft). Set it with a spring and an adjuster screw, and test with a torque wrench or a lever and a luggage scale.</p>
 
 <div class="sim">
-  <h4>Simulation 2 · Torque limiter design window</h4>
+  <h4>Simulation 3 · Torque limiter design window</h4>
   <p class="desc">Choose the clutch type and size it. The bar shows the running torque, the slip torque you built, and the strength of the weakest part. Green when the slip torque sits comfortably between them.</p>
   <canvas id="tl-canvas"></canvas>
   <div class="row"><label>Type <select id="tl-type"><option value="ball">Ball detent</option><option value="disc">Friction disc</option></select></label></div>
@@ -100,12 +118,15 @@ Ball detent:     T_slip = N · r · F_ball · tan(φ + β)    (N balls on radius
 <div class="eq">α &lt; 2 · atan(μ)</div>
 
 <div class="sim">
-  <h4>Simulation 3 · Roller wedge clutch</h4>
+  <h4>Simulation 4 · Roller wedge clutch</h4>
   <p class="desc">A roller sits in a wedge-shaped gap, pushed toward the narrow end by torque. Whether it jams or squeezes out depends on the wedge angle and friction.</p>
   <canvas id="rw-canvas"></canvas>
   <div class="controls" id="rw-ctl"></div>
   <div class="readout" id="rw-out"></div>
 </div>
+<h3>Sprags and wrap springs: two more ways to lock one way</h3>
+<p><strong>Sprag clutch.</strong> Instead of rollers in wedge-shaped pockets, the gap between two concentric round races is filled with many small shaped blocks (sprags), each slightly tilted and pushed upright by a spring. Each sprag is longer across one diagonal than the gap is wide. Turn the outer race one way and friction tilts the sprags toward upright: they try to become longer than the gap and jam between the races, locking. Turn it the other way and they lean over, become shorter than the gap, and slide. There are many sprags around the ring, so they share a large torque; this is the clutch inside bought one-way bearings.</p>
+<p><strong>Wrap-spring clutch.</strong> A close-wound coil spring sits over two drums end to end, a slight interference fit on both. Turn the input drum in the direction that winds the spring tighter, and the spring grips both drums harder the more torque you apply: this is the capstan effect (chapter 8, T₁/T₂ = e^(μθ)) with several turns, so the grip multiplies itself and locks completely. Turn the other way and the spring unwinds slightly, loosens and slips. It is compact, silent and strong for its size, and the same principle makes a one-way brake (one drum fixed). A printed version uses two printed drums and a bought or hand-wound steel spring.</p>
 <p>Real roller clutches use a very small angle (3–8°) to give margin against varying friction. Printed versions with steel balls or rollers work for light torque; use hard, smooth, clean surfaces and keep lubricant off the wedge surfaces unless it is designed for.</p>
 
 <h2>14.7 Designing latches and clutches for printing</h2>
@@ -252,6 +273,57 @@ const TAU = Math.PI * 2, R2D = 180 / Math.PI, D2R = Math.PI / 180;
   Sim.slider(hs, { label: 'Wedge angle α', min: 1, max: 40, step: 0.5, dec: 1, value: S.a, unit: '°', onInput: v => { S.a = v; info(); } });
   Sim.slider(hs, { label: 'Friction μ', min: 0.03, max: 0.6, step: 0.01, dec: 2, value: S.mu, onInput: v => { S.mu = v; info(); } });
   info();
+})();
+/* ---------- push-push latch ---------- */
+(function () {
+  const SEG = [
+    [[0, 0], [0.32, 0.33], [0.37, 0.7], [0.22, 1.0]],      // press 1
+    [[0.22, 1.0], [0, 0.69]],                                // release 1 -> latched
+    [[0, 0.69], [-0.22, 1.0]],                               // press 2
+    [[-0.22, 1.0], [-0.37, 0.7], [-0.32, 0.33], [0, 0]]     // release 2 -> out
+  ];
+  const ISLAND = [[0, 0.17], [0.2, 0.3], [0.27, 0.5], [0.2, 0.63], [0.07, 0.66], [0, 0.6], [-0.07, 0.66], [-0.2, 0.63], [-0.27, 0.5], [-0.2, 0.3]];
+  const LABEL = ['pressing: pin climbs the right side', 'released: pin is steered into the notch, latched IN', 'pressing again: pin leaves the notch to the top left', 'released: pin runs down the left side, button OUT'];
+  const len = pts => { let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); return L; };
+  const along = (pts, f) => { let d = f * len(pts); for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (d <= l || i === pts.length - 1) { const u = Math.min(1, d / l); return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]; } d -= l; } };
+  let seg = 0, f = 1, target = null, auto = false, rest = 0, state = 'out (released)', pushes = 0;
+  const canvas = document.getElementById('pp-canvas'), out = document.getElementById('pp-out');
+  const pinPos = () => f >= 1 ? SEG[seg][SEG[seg].length - 1] : along(SEG[seg], f);
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const sc = h * 0.75, ox = w * 0.32, oy = h - 24, P = ([x, y]) => [ox + x * sc, oy - y * sc];
+    // groove: thick rounded stroke along the whole loop
+    c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = col.line; c.lineWidth = sc * 0.1;
+    c.beginPath(); SEG.forEach(sg => sg.forEach((p, i) => { const [X, Y] = P(p); (i === 0 && sg === SEG[0]) ? c.moveTo(X, Y) : c.lineTo(X, Y); })); c.closePath(); c.stroke();
+    c.lineWidth = 1; c.strokeStyle = col.muted; c.setLineDash([2, 4]); c.beginPath(); SEG.forEach(sg => sg.forEach((p, i) => { const [X, Y] = P(p); (i === 0 && sg === SEG[0]) ? c.moveTo(X, Y) : c.lineTo(X, Y); })); c.stroke(); c.setLineDash([]);
+    // direction arrows
+    c.fillStyle = col.muted; c.font = '16px system-ui'; c.textAlign = 'center';
+    [[0.42, 0.5, '↑'], [0.12, 0.92, '↙'], [-0.12, 0.92, '↖'], [-0.42, 0.5, '↓']].forEach(([x, y, a]) => { const [X, Y] = P([x, y]); c.fillText(a, X, Y); });
+    // island
+    c.beginPath(); ISLAND.forEach((p, i) => { const [X, Y] = P(p); i ? c.lineTo(X, Y) : c.moveTo(X, Y); }); c.closePath(); c.fillStyle = col.accent + '55'; c.fill(); c.strokeStyle = col.accent; c.lineWidth = 2; c.stroke();
+    const pin = pinPos(), [px, py] = P(pin);
+    // swing arm from a pivot far below the plate
+    const [qx, qy] = P([0, -0.25]); Sim.line(c, qx, qy, px, py, col.muted, 2); Sim.dot(c, qx, qy, 4, col.ink);
+    Sim.dot(c, px, py, sc * 0.035, col.warn, col.surface);
+    c.lineCap = 'butt';
+    // button on the right: depression = pin height
+    const bx = w * 0.72, top = h * 0.18, bw = w * 0.12, dep = pin[1] * h * 0.3;
+    c.fillStyle = col.muted + '44'; c.fillRect(bx - bw * 0.8, top + h * 0.22, bw * 1.6, h * 0.5); c.strokeStyle = col.muted; c.lineWidth = 2; c.strokeRect(bx - bw * 0.8, top + h * 0.22, bw * 1.6, h * 0.5);
+    c.fillStyle = col.accent2; c.fillRect(bx - bw / 2, top + dep, bw, h * 0.3); c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'center';
+    c.fillText(pin[1] > 0.6 ? (pin[1] > 0.9 ? 'pressed' : 'held in') : pin[1] < 0.05 ? 'out' : 'moving', bx, top - 8);
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText(f < 1 ? LABEL[seg] : 'state: ' + state, 8, 16);
+  });
+  const go = () => { if (f < 1 || target !== null) return; seg = (seg + 1) % 4; f = 0; target = (seg + 1) % 4; pushes++; };
+  const loop = Sim.loop(dt => {
+    if (f < 1) { f = Math.min(1, f + dt / (seg % 2 ? 0.8 : 1.0)); if (f >= 1) { if (seg % 2 === 0) { seg = (seg + 1) % 4; f = 0; } else { target = null; state = seg === 1 ? 'IN (latched)' : 'OUT (released)'; info(); rest = 0.9; } } }
+    else if (auto) { rest -= dt; if (rest <= 0) go(); }
+    view.redraw();
+  });
+  function info() { out.innerHTML = 'Pushes: <strong>' + pushes + '</strong> · button is <strong>' + state + '</strong>. Each push moves the pin half-way round the heart: odd pushes end in the notch (in), even pushes return it to the bottom (out).'; }
+  seg = 3; f = 1;
+  document.getElementById('pp-push').onclick = () => { if (!loop.on) loop.toggle(); go(); };
+  const runBtn = document.getElementById('pp-run');
+  runBtn.onclick = () => { auto = !auto; runBtn.textContent = auto ? 'Pause' : 'Run'; runBtn.classList.toggle('on', auto); if (auto && !loop.on) loop.toggle(); rest = 0; };
+  state = 'OUT (released)'; info(); view.redraw();
 })();
 </script>
 </body>

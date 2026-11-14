@@ -66,6 +66,7 @@ PV = P · v        (MPa·m/s)         friction heat ≈ μ · F · v  (W)</div>
 </table>
 <p>Suffixes: <strong>ZZ</strong> metal shields (light protection, spins freely), <strong>2RS</strong> rubber seals (better dirt protection, a little more drag). Skip unneeded drag in light mechanisms with ZZ.</p>
 
+<p><strong>Why rolling beats sliding.</strong> In a plain bearing the whole contact rubs, and friction is μ·F with μ around 0.1–0.3 for plastics. In a ball bearing, each ball rolls on the races, so the touching points do not slide; what remains is a little deformation and recovery of the steel at the contacts and the drag of the cage and grease, an effective μ of about 0.001–0.005. Because there is no sliding, there is almost no wear and no stick-slip, and the friction hardly depends on speed. The cost is that the load is carried at a few tiny contact points, so a ball bearing hates shocks and dirt, and its races must not be squeezed out of round by a too-tight housing.</p>
 <h3>Seating a bearing in a printed housing</h3>
 <ul>
   <li><strong>Design the bore from your measured hole shrink</strong> (chapter 4's coupon). The printed bore ends up <em>smaller</em> than modelled; model it larger by the shrink amount.</li>
@@ -127,6 +128,25 @@ PV = P · v        (MPa·m/s)         friction heat ≈ μ · F · v  (W)</div>
   <tr><td>Flexible shaft / tubing</td><td>Everything, little torque</td><td>Toy-level</td></tr>
 </table>
 <p>Misalignment types: <em>parallel</em> (shifted axes), <em>angular</em> (tilted), and <em>axial</em> (the ends move together/apart). Rule: <strong>if two shafts are each held by their own bearings, the coupling between them must be flexible.</strong> That is the over-constraint rule of chapter 1 again.</p>
+<h3>How the flexible couplings absorb misalignment</h3>
+<ul>
+  <li><strong>Helical / beam coupling:</strong> a spiral slot turns a tube into a coiled spring that bends easily (to follow angular and parallel error) but is stiff in torsion, because twisting the coil tightens it along its length. It works by bending, so it has no backlash but loads the shaft bearings a little with its spring force.</li>
+  <li><strong>Jaw / spider coupling:</strong> two hubs with interleaved jaws, with an elastomer star between them. Torque compresses the star segments; misalignment is absorbed by the star deforming. If the star wears out, the jaws still drive each other (fail-safe), with backlash.</li>
+  <li><strong>Oldham coupling:</strong> a middle disc with a tongue on each face, at 90° to each other, each sliding in a slot in one hub. The disc can slide freely along one direction relative to the input hub and along the perpendicular direction relative to the output hub, so together it can reach any sideways offset. Because both slots force the disc to turn with each hub, the output angle always equals the input angle exactly: no speed fluctuation. The cost is sliding: the disc's centre orbits on a circle whose diameter equals the offset, twice per revolution, so the tongues need clearance, lubricant and a wear-resistant material (nylon, POM).</li>
+  <li><strong>Universal (cardan) joint:</strong> two yokes connected by a cross whose four arms run in bearings. It passes rotation through a large angle, but not uniformly: the output speeds up and slows down twice per revolution. The simulation shows why a pair of joints is needed to cancel it.</li>
+</ul>
+<div class="eq">Single cardan joint at angle β:   tan θ_out = tan θ_in / cos β<br>
+Speed ratio   ω_out / ω_in = cos β / (1 − sin²β · cos²θ_in)      varies between cos β and 1 / cos β</div>
+<p>Two joints cancel each other exactly if the intermediate shaft makes equal angles with the input and output shafts, and the two yokes on the intermediate shaft are in the same plane (in phase). Get the phasing wrong by 90° and the fluctuations add instead of cancelling.</p>
+
+<div class="sim">
+  <h4>Simulation 4 · Universal joint speed fluctuation</h4>
+  <p class="desc">The input turns at constant speed. The dials show the input angle (grey) and the output angle (orange); the plot shows the output speed relative to the input over one input turn. Raise the joint angle and compare a single joint, a correctly phased pair, and a pair with the middle yokes 90° out of phase.</p>
+  <canvas id="uj-canvas"></canvas>
+  <div class="row"><label>Arrangement <select id="uj-mode"><option value="1">Single joint</option><option value="2">Two joints, yokes in phase</option><option value="3">Two joints, yokes 90° out of phase</option></select></label><button id="uj-run" class="on">Pause</button></div>
+  <div class="controls" id="uj-ctl"></div>
+  <div class="readout" id="uj-out"></div>
+</div>
 
 <h2>10.6 Hinges and pivots</h2>
 <p>A hinge is the most common rotary joint in printed objects: lids, doors, linkage pivots, folding legs. Most turn slowly and rarely, so the problem is not heat or speed but <strong>strength of the pin and knuckles</strong>, <strong>play</strong>, and <strong>wear of the hole</strong>.</p>
@@ -183,7 +203,7 @@ Needed            T_f ≥ 1.3 · m · g · r_cg        (r_cg = horizontal distan
 </ul>
 
 <div class="sim">
-  <h4>Simulation 4 · Printed ball-race turntable</h4>
+  <h4>Simulation 5 · Printed ball-race turntable</h4>
   <p class="desc">Set the ring's ball-circle diameter, the ball size, the load and how far off centre it sits. The plan view shows the balls (coloured and shaded by how much load each takes; red means over 50 N) and the load point. The readout gives the ball count, the share of the most loaded ball and whether the table tips.</p>
   <canvas id="tt-canvas"></canvas>
   <div class="row"><label><input type="checkbox" id="tt-cage" checked> printed cage (spaced balls)</label></div>
@@ -379,6 +399,48 @@ Needed            T_f ≥ 1.3 · m · g · r_cg        (r_cg = horizontal distan
   [['D', 'Ball-circle Ø', 40, 300, 5, 0, ' mm'], ['b', 'Ball Ø', 3, 12, 0.5, 1, ' mm'], ['W', 'Load', 5, 500, 5, 0, ' N'], ['e', 'Load offset', 0, 160, 1, 0, ' mm']]
     .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
   cage.onchange = info; info();
+})();
+/* ---------- universal joint ---------- */
+(function () {
+  const TAU = Math.PI * 2, S = { b: 30, th: 0 }, sel = document.getElementById('uj-mode');
+  const canvas = document.getElementById('uj-canvas'), out = document.getElementById('uj-out');
+  const fwd = (t, cb) => Math.atan2(Math.sin(t), Math.cos(t) * cb);   // through one joint
+  const back = (t, cb) => Math.atan2(Math.sin(t) * cb, Math.cos(t));  // through a joint phased to undo it
+  const outA = (t) => { const cb = Math.cos(S.b * Math.PI / 180), m = sel.value; const a1 = fwd(t, cb); return m === '1' ? a1 : m === '2' ? back(a1, cb) : fwd(a1, cb); };
+  const unwrapD = (a, b) => { let d = a - b; while (d > Math.PI) d -= TAU; while (d < -Math.PI) d += TAU; return d; };
+  const ratio = t => unwrapD(outA(t + 1e-4), outA(t - 1e-4)) / 2e-4;
+  const view = Sim.make(canvas, 0.62, (c, w, h, col) => {
+    const topH = h * 0.42, R = Math.min(topH * 0.38, w * 0.12), th = S.th;
+    // schematic side view of the shafts
+    const b = S.b * Math.PI / 180, two = sel.value !== '1', y = topH / 2 + 4, x0 = w * 0.05, L = w * 0.16;
+    let x = x0 + L; Sim.line(c, x0, y, x, y, col.muted, 6); Sim.dot(c, x, y, 7, col.surface, col.ink);
+    let ex = x + L * Math.cos(b), ey = y - L * Math.sin(b); Sim.line(c, x, y, ex, ey, two ? col.accent : col.accent2, 6);
+    if (two) { Sim.dot(c, ex, ey, 7, col.surface, col.ink); Sim.line(c, ex, ey, ex + L, ey, col.accent2, 6); }
+    c.fillStyle = col.muted; c.font = '12px system-ui'; c.textAlign = 'left'; c.fillText('β = ' + S.b + '°' + (two ? ' at each joint' : ''), x0, 16);
+    // dials
+    const dial = (cx, a, colr, label) => { c.beginPath(); c.arc(cx, y, R, 0, TAU); c.strokeStyle = col.line; c.lineWidth = 1.5; c.stroke(); for (let i = 0; i < 12; i++) { const q = i * TAU / 12; Sim.line(c, cx + R * 0.88 * Math.cos(q), y + R * 0.88 * Math.sin(q), cx + R * Math.cos(q), y + R * Math.sin(q), col.line, 1); } Sim.line(c, cx, y, cx + R * 0.9 * Math.cos(a), y - R * 0.9 * Math.sin(a), colr, 4); Sim.dot(c, cx, y, 4, col.ink); c.fillStyle = col.muted; c.textAlign = 'center'; c.fillText(label, cx, y + R + 16); };
+    const a2 = outA(th);
+    dial(w * 0.62, th, col.muted, 'input'); dial(w * 0.85, a2, col.accent2, 'output');
+    c.globalAlpha = 0.35; Sim.line(c, w * 0.85, y, w * 0.85 + R * 0.9 * Math.cos(th), y - R * 0.9 * Math.sin(th), col.muted, 3); c.globalAlpha = 1;
+    c.fillStyle = col.ink; c.textAlign = 'center'; c.fillText('output − input: ' + (unwrapD(a2, th) * 180 / Math.PI).toFixed(1) + '°', w * 0.85, y - R - 8);
+    // plot of speed ratio
+    const l = 40, r = 10, pt = topH + 22, pb = h - 22, pw = w - l - r, ph = pb - pt, cb = Math.cos(b), lo = Math.min(0.5, cb * cb * 0.95), hi = Math.max(1.6, 1 / (cb * cb) * 1.05);
+    const X = t => l + t / TAU * pw, Y = v => pb - (v - lo) / (hi - lo) * ph;
+    c.strokeStyle = col.line; c.lineWidth = 1; c.textAlign = 'right'; c.fillStyle = col.muted;
+    [lo, 1, hi].forEach(v => { c.beginPath(); c.moveTo(l, Y(v)); c.lineTo(l + pw, Y(v)); c.stroke(); c.fillText(v.toFixed(2), l - 4, Y(v) + 4); });
+    c.strokeStyle = col.accent2; c.lineWidth = 2.5; c.beginPath(); for (let i = 0; i <= 360; i++) { const t = i / 360 * TAU; i ? c.lineTo(X(t), Y(ratio(t))) : c.moveTo(X(t), Y(ratio(t))); } c.stroke();
+    const t0 = ((th % TAU) + TAU) % TAU; Sim.dot(c, X(t0), Y(ratio(t0)), 5, col.accent2, col.surface);
+    c.fillStyle = col.muted; c.textAlign = 'center'; [0, 90, 180, 270, 360].forEach(d => c.fillText(d + '°', X(d * Math.PI / 180), h - 6));
+    c.textAlign = 'left'; c.fillText('output speed ÷ input speed over one input turn', l + 6, pt + 2);
+  });
+  function info() {
+    let mn = 9, mx = 0; for (let i = 0; i < 360; i++) { const v = ratio(i / 360 * TAU); mn = Math.min(mn, v); mx = Math.max(mx, v); }
+    out.innerHTML = 'Output speed swings between <strong>' + mn.toFixed(3) + '×</strong> and <strong>' + mx.toFixed(3) + '×</strong> the input (±' + ((mx - mn) / 2 * 100).toFixed(1) + '%), twice per turn' + (sel.value === '2' ? ' : the second joint undoes the first, so the output follows the input exactly.' : sel.value === '3' ? ' : out of phase, the two joints add their errors. Check the yoke orientation on the middle shaft.' : '. Fine for a hand-turned knob at small angles; a problem for a motor drive or anything that needs even motion.');
+  }
+  Sim.slider(document.getElementById('uj-ctl'), { label: 'Joint angle β', min: 0, max: 45, value: S.b, unit: '°', onInput: v => { S.b = v; info(); view.redraw(); } });
+  sel.onchange = () => { info(); view.redraw(); };
+  const loop = Sim.loop(dt => { S.th += dt * 1.2; view.redraw(); });
+  document.getElementById('uj-run').onclick = e => loop.toggle(e.target); loop.toggle(document.getElementById('uj-run')); info();
 })();
 </script>
 </body>

@@ -66,6 +66,9 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
   <tr><td>Bearing / PV</td><td>P = F/(d·L);  v = π·d·n/60000;  PV = P·v</td><td>MPa, m/s, rpm, mm</td></tr>
   <tr><td>Spur gear</td><td>m = d/z;  a = m(z₁+z₂)/2;  i = z₂/z₁</td><td>z ≥ 17 at 20°; contact ratio ≥ 1.2</td></tr>
   <tr><td>Lewis gear tooth</td><td>F_t = σ·b·m·Y;  Y ≈ π(0.154 − 0.912/z)</td><td>Use conservative σ for plastics</td></tr>
+  <tr><td>Involute gearing</td><td>base pitch p_b = π·m·cos α;  cos α_w = (r_b1 + r_b2)/a</td><td>ratio = r_b2/r_b1 at any centre distance</td></tr>
+  <tr><td>Worm, cycloidal, strain-wave</td><td>i = z_wheel/starts;  i = −(N − 1);  i = z_flex/(z_ring − z_flex)</td><td>N = ring pins</td></tr>
+  <tr><td>Willis (planetary)</td><td>(ω_s − ω_c)/(ω_r − ω_c) = −Z_r/Z_s</td><td>covers every planetary setup</td></tr>
   <tr><td>Planetary</td><td>Z_r = Z_s + 2Z_p;  i = 1 + Z_r/Z_s (ring fixed)</td><td>(Z_s + Z_r)/N integer</td></tr>
   <tr><td>Timing belt</td><td>d = z·p/π;  L ≈ 2C + π(D+d)/2 + (D−d)²/(4C)</td><td>≥ 6 teeth in mesh</td></tr>
   <tr><td>Chain</td><td>D = p/sin(180°/z);  speed variation ≈ 1 − cos(π/z)</td><td>≥ 17 teeth</td></tr>
@@ -76,6 +79,10 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
   <tr><td>Power screw</td><td>λ = atan(l/(π·d_m));  η = tanλ(1 − μ′tanλ)/(tanλ + μ′);  F = 2π·η·T/l</td><td>self-locking if tan λ ≤ μ′</td></tr>
   <tr><td>Slider jam</td><td>jams when a ≥ L/(2μ)</td><td>a = push offset, L = span</td></tr>
   <tr><td>Screw critical speed</td><td>n ≈ 1.22×10⁸·k·d/L² rpm (mm)</td><td>k = 0.36, 1, 1.56, 2.27</td></tr>
+  <tr><td>Screw as a ramp</td><td>P = W·tan(λ + φ) raise;  P = W·tan(φ − λ) lower;  T = P·d_m/2</td><td>λ ≤ φ: self-locking</td></tr>
+  <tr><td>Friction belt</td><td>T₁/T₂ ≤ e^(μθ);  V-groove μ_eff = μ/sin β</td><td>β = half groove angle</td></tr>
+  <tr><td>Universal joint</td><td>tan θ_out = tan θ_in / cos β;  ω ratio between cos β and 1/cos β</td><td>pair them, yokes in phase</td></tr>
+  <tr><td>DC motor</td><td>V = I·R + k·ω;  T = k·I</td><td>stall I = V/R; no-load ω = V/k</td></tr>
   <tr><td>Screw buckling</td><td>F = c·π²·E·I/L², I = π·d_r⁴/64</td><td>c = 0.25, 1, 2, 4; use ≤ 50%</td></tr>
   <tr><td>Screw back-driving</td><td>η_back = (1 − μ′/tanλ)/(1 + μ′·tanλ);  T_back = F·l·η_back/(2π)</td><td>η_back ≤ 0: self-locking</td></tr>
   <tr><td>Wedge / latch face</td><td>P_open = F·tan(φ + β)</td><td>β &gt; 0 undercut</td></tr>
@@ -257,7 +264,13 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
     ['Detent torque', 'The small torque an unpowered stepper motor resists with, from its magnets.'], ['Differential', 'A gearset whose carrier turns at the average of its two outputs, letting them run at different speeds.'], ['Double shear', 'A pin loaded across two planes, so each carries half the load.'],
     ['Glass transition (Tg)', 'Temperature range where an amorphous plastic turns from glassy and stiff to rubbery.'], ['HDT', 'Heat deflection temperature: where a standard bar bends a set amount under a set stress.'], ['Pantograph', 'A parallelogram linkage that copies a motion at a fixed scale.'],
     ['Sarrus linkage', 'A spatial linkage of two hinged plate pairs giving exact straight-line motion.'], ['Scissor lift', 'Stacked crossed links that extend a long way from a compact base; force rises steeply at low angles.'], ['Scotch yoke', 'A crank pin sliding in a slotted crosshead, giving exactly sinusoidal reciprocating motion.'],
-    ['Shear modulus (G)', 'Stiffness in shear or twisting; sets how far a shaft winds up under torque.'], ['S–N curve', 'Stress against the number of cycles to fatigue failure.'], ['Solenoid', 'A coil that pulls an iron plunger; force falls steeply with the gap.']
+    ['Shear modulus (G)', 'Stiffness in shear or twisting; sets how far a shaft winds up under torque.'], ['S–N curve', 'Stress against the number of cycles to fatigue failure.'], ['Solenoid', 'A coil that pulls an iron plunger; force falls steeply with the gap.'],
+    ['Back-EMF', 'The voltage a spinning motor generates against its supply, proportional to speed; it is why a DC motor slows under load.'], ['Base pitch', 'Spacing of gear teeth measured along the line of action: π·m·cos α.'], ['Bistable', 'Having two stable positions separated by an unstable one; snaps between them.'],
+    ['Cardan joint', 'Universal joint: two yokes and a cross; output speed fluctuates unless used in phased pairs.'], ['Cycloidal drive', 'An eccentric wobbles a lobed disc inside a ring of pins; N − 1 lobes on N pins gives an (N − 1):1 reduction.'], ['Dog clutch', 'A clutch whose jaws interlock axially; positive drive, engaged at rest or low speed.'],
+    ['Kinematic inversion', 'Viewing a mechanism from a moving link (e.g. riding on the cam) to construct or analyse it.'], ['Line of action', 'The fixed line along which involute gear teeth touch and push; tangent to both base circles.'], ['Negative stiffness', 'A range where force falls as displacement grows; the cause of snap-through.'],
+    ['Oldham coupling', 'A shaft coupling with a sliding middle disc; absorbs parallel offset with constant speed ratio.'], ['Pitch point', 'Where the line of action crosses the line of centres; fixes the gear ratio.'], ['Push-push latch', 'A heart-shaped cam track that latches on one push and releases on the next.'],
+    ['Sprag clutch', 'One-way clutch whose tilted blocks jam between two races in one direction and slip in the other.'], ['Strain-wave drive', 'Harmonic drive: a flexible toothed cup with two teeth fewer than its ring, deformed by an elliptical cam.'], ['Willis equation', '(ω_s − ω_c)/(ω_r − ω_c) = −Z_r/Z_s; the general relation for a planetary set.'],
+    ['Wrap-spring clutch', 'A coil spring over two drums that grips when wound tighter and slips the other way.']
   ];
   G.sort((x, y) => x[0].localeCompare(y[0]));
   const dl = document.getElementById('gl'), q = document.getElementById('gl-q');
