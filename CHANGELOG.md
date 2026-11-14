@@ -6,6 +6,8 @@ All notable changes to this compendium are recorded here. The format follows
 
 ## Unreleased
 
+## 1.2.0 - 2026-11-14
+
 Reviewed every mechanism for how clearly its principle of operation is explained, and added interactive models where a picture in motion explains it better than words.
 
 ### Added
