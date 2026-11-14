@@ -26,24 +26,24 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
 <table>
   <tr><th>If you need to...</th><th>Go to</th></tr>
   <tr><td>count degrees of freedom, spot over-constraint</td><td><a href="01-thinking-about-mechanisms.html">Ch 1</a></td></tr>
-  <tr><td>size a part for strength or stiffness; friction; safety factors</td><td><a href="02-mechanics-you-need.html">Ch 2</a></td></tr>
-  <tr><td>choose a material or understand heat, creep, anisotropy</td><td><a href="03-materials-and-technologies.html">Ch 3</a></td></tr>
-  <tr><td>orient, set clearances, compensate holes, print-in-place</td><td><a href="04-design-for-3d-printing.html">Ch 4</a></td></tr>
-  <tr><td>design linkages, toggles, straight-line mechanisms</td><td><a href="05-linkages.html">Ch 5</a></td></tr>
+  <tr><td>size a part for strength or stiffness; torsion and twist; fatigue and wear; friction; safety factors</td><td><a href="02-mechanics-you-need.html">Ch 2</a></td></tr>
+  <tr><td>choose a material or understand heat, creep, annealing, anisotropy</td><td><a href="03-materials-and-technologies.html">Ch 3</a></td></tr>
+  <tr><td>orient, set clearances, compensate holes, print-in-place, split and align parts</td><td><a href="04-design-for-3d-printing.html">Ch 4</a></td></tr>
+  <tr><td>design linkages, Scotch yokes, toggles, straight-line mechanisms, scissor lifts</td><td><a href="05-linkages.html">Ch 5</a></td></tr>
   <tr><td>design a cam and check pressure angle</td><td><a href="06-cams-and-followers.html">Ch 6</a></td></tr>
-  <tr><td>gears, ratios, planetary, printed gear rules</td><td><a href="07-gears.html">Ch 7</a></td></tr>
-  <tr><td>belts, chains, cables, linear belt drives</td><td><a href="08-belts-chains-cables.html">Ch 8</a></td></tr>
-  <tr><td>leadscrews, guides, jamming, critical speed</td><td><a href="09-screws-and-linear-motion.html">Ch 9</a></td></tr>
-  <tr><td>bearings, shafts, couplings, hub connections</td><td><a href="10-bearings-shafts-joints.html">Ch 10</a></td></tr>
+  <tr><td>gears, ratios, planetary, differentials, bevels, printed gear rules</td><td><a href="07-gears.html">Ch 7</a></td></tr>
+  <tr><td>belts, tensioning, CoreXY, chains, cables, block and tackle</td><td><a href="08-belts-chains-cables.html">Ch 8</a></td></tr>
+  <tr><td>leadscrews, guides, jamming, critical speed, buckling, holding vertical loads</td><td><a href="09-screws-and-linear-motion.html">Ch 9</a></td></tr>
+  <tr><td>bearings, shafts, couplings, hinges, turntables, lubricants</td><td><a href="10-bearings-shafts-joints.html">Ch 10</a></td></tr>
   <tr><td>ratchets, Geneva drives, detents, escapements</td><td><a href="11-intermittent-motion.html">Ch 11</a></td></tr>
   <tr><td>living hinges, flexures, snap-fits, printed springs</td><td><a href="12-compliant-mechanisms.html">Ch 12</a></td></tr>
   <tr><td>screws, inserts, nut traps, adhesives, bought springs</td><td><a href="13-fasteners-joints-springs.html">Ch 13</a></td></tr>
   <tr><td>latches, locks, clutches, torque limiters</td><td><a href="14-latching-locking-clutching.html">Ch 14</a></td></tr>
   <tr><td>print vs buy, standard sizes, motor mounts</td><td><a href="15-hybrid-builds.html">Ch 15</a></td></tr>
-  <tr><td>motors, steppers, servos, sizing an actuator</td><td><a href="16-actuation.html">Ch 16</a></td></tr>
+  <tr><td>motors, steppers, servos, solenoids, drivers, cable chains</td><td><a href="16-actuation.html">Ch 16</a></td></tr>
   <tr><td>fix a problem, tolerance stack-up, thermal expansion</td><td><a href="17-problems-and-solutions.html">Ch 17</a></td></tr>
   <tr><td>the workflow, tools, printer profile, checklist</td><td><a href="18-workflow-and-tools.html">Ch 18</a></td></tr>
-  <tr><td>see it all applied</td><td><a href="19-case-studies.html">Ch 19</a></td></tr>
+  <tr><td>see it all applied; practice projects</td><td><a href="19-case-studies.html">Ch 19</a></td></tr>
 </table>
 
 <h2>20.2 Formula cheat sheet</h2>
@@ -56,26 +56,38 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
   <tr><td>Beam bending (rectangle)</td><td>I = b·t³/12;  σ = M·c/I;  cantilever δ = F·L³/(3EI), σ = 6FL/(b t²)</td><td>Thickness cubed in stiffness, squared in strength</td></tr>
   <tr><td>Simply supported, centre load</td><td>δ = F·L³/(48·E·I)</td><td></td></tr>
   <tr><td>Euler buckling</td><td>P = π²·E·I/(K·L)²</td><td>K = 1 pinned, 2 free-fixed, 0.5 fixed</td></tr>
-  <tr><td>Torsion, round shaft</td><td>τ = 16·T/(π·d³)</td><td>Cubic in diameter</td></tr>
+  <tr><td>Torsion, round shaft</td><td>τ = 16·T/(π·d³);  θ = T·L/(G·J), J = π·d⁴/32</td><td>Cubic in diameter (stress), quartic (twist)</td></tr>
+  <tr><td>Fatigue (printed, indicative)</td><td>allowable ≈ 0.45 (10⁴), 0.35 (10⁵), 0.25 (10⁶) × static</td><td>count cycles honestly</td></tr>
+  <tr><td>Wear (Archard)</td><td>V ≈ k·F·s/H</td><td>halve load or sliding distance, halve wear</td></tr>
   <tr><td>Stress concentration</td><td>σ_peak = Kt·σ_nom;  Kt ≈ 1 + 2√(d/r) (notch)</td><td>Fillet every inside corner</td></tr>
   <tr><td>Friction</td><td>F ≤ μ·N;  slope holds if tan θ ≤ μ</td><td>φ = atan μ</td></tr>
+  <tr><td>Pin in double shear</td><td>τ = 2F/(π·d²);  bearing σ_b = F/(d·t)</td><td>σ_b ≤ 5–10 MPa in printed holes</td></tr>
+  <tr><td>Friction hinge</td><td>T_f ≈ n·μ·F_clamp·r_m ≥ 1.3·m·g·r_cg</td><td>n = rubbing faces</td></tr>
   <tr><td>Bearing / PV</td><td>P = F/(d·L);  v = π·d·n/60000;  PV = P·v</td><td>MPa, m/s, rpm, mm</td></tr>
   <tr><td>Spur gear</td><td>m = d/z;  a = m(z₁+z₂)/2;  i = z₂/z₁</td><td>z ≥ 17 at 20°; contact ratio ≥ 1.2</td></tr>
   <tr><td>Lewis gear tooth</td><td>F_t = σ·b·m·Y;  Y ≈ π(0.154 − 0.912/z)</td><td>Use conservative σ for plastics</td></tr>
   <tr><td>Planetary</td><td>Z_r = Z_s + 2Z_p;  i = 1 + Z_r/Z_s (ring fixed)</td><td>(Z_s + Z_r)/N integer</td></tr>
   <tr><td>Timing belt</td><td>d = z·p/π;  L ≈ 2C + π(D+d)/2 + (D−d)²/(4C)</td><td>≥ 6 teeth in mesh</td></tr>
   <tr><td>Chain</td><td>D = p/sin(180°/z);  speed variation ≈ 1 − cos(π/z)</td><td>≥ 17 teeth</td></tr>
+  <tr><td>Differential</td><td>ω_carrier = (ω_L + ω_R)/2</td><td>torque splits equally</td></tr>
+  <tr><td>Belt tension (pluck)</td><td>T = 4·m′·L²·f²</td><td>m′ kg/m, L m, f Hz</td></tr>
+  <tr><td>Block and tackle</td><td>F = W(1 − η)/(η(1 − ηⁿ));  ideal W/n</td><td>rope = n × lift</td></tr>
   <tr><td>Capstan</td><td>T_load = T_hold·e^(μθ)</td><td>θ in radians</td></tr>
   <tr><td>Power screw</td><td>λ = atan(l/(π·d_m));  η = tanλ(1 − μ′tanλ)/(tanλ + μ′);  F = 2π·η·T/l</td><td>self-locking if tan λ ≤ μ′</td></tr>
   <tr><td>Slider jam</td><td>jams when a ≥ L/(2μ)</td><td>a = push offset, L = span</td></tr>
   <tr><td>Screw critical speed</td><td>n ≈ 1.22×10⁸·k·d/L² rpm (mm)</td><td>k = 0.36, 1, 1.56, 2.27</td></tr>
+  <tr><td>Screw buckling</td><td>F = c·π²·E·I/L², I = π·d_r⁴/64</td><td>c = 0.25, 1, 2, 4; use ≤ 50%</td></tr>
+  <tr><td>Screw back-driving</td><td>η_back = (1 − μ′/tanλ)/(1 + μ′·tanλ);  T_back = F·l·η_back/(2π)</td><td>η_back ≤ 0: self-locking</td></tr>
   <tr><td>Wedge / latch face</td><td>P_open = F·tan(φ + β)</td><td>β &gt; 0 undercut</td></tr>
   <tr><td>Roller clutch</td><td>locks if wedge angle α &lt; 2·atan(μ)</td><td></td></tr>
   <tr><td>Toggle</td><td>F_out = F_in/(2·tan α)</td><td>α from straight</td></tr>
   <tr><td>Slider-crank</td><td>x = r cosθ + √(l² − (e − r sinθ)²)</td><td>stroke ≈ 2r</td></tr>
+  <tr><td>Scotch yoke</td><td>x = r cosθ</td><td>pure sine, stroke 2r</td></tr>
+  <tr><td>Scissor lift</td><td>H = n·L·sinθ;  F = n·W/tanθ</td><td>horizontal push at base; keep θ ≥ 10–15°</td></tr>
   <tr><td>Cam pressure angle</td><td>tan φ = (ds/dθ)/(R_prime + s)</td><td>keep ≤ 30°</td></tr>
   <tr><td>Strain in a hinge</td><td>ε = t·θ/(2L)</td><td>long, thin hinges</td></tr>
   <tr><td>Snap-fit arm</td><td>ε = 1.5·t·y/L²;  F = 3EI·y/L³</td><td>taper to half: ≈ 0.92·t·y/L²</td></tr>
+  <tr><td>Printed springs</td><td>leaf k = Ebt³/(4L³);  serpentine k ≈ Ebt³/(nL³);  spiral k_θ = Ebt³/(12L)</td><td>tune by test; bends soften serpentines</td></tr>
   <tr><td>Parallel flexure</td><td>k = 2·E·b·t³/L³;  ε = 3tδ/L²;  shortening ≈ 3δ²/(5L)</td><td></td></tr>
   <tr><td>Compression spring</td><td>k = G·d⁴/(8·D³·n)</td><td>G ≈ 79 000 MPa steel</td></tr>
   <tr><td>Torsion spring</td><td>k = E·d⁴/(64·D·n) per rad</td><td></td></tr>
@@ -126,7 +138,14 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
   <tr><td>Nut pocket across-flats</td><td>+0.2 to +0.4</td><td></td></tr>
   <tr><td>Counterbore for socket head</td><td>head Ø + 0.4–0.6, depth head + 0.3</td><td></td></tr>
   <tr><td>Wall minimum</td><td>0.8 mm (2 lines); 1.2–2 mm functional</td><td></td></tr>
+  <tr><td>Bearing seat (light press)</td><td>bearing OD − 0.05 to 0.1, plus hole shrink</td><td>shoulder + cover plate; chapter 10, Simulation 2</td></tr>
+  <tr><td>Steel dowel, press half / slip half</td><td>−0.05 to −0.1 / +0.05 to +0.1</td><td>two pins, or a pin and a slot</td></tr>
+  <tr><td>Printed alignment pin in socket</td><td>0.15–0.25</td><td>chamfer pin ends</td></tr>
+  <tr><td>Dovetail / T-slot</td><td>0.2–0.3</td><td>profile in XY</td></tr>
+  <tr><td>Hinge side gap between knuckles</td><td>0.2–0.3 per side</td><td>or a thin washer</td></tr>
+  <tr><td>Heat-set insert hole</td><td>per insert maker (typically insert OD − 0.2 to −0.4)</td><td>chapter 13</td></tr>
 </table>
+<p>These are starting points. Replace them with what your own fit coupon shows (chapter 4) and record the results on your printer profile card (chapter 18): your printer, filament and settings beat any table.</p>
 
 <h2>20.6 Fastener and insert sizes (ISO metric, typical)</h2>
 <table>
@@ -231,8 +250,16 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
     ['Shrinkage', 'Contraction of plastic on cooling; makes holes smaller and parts smaller.'], ['Snap-fit', 'A joint using a flexing hook that snaps over an undercut.'], ['Stick-slip', 'Jerky sliding when static friction exceeds kinetic friction in a springy system.'],
     ['Strain', 'Relative deformation, ΔL/L.'], ['Stress', 'Force per unit area, MPa.'], ['Stress concentration', 'Local rise in stress at corners, holes and notches.'],
     ['Tolerance stack-up', 'The accumulation of dimensional tolerances in a chain of parts.'], ['Torque', 'A turning moment, force × distance.'], ['Transmission angle', 'Angle between coupler and output link in a four-bar; best near 90°.'],
-    ['Undercut (gear)', 'Material cut away at the root of a gear with too few teeth.'], ['Undercut (snap-fit)', 'The recess behind a hook that retains it.'], ['Worm gear', 'A screw meshing with a gear wheel; high ratio, often self-locking.']
+    ['Undercut (gear)', 'Material cut away at the root of a gear with too few teeth.'], ['Undercut (snap-fit)', 'The recess behind a hook that retains it.'], ['Worm gear', 'A screw meshing with a gear wheel; high ratio, often self-locking.'],
+    ['Annealing', 'Heating a finished print below its melting point to crystallise it: more heat resistance, but the part changes size.'], ['Archard wear law', 'Worn volume ∝ load × sliding distance ÷ hardness.'], ['Back-driving', 'The load turning a drive backwards (a weight unwinding a screw); impossible if the drive is self-locking.'],
+    ['Bevel gear', 'A conical gear that transmits motion between intersecting shafts, usually at 90°.'], ['Block and tackle', 'A rope reeved through pulleys in two blocks, multiplying force by the number of supporting segments.'], ['Cable chain', 'A chain of hinged links that guides moving cables at a fixed minimum bend radius (drag chain, energy chain).'],
+    ['Clevis', 'A forked bracket holding a pin at both ends, so the pin is in double shear.'], ['Conformity', 'Ratio of a ball race groove radius to the ball diameter, typically 0.52–0.55.'], ['CoreXY', 'A two-axis motion system with two fixed motors and crossed belts; X = (A + B)/2, Y = (A − B)/2.'],
+    ['Detent torque', 'The small torque an unpowered stepper motor resists with, from its magnets.'], ['Differential', 'A gearset whose carrier turns at the average of its two outputs, letting them run at different speeds.'], ['Double shear', 'A pin loaded across two planes, so each carries half the load.'],
+    ['Glass transition (Tg)', 'Temperature range where an amorphous plastic turns from glassy and stiff to rubbery.'], ['HDT', 'Heat deflection temperature: where a standard bar bends a set amount under a set stress.'], ['Pantograph', 'A parallelogram linkage that copies a motion at a fixed scale.'],
+    ['Sarrus linkage', 'A spatial linkage of two hinged plate pairs giving exact straight-line motion.'], ['Scissor lift', 'Stacked crossed links that extend a long way from a compact base; force rises steeply at low angles.'], ['Scotch yoke', 'A crank pin sliding in a slotted crosshead, giving exactly sinusoidal reciprocating motion.'],
+    ['Shear modulus (G)', 'Stiffness in shear or twisting; sets how far a shaft winds up under torque.'], ['S–N curve', 'Stress against the number of cycles to fatigue failure.'], ['Solenoid', 'A coil that pulls an iron plunger; force falls steeply with the gap.']
   ];
+  G.sort((x, y) => x[0].localeCompare(y[0]));
   const dl = document.getElementById('gl'), q = document.getElementById('gl-q');
   function render() { const f = q.value.trim().toLowerCase(); dl.innerHTML = G.filter(g => !f || g[0].toLowerCase().includes(f) || g[1].toLowerCase().includes(f)).map(g => '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>').join(''); }
   q.oninput = render; render();

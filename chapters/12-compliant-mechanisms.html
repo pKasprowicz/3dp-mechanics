@@ -129,6 +129,24 @@ Mating (push-on) force  W = F · (μ + tan α) / (1 − μ · tan α)       (α 
   <li><strong>For constant forces, buy a spring.</strong> Steel springs cost cents, do not creep, and have well-known rates (chapter 13).</li>
   <li>Use printed springs where the spring is <em>part of the mechanism</em> (a returning button, a latch) and the load is modest; in that case design for the cyclic strain limit, as above.</li>
 </ul>
+<h3>Sizing the three useful shapes</h3>
+<p>All three are beams in bending, so the same rules apply: thickness sets the strain, length sets how far it can go, and stiffness goes with t³. Thickness t, width b (the print height, usually), length L:</p>
+<table>
+  <tr><th>Shape</th><th>Stiffness</th><th>Strain at the limit</th><th>Use</th></tr>
+  <tr><td><strong>Leaf (cantilever)</strong>, one end fixed, force at the other</td><td>k = E·b·t³ / (4·L³)</td><td>ε = 3·t·δ / (2·L²)</td><td>Button returns, latch springs, detent arms</td></tr>
+  <tr><td><strong>Serpentine (zigzag)</strong>, n straight legs joined by bends</td><td>k ≈ E·b·t³ / (n·L³)</td><td>ε ≈ 3·t·(δ/n) / L²</td><td>Linear springs with long travel in a small space: drawer returns, compliant pushers</td></tr>
+  <tr><td><strong>Spiral (clock spring)</strong>, strip of total length L wound flat</td><td>k_θ = E·b·t³ / (12·L)  (torque per radian)</td><td>ε = t·θ / (2·L)</td><td>Rotary returns: knobs, reels, lids</td></tr>
+</table>
+<p>The serpentine formula treats each leg as a beam whose ends stay parallel (the bends are stiff), with the legs in series. Real bends flex too, so measured springs come out 20–50% softer than this estimate: use it to choose dimensions, then tune with a test print. Round the inside of every bend (radius ≥ t) because the peak strain sits there.</p>
+<p>Design order: pick the material from the cyclic strain limit; choose the travel; choose L (or the number of legs n) long enough that the strain at full travel stays under the cyclic limit; then choose t and b for the force you need. Print the spring with its bending plane in XY so the layers run along the strip: a spring that bends across its layers delaminates.</p>
+
+<div class="sim">
+  <h4>Simulation 4 · Printed spring calculator</h4>
+  <p class="desc">Pick a spring shape and a material, then set its dimensions and the travel it must give. The readout gives the stiffness, the force (or torque) at full travel and the strain compared with the material's limits.</p>
+  <div class="row"><label>Shape <select id="ps-type"><option value="leaf">Leaf (cantilever)</option><option value="serp" selected>Serpentine (zigzag)</option><option value="spiral">Spiral (clock spring)</option></select></label><label>Material <select id="ps-mat"></select></label></div>
+  <div class="controls" id="ps-ctl"></div>
+  <div class="readout" id="ps-out"></div>
+</div>
 
 <h2>12.6 Design workflow</h2>
 <ol>
@@ -179,6 +197,8 @@ Mating (push-on) force  W = F · (μ + tan α) / (1 − μ · tan α)       (α 
 <details class="quiz"><summary>You double the thickness of a flexure leaf to stop it twisting. What happens to its stiffness and strain?</summary>
 <p>Stiffness ∝ t³: eight times stiffer. Strain at a given deflection ∝ t: twice as high. So you need eight times the force and you are closer to the strain limit. Widening the leaf (b) raises the out-of-plane stiffness (∝ b³) with only a linear increase in the working stiffness, and is usually the better fix.</p></details>
 
+<details class="quiz"><summary>A PETG serpentine spring has 6 legs of 15 mm, t = 1.2 mm, b = 6 mm (E ≈ 2000 MPa). What is its stiffness, and is 6 mm of travel safe?</summary>
+<p>k ≈ E·b·t³/(n·L³) = 2000 × 6 × 1.73 / (6 × 3375) ≈ <strong>1.0 N/mm</strong>, so about 6 N at 6 mm (a little less in reality). Strain: ε = 3 × 1.2 × (6/6) / 15² = 1.6%, just over PETG's ~1.5% cyclic limit. Add a leg or lengthen them slightly.</p></details>
 <div class="pager" id="pager"></div>
 </main>
 </div>
@@ -285,6 +305,24 @@ const verdict = (eps, m) => eps <= m.c ? ['good', 'within the cyclic limit: shou
   [['L', 'Arm length L', 6, 40, 1, 0, ' mm'], ['t', 'Arm thickness t', 0.8, 4, 0.1, 1, ' mm'], ['b', 'Arm width b', 3, 15, 1, 0, ' mm'], ['y', 'Undercut y', 0.4, 3, 0.1, 1, ' mm'], ['a', 'Lead-in angle', 15, 70, 1, 0, '°']]
     .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
   sel.onchange = taper.onchange = info; info();
+})();
+/* ---------- Sim 4: printed springs ---------- */
+(function () {
+  const S = { t: 1.2, b: 6, L: 15, n: 6, d: 6, th: 90 }, type = document.getElementById('ps-type'), sel = fillSel('ps-mat', 'PETG'), out = document.getElementById('ps-out');
+  function info() {
+    const m = MAT[sel.value], ty = type.value; let k, f, e, unit, travel;
+    if (ty === 'leaf') { k = m.E * S.b * S.t ** 3 / (4 * S.L ** 3); f = k * S.d; e = 150 * S.t * S.d / S.L ** 2; unit = 'N/mm'; travel = S.d + ' mm'; }
+    else if (ty === 'serp') { k = m.E * S.b * S.t ** 3 / (S.n * S.L ** 3); f = k * S.d; e = 300 * S.t * (S.d / S.n) / S.L ** 2; unit = 'N/mm'; travel = S.d + ' mm'; }
+    else { k = m.E * S.b * S.t ** 3 / (12 * S.L) / 1000; const th = S.th * Math.PI / 180; f = k * th; e = 100 * S.t * th / (2 * S.L); unit = 'N·m/rad'; travel = S.th + '°'; }
+    const v = verdict(e, m);
+    out.innerHTML = 'Stiffness <strong>' + (k < 0.01 ? k.toExponential(2) : k.toFixed(ty === 'spiral' ? 4 : 2)) + ' ' + unit + '</strong> · at ' + travel + ': <strong>' + (ty === 'spiral' ? (f * 1000).toFixed(1) + ' N·mm' : f.toFixed(2) + ' N') + '</strong> · peak strain <strong style="color:var(--' + v[0] + ')">' + e.toFixed(2) + '%</strong> (' + v[1] + '; ' + sel.value + ' limits ' + m.c + '% cyclic, ' + m.s + '% single).' +
+      (ty === 'serp' ? '<br>Estimate assumes stiff bends: expect the real spring 20–50% softer. Leave a gap between legs larger than the travel each leg takes (' + (S.d / S.n).toFixed(1) + ' mm) so they never touch.' : ty === 'spiral' ? '<br>Strip length ' + S.L + ' mm wound into a flat spiral; leave a gap between turns larger than the travel closes up.' : '');
+  }
+  const hs = document.getElementById('ps-ctl'), ctl = {};
+  [['t', 'Thickness t', 0.4, 4, 0.1, 1, ' mm'], ['b', 'Width b', 2, 20, 0.5, 1, ' mm'], ['L', 'Length L (leg / strip)', 5, 300, 1, 0, ' mm'], ['n', 'Legs n (serpentine)', 2, 20, 1, 0, ''], ['d', 'Travel δ (leaf, serpentine)', 0.5, 40, 0.5, 1, ' mm'], ['th', 'Wind-up θ (spiral)', 5, 720, 5, 0, '°']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => { ctl[k] = Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }); });
+  type.onchange = () => { if (type.value === 'spiral' && S.L < 100) { S.L = 150; ctl.L.set(150); } if (type.value !== 'spiral' && S.L > 60) { S.L = 15; ctl.L.set(15); } info(); };
+  sel.onchange = info; info();
 })();
 </script>
 </body>

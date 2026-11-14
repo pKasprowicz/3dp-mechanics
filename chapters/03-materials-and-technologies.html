@@ -91,6 +91,33 @@
   <div class="row" id="ht-presets"></div>
   <div class="controls" id="ht-ctl"></div>
 </div>
+<h3>Tg, HDT and the number on the spool</h3>
+<p>Datasheets quote two different temperatures, and neither is a safe working limit:</p>
+<ul>
+  <li><strong>Glass transition (Tg)</strong>: the temperature range over which an amorphous plastic turns from glassy and stiff to rubbery. PLA ≈ 55–60 °C, PETG ≈ 75–80 °C, ABS/ASA ≈ 100 °C, PC ≈ 145 °C. Stiffness falls sharply through it: a PLA part is still hard at 45 °C, but already noticeably less stiff and much more prone to creep.</li>
+  <li><strong>Heat deflection temperature (HDT)</strong>: the temperature at which a standard bar bends a set amount under a set stress (0.45 or 1.8 MPa). It is closer to a design figure, but it is measured over minutes, on moulded bars. A printed part under load for weeks fails 10–20 °C lower.</li>
+</ul>
+<p>Semi-crystalline plastics (nylon, PP, POM) behave differently: they soften partly at Tg but keep useful stiffness up to well above it, which is why nylon and especially PA-CF survive near motors where PETG droops.</p>
+<h3>Heat makes everything creep faster</h3>
+<p>Creep (chapter 2) roughly doubles with every 10 °C or so of temperature rise. A snap-fit or press fit that holds for years at 20 °C can relax in weeks at 40 °C and in days at 50 °C. So "it survived a hot day" is not proof: a clip that sits in a car all summer has been tested at its worst. For anything under <em>sustained</em> load (a clamped bearing, a preloaded screw, a spring arm), keep the working temperature 20–30 °C below the material's Tg, or choose a material with more headroom.</p>
+<h3>Heat the part makes itself</h3>
+<p>The surroundings are not the only source. Check:</p>
+<ul>
+  <li><strong>Motors</strong>: a stepper running at full current sits at 50–80 °C on its case, so a PLA motor mount softens and lets the motor sag. Use PETG, ASA or PA-CF, and keep a small air gap or a metal plate between the motor face and the plastic.</li>
+  <li><strong>Friction</strong>: a plain bearing or a sliding gear makes heat at μ·F·v watts (chapter 10), and plastic conducts it away badly. The surface can be much hotter than the part.</li>
+  <li><strong>Hysteresis</strong>: a flexure or TPU part flexed rapidly warms from the inside (chapter 2.9).</li>
+  <li><strong>Electronics</strong>: drivers, regulators and LEDs in an enclosure raise the air inside by 10–20 °C.</li>
+</ul>
+<h3>Annealing</h3>
+<p>Heating a finished print below its melting point and letting it cool slowly lets the polymer crystallise, which raises heat resistance and stiffness:</p>
+<table>
+  <tr><th>Material</th><th>Typical anneal</th><th>Gain</th><th>Cost</th></tr>
+  <tr><td>PLA</td><td>~80–100 °C for 30–60 min</td><td>Heat resistance from ~55 °C to 80–100 °C+; stiffer</td><td>Shrinks a few % in XY and grows in Z; can warp; somewhat more brittle</td></tr>
+  <tr><td>"HT" or annealable PLA grades</td><td>As specified</td><td>Designed for it, with less distortion</td><td>Follow the supplier's settings</td></tr>
+  <tr><td>Nylon, PA-CF</td><td>~80 °C dry-annealing</td><td>Relieves stress, improves dimensional stability</td><td>Small dimensional change</td></tr>
+  <tr><td>PETG, ABS, ASA, PC</td><td>Rarely worth it</td><td>Some stress relief</td><td>Little gain in heat resistance (amorphous)</td></tr>
+</table>
+<p>Annealing changes dimensions, so it is not a fix for a precision part designed for the as-printed size. If you plan to anneal, print a test piece, measure the change in each direction, and scale the model to compensate. Supporting the part in fine sand or salt during annealing reduces warping.</p>
 
 <h2>3.6 Moisture and drying</h2>
 <ul>

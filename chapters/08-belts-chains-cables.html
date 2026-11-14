@@ -87,6 +87,31 @@ Belt force F = T · η / r_pitch</div>
   <div class="readout" id="ld-out"></div>
 </div>
 
+<h3>Tensioning the belt</h3>
+<p>A timing belt needs enough tension that the slack side never goes loose under the hardest acceleration, and no more: excess tension loads the motor bearings, bends printed brackets and makes them creep. Ways to set it:</p>
+<ul>
+  <li><strong>Slotted motor mount</strong>: the motor slides on slots and is pushed by a screw. Simple, but the motor shaft tilts if the mount is not stiff.</li>
+  <li><strong>Screw tensioner on the idler</strong>: the far idler pulley sits in a printed block on a slot, pulled by an M3 or M4 screw. The standard choice; fine and repeatable.</li>
+  <li><strong>Spring-loaded idler</strong>: keeps tension constant as the belt and the printed parts creep, but a spring that is softer than the belt lets the carriage lose position under acceleration. Use it for light, slow drives, or lock it after setting.</li>
+  <li><strong>Tension in the belt clamp</strong>: a screw that draws one belt end into the carriage. Compact, no extra parts.</li>
+</ul>
+<p>Measure tension by plucking the free span and reading the frequency (a phone tuner app works): <code>T = 4 · m′ · L² · f²</code>, where m′ is the belt mass per metre (from the datasheet), L the free span in metres and f in hertz. Write the frequency down for your machine, so you can return to it after maintenance. Recheck after the first few hours: printed parts and new belts settle.</p>
+<h3>Belt clamps that hold</h3>
+<ul>
+  <li>Clamp on the teeth: a printed toothed bed (matching the belt profile) under the belt, a flat plate on top, two screws. Engage at least 8–10 teeth.</li>
+  <li>Or fold the belt back on itself teeth-to-teeth in a narrow slot: the teeth lock together and the slot keeps them engaged. No screws, very secure.</li>
+  <li>Keep the belt's line of pull level with the pulley's pitch line, so the clamp does not tilt the belt or rock the carriage.</li>
+  <li>Round every edge the belt bends over: a sharp edge cuts the reinforcing cords.</li>
+</ul>
+<h3>Two axes: Cartesian, CoreXY and H-bot</h3>
+<table>
+  <tr><th>Layout</th><th>How it works</th><th>Pros</th><th>Cons</th></tr>
+  <tr><td><strong>Cartesian</strong> (stacked axes)</td><td>One motor per axis; the X motor rides on the Y carriage</td><td>Simple, independent axes, easy to debug</td><td>The Y axis carries the X motor's mass, limiting acceleration</td></tr>
+  <tr><td><strong>CoreXY</strong></td><td>Two fixed motors, two crossed belts; X = (A + B)/2, Y = (A − B)/2</td><td>Light moving mass, both motors share the work, fast</td><td>Long belts; both belts must be equal in length and tension, and the frame square, or the axes skew</td></tr>
+  <tr><td><strong>H-bot</strong></td><td>One long belt, two fixed motors</td><td>Fewer parts than CoreXY</td><td>Applies a twisting moment to the gantry, which racks under acceleration; needs a very stiff gantry</td></tr>
+</table>
+<p>For a printed plotter, laser or pick-and-place, a Cartesian layout is the easiest to get right. CoreXY pays off when the moving mass and speed matter. Most current fast desktop printers use CoreXY, so yours is likely a worked example worth studying: look at how its belts are routed and tensioned.</p>
+
 <h2>8.5 Chains and sprockets</h2>
 <p>A roller chain (the bicycle kind) carries far more load than a belt of the same width, tolerates dirt and heat, and does not slip. It needs lubrication, has a bit of slack, and makes noise. Basic formulas:</p>
 <div class="eq">Sprocket pitch diameter  D = p / sin(180° / z)<br>
@@ -120,6 +145,26 @@ Chain length (links)     L ≈ 2C/p + (z₁ + z₂)/2 + ((z₂ − z₁) / 2π)�
   <canvas id="cp-canvas"></canvas>
   <div class="controls" id="cp-ctl"></div>
   <div class="readout" id="cp-out"></div>
+</div>
+
+<h3>Pulley systems: the block and tackle</h3>
+<p>A rope reeved through pulleys (sheaves) in a fixed block and a moving block multiplies force: the load hangs on <strong>n</strong> rope segments, so each carries roughly W/n, and you pull n times as much rope as the load rises. The ideal mechanical advantage is the number of segments supporting the moving block. Friction in each sheave takes some of it back:</p>
+<div class="eq">Ideal       F = W / n            rope pulled = n × lift<br>
+With losses F = W · (1 − η) / (η · (1 − ηⁿ))        η = efficiency per sheave</div>
+<p>Sheave efficiency η is about 0.95–0.98 with ball bearings, 0.9 with a good bushing, and 0.8–0.85 for a printed pulley turning on a plain pin or a rope rubbing in a groove. With printed pulleys, adding sheaves stops paying off quickly: past 4–5 segments the friction eats most of the gain. Practical points:</p>
+<ul>
+  <li>Put a <strong>bearing in every sheave</strong> (a 623 or 624 is plenty for cords) and make the groove radius slightly larger than the rope, with a sheave diameter at least 8–10× the rope diameter.</li>
+  <li>Add <strong>cheek plates</strong> that sit close to the sheave rim so the rope cannot jump out and jam between sheave and frame.</li>
+  <li>The anchor point of the rope's dead end sets whether n is even or odd: tied to the moving block adds one segment.</li>
+  <li>The same idea works in reverse as a <strong>motion multiplier</strong>: a short-stroke actuator on the moving block pulls n times its stroke of cable, at 1/n of its force.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 5 · Block and tackle</h4>
+  <p class="desc">Choose the number of supporting rope segments, the sheave efficiency and the load. The bars show the real mechanical advantage against the ideal for 1–8 segments; the readout gives the pull and how much rope you pull.</p>
+  <canvas id="bt-canvas"></canvas>
+  <div class="controls" id="bt-ctl"></div>
+  <div class="readout" id="bt-out"></div>
 </div>
 
 <h2>8.7 Common problems and fixes</h2>
@@ -161,6 +206,8 @@ Chain length (links)     L ≈ 2C/p + (z₁ + z₂)/2 + ((z₂ − z₁) / 2π)�
 <details class="quiz"><summary>Why does a 9-tooth sprocket run rougher than a 25-tooth one?</summary>
 <p>Chordal action: the chain's effective radius varies by 1 − cos(π/z), which is ~6% at 9 teeth but only ~0.8% at 25. Fewer teeth means a rougher, noisier, faster-wearing drive.</p></details>
 
+<details class="quiz"><summary>Four supporting segments with printed pulleys on plain pins (η ≈ 0.85 per sheave) lift 100 N. What is the pull, compared with the ideal 25 N?</summary>
+<p>F = W(1 − η)/(η(1 − ηⁿ)) = 100 × 0.15 / (0.85 × (1 − 0.522)) ≈ <strong>37 N</strong>: the real advantage is 2.7×, not 4×. Ball bearings in the sheaves (η ≈ 0.97) bring it to about 27 N.</p></details>
 <div class="pager" id="pager"></div>
 </main>
 </div>
@@ -295,6 +342,34 @@ const TAU = Math.PI * 2;
   Sim.slider(hs, { label: 'Friction μ', min: 0.05, max: 0.6, step: 0.01, dec: 2, value: S.mu, onInput: v => { S.mu = v; up(); } });
   Sim.slider(hs, { label: 'Turns of wrap', min: 0, max: 5, step: 0.25, dec: 2, value: S.turns, onInput: v => { S.turns = v; up(); } });
   Sim.slider(hs, { label: 'Hold force', min: 1, max: 100, value: S.Fh, unit: ' N', onInput: v => { S.Fh = v; up(); } });
+  info();
+})();
+/* ---------- Sim 5: block and tackle ---------- */
+(function () {
+  const S = { n: 4, eta: 0.9, W: 100, lift: 100 };
+  const canvas = document.getElementById('bt-canvas'), out = document.getElementById('bt-out');
+  const ma = (n, e) => e >= 0.9999 ? n : e * (1 - Math.pow(e, n)) / (1 - e);
+  const view = Sim.make(canvas, 0.45, (c, w, h, col) => {
+    const l = 40, r = 12, t = 28, b = h - 26, pw = w - l - r, ph = b - t, bw = pw / 8, Y = v => b - v / 8 * ph;
+    c.font = '12px system-ui'; c.strokeStyle = col.line; c.lineWidth = 1; c.fillStyle = col.muted; c.textAlign = 'right';
+    [0, 2, 4, 6, 8].forEach(v => { c.beginPath(); c.moveTo(l, Y(v)); c.lineTo(l + pw, Y(v)); c.stroke(); c.fillText(v + '×', l - 4, Y(v) + 4); });
+    for (let n = 1; n <= 8; n++) {
+      const x = l + (n - 1) * bw + bw * 0.15, bwi = bw * 0.7, m = ma(n, S.eta);
+      c.strokeStyle = col.muted; c.setLineDash([3, 3]); c.strokeRect(x, Y(n), bwi, b - Y(n)); c.setLineDash([]);
+      c.fillStyle = (n === S.n ? col.accent2 : col.accent) + (n === S.n ? '' : '99'); c.fillRect(x, Y(m), bwi, b - Y(m));
+      c.fillStyle = col.muted; c.textAlign = 'center'; c.fillText(n, x + bwi / 2, h - 10);
+    }
+    c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText('real MA (filled) vs ideal (dashed), by number of segments', l, 14);
+  });
+  function info() {
+    const m = ma(S.n, S.eta), F = S.W / m;
+    out.innerHTML = n_txt() + ': pull <strong>' + F.toFixed(1) + ' N</strong> to hold-and-lift ' + S.W + ' N (ideal ' + (S.W / S.n).toFixed(1) + ' N) · real mechanical advantage <strong>' + m.toFixed(2) + '×</strong> of ' + S.n + '× ideal (' + (m / S.n * 100).toFixed(0) + '% efficient) · to lift ' + S.lift + ' mm you pull <strong>' + (S.n * S.lift) + ' mm</strong> of rope.';
+    view.redraw();
+  }
+  const n_txt = () => S.n + ' supporting segment' + (S.n > 1 ? 's' : '');
+  const hs = document.getElementById('bt-ctl');
+  [['n', 'Segments', 1, 8, 1, 0, ''], ['eta', 'Sheave efficiency', 0.7, 1, 0.01, 2, ''], ['W', 'Load', 5, 500, 5, 0, ' N'], ['lift', 'Lift', 10, 500, 10, 0, ' mm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
   info();
 })();
 </script>

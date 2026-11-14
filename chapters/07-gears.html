@@ -81,7 +81,7 @@
   <div class="readout" id="gt-out"></div>
 </div>
 
-<h2>7.5 Planetary gears</h2>
+<h2>7.5 Planetary gears and differentials</h2>
 <p>A planetary (epicyclic) set puts a <strong>sun</strong> gear in the middle, several <strong>planets</strong> orbiting it on a <strong>carrier</strong>, and an internal <strong>ring</strong> gear around the outside. It is compact, coaxial (input and output on the same axis), and shares the load between planets, so a small printed set can carry a lot of torque.</p>
 <p>Ratios depend on which member you hold still. With teeth <code>Z_r = Z_s + 2·Z_p</code> (ring = sun + two planets), the common setups are:</p>
 <table>
@@ -102,6 +102,18 @@
   <div class="readout" id="pl-out"></div>
 </div>
 
+<h3>Differentials</h3>
+<p>A planetary set with all three members free is a <strong>differential</strong>: it adds or splits motion instead of just reducing it. The car differential is the familiar one: the engine drives the carrier (the case), and two output gears drive the left and right wheels, which may turn at different speeds in a corner. The rule is the same for every differential with equal outputs:</p>
+<div class="eq">ω_carrier = (ω_left + ω_right) / 2        torque splits equally: T_left = T_right = T_carrier / 2</div>
+<p>If one output is held, the other turns at twice the carrier speed. If the carrier is held, the outputs turn in opposite directions at equal speed. Three ways to build one:</p>
+<table>
+  <tr><th>Type</th><th>How</th><th>Printing notes</th></tr>
+  <tr><td><strong>Bevel differential</strong></td><td>Two side bevel gears and two or more spider bevel pinions in a rotating case</td><td>The classic layout; compact but needs bevel gears with accurate apex alignment (7.7). Large module (≥ 1.5) helps.</td></tr>
+  <tr><td><strong>Spur-gear differential</strong></td><td>Two sun gears, each meshing with one of a pair of overlapping planets that also mesh with each other, all in a carrier</td><td>All spur gears printed flat: the most printable. Slightly longer.</td></tr>
+  <tr><td><strong>Planetary (sun and ring as outputs)</strong></td><td>Sun and ring as the two outputs, carrier as input</td><td>Unequal split (set by the tooth counts); used to blend two motors.</td></tr>
+</table>
+<p>Uses in printed projects: wheeled robots and RC cars (so the wheels don't scrub in turns), <strong>mixing two motor inputs</strong> into one output (a differential "adder", as in some camera and telescope drives, or in robot wrists where two motors combine to give pitch and roll), and teaching models. An open differential sends torque to the wheel that slips most easily; that is why a car stuck with one wheel on ice goes nowhere. A little built-in friction (a spring-loaded clutch pack or friction washers behind the side gears) gives a <em>limited-slip</em> effect, easy to add in a printed design.</p>
+
 <h2>7.6 How strong is a printed gear?</h2>
 <p>A tooth is a small cantilever beam (chapter 2). The classic estimate, the <strong>Lewis equation</strong>, treats it as such: the tangential force a tooth can carry is</p>
 <div class="eq">F_t ≈ σ_allow · b · m · Y         Y ≈ π·(0.154 − 0.912 / z)   (20° teeth)<br>T = F_t · (d / 2)</div>
@@ -118,6 +130,7 @@
   <li><strong>Centre distance is critical.</strong> It must be <code>m(z₁+z₂)/2</code> within roughly ±0.1 mm. Mount shafts in a <em>single printed part</em> (a gearbox frame) or use slotted holes to adjust, not two separately aligned brackets. Shaft holes should be reamed or sized by coupon test (chapter 4).</li>
   <li><strong>Shafts and hubs.</strong> Support each shaft at both ends, ideally with bearings. Fix the gear on its shaft with a D-flat, grub screw, or a metal hub: a plain round press fit will slip (chapter 10).</li>
   <li><strong>Thin rims break.</strong> Keep ≥ 2·m of material under the tooth roots and spoke wide wheels instead of one thin web.</li>
+  <li><strong>Bevel gears.</strong> The pitch cones of both gears must share one apex, so the two shafts must meet at a point, at the designed angle, and each gear must sit at the right axial position: an axial error of a fraction of a millimetre makes the teeth bind or rattle. Mount both shafts in one printed housing, put a shoulder or shim behind each gear so its axial position can be set, and support both shafts on two bearings each. Print straight bevels with the large end down (the teeth then overhang only gently), at fine layers; prefer module ≥ 1.5 and ≥ 15 teeth. For loads beyond a gadget, buy a metal or moulded bevel pair and print the housing.</li>
   <li><strong>Material.</strong> Nylon or PETG over PLA for moving gears (chapter 3); lubricate with a little PTFE or lithium-free grease suitable for plastics.</li>
 </ul>
 
@@ -158,6 +171,8 @@
 <details class="quiz"><summary>You need twice the torque from a printed pinion, same ratio and size constraints as far as possible. What's the most effective change?</summary>
 <p>Increase the face width (linear with torque) and, if you can, the module. Switching to nylon or adding a second helix (herringbone) also helps. Adding teeth at the same module increases the diameter, which also raises the torque.</p></details>
 
+<details class="quiz"><summary>A robot's differential carrier turns at 60 rpm and the left wheel is held still by an obstacle. How fast does the right wheel turn?</summary>
+<p>ω_carrier = (ω_L + ω_R)/2, so 60 = (0 + ω_R)/2 and ω_R = <strong>120 rpm</strong>. That is why an open differential stalls a vehicle with one wheel stuck or spinning.</p></details>
 <div class="pager" id="pager"></div>
 </main>
 </div>

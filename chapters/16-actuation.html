@@ -89,20 +89,58 @@
 </div>
 
 <h2>16.6 Solenoids, linear actuators and others</h2>
+<h3>Solenoids</h3>
+<p>A solenoid pulls an iron plunger into a coil. It is fast, cheap and simple, but its force falls steeply with the gap (roughly with the inverse square), so the force at full stroke can be a tenth of the force when closed. Use it at the short end of its stroke, with a <strong>return spring</strong> sized below the solenoid's force at the open position. A small 12 V push-pull solenoid gives a few newtons at 5 mm and tens of newtons near closed.</p>
 <ul>
-  <li><strong>Solenoid</strong>: force falls rapidly with stroke (inversely with the square of the gap). Use it at its short end, with a return spring. Duty cycle matters: a solenoid rated for 25% duty burns out if held on. A "hold" current lower than the pull-in current (via PWM) reduces heat.</li>
-  <li><strong>Linear actuator</strong>: motor + leadscrew (chapter 9): force = 2πηT/lead; self-locking at low lead. Check the speed.</li>
-  <li><strong>Pneumatics</strong>: force = pressure × area (1 bar on a 10 mm piston = 8 N). Gentle, simple and light; a small compressor or a syringe pushes a soft gripper.</li>
-  <li><strong>Muscle by hand</strong>: for hand-operated parts design for a comfortable force: a finger push of 5–15 N, a hand crank of 10–20 N at ~150 mm radius (1.5–3 N·m).</li>
+  <li><strong>Duty cycle</strong> matters: a solenoid rated for 25% duty burns out if held on. To hold it closed, drop to a lower <em>hold</em> current with PWM after pull-in (the closed magnetic circuit needs much less), or use a <strong>latching</strong> solenoid (a permanent magnet holds it; a reverse pulse releases it).</li>
+  <li>Add a <strong>flyback diode</strong> across the coil, and expect a sharp impact at the end of the stroke: give the plunger a TPU or rubber bumper and keep printed parts out of the hammer path.</li>
+  <li>To get more stroke, use a lever (chapter 2): the solenoid works near its strong closed end, and the lever multiplies the motion.</li>
+</ul>
+<h3>Linear actuators</h3>
+<p>A bought linear actuator is a gearmotor and a leadscrew in a tube: <code>force = 2π·η·T / lead</code>, self-locking at low lead (chapter 9). They give tens to thousands of newtons at slow speeds (5–50 mm/s), usually with built-in end switches. Mount them on <strong>clevis pins at both ends</strong> so they can pivot: an actuator clamped rigidly is side-loaded and wrecks its seals and nut. Micro linear actuators (with a small stepper or a geared motor and an M3-size screw) suit printed mechanisms well.</p>
+<h3>Pneumatics</h3>
+<p>Force is pressure times area: <code>F = p · A</code>, and 1 bar is 0.1 N/mm², so 1 bar on a 10 mm piston gives 8 N and 6 bar on a 20 mm bore cylinder gives about 190 N. Pneumatics are fast, gentle (air is springy), light at the moving end and safe around fingers at low pressure. A small aquarium pump or a syringe drives <strong>soft pneumatic grippers</strong> printed in TPU. Printed cylinders leak through layer lines unless sealed (an O-ring piston in a reamed or smoothed bore, or a coated print); bought mini cylinders are cheap and reliable.</p>
+<h3>Others worth knowing</h3>
+<ul>
+  <li><strong>Shape-memory alloy wire</strong> (nitinol): contracts about 3–5% when heated by a current, silently, with useful force for its size. Tiny strokes (lever them up), slow to cool, low efficiency: good for small silent latches and toys.</li>
+  <li><strong>Voice-coil and magnet actuators</strong>: a coil in a magnet's field gives a force proportional to current, with no friction; for fast, short, proportional motion.</li>
+  <li><strong>Permanent magnets</strong> as springs, latches and detents: the force rises sharply as the gap closes, which suits a "snap shut" latch (chapter 14).</li>
+  <li><strong>Muscle</strong>: for hand-operated parts, design for a comfortable force: a finger push of 5–15 N, a thumb on a button of 2–5 N, a hand crank of 10–20 N at ~150 mm radius (1.5–3 N·m), a firm hand squeeze of 50–100 N.</li>
 </ul>
 
 <h2>16.7 Controls and electronics in one page</h2>
+<h3>A driver for every motor</h3>
+<p>Never power a motor directly from a microcontroller pin: put a driver between them, sized for the motor's stall current.</p>
+<table>
+  <tr><th>Actuator</th><th>Driver</th><th>Notes</th></tr>
+  <tr><td>Brushed DC, one direction</td><td>Logic-level MOSFET + flyback diode</td><td>PWM for speed.</td></tr>
+  <tr><td>Brushed DC, both directions</td><td>H-bridge (e.g. DRV8833, TB6612 for small motors)</td><td>Check the stall current, not the running current.</td></tr>
+  <tr><td>Stepper</td><td>Step/dir driver (A4988, DRV8825, TMC2209)</td><td>Set the current limit; TMC-type drivers are quiet and can detect stalls.</td></tr>
+  <tr><td>Hobby servo</td><td>None: a PWM signal (1–2 ms pulse at 50 Hz)</td><td>Power it from its own 5–6 V supply, not the microcontroller's regulator.</td></tr>
+  <tr><td>Solenoid, relay</td><td>MOSFET + flyback diode</td><td>PWM hold current to save heat.</td></tr>
+  <tr><td>Brushless (BLDC)</td><td>ESC or FOC driver</td><td>For gimbals and fast drives; a world of its own.</td></tr>
+</table>
+<h3>Knowing where it is</h3>
 <ul>
-  <li><strong>Driver / H-bridge</strong> between the microcontroller and any motor; never power a motor directly from a pin. Add a flyback diode on solenoids and relays.</li>
   <li><strong>Limit switches or hall sensors</strong> at the ends of travel, for homing and for safety; <strong>encoders</strong> if you need position feedback from a DC motor.</li>
-  <li><strong>Supply</strong>: size it for the peak current, with a bulk capacitor near the driver; keep motor wiring away from sensor wiring.</li>
-  <li><strong>Soft limits and slip clutches</strong> in the mechanism protect the printed parts from a controller mistake (chapter 14).</li>
+  <li><strong>A homing routine</strong> for any stepper axis: move toward the switch at moderate speed until it triggers, back off a few millimetres, approach again slowly, and set that position as zero. The second, slow approach makes the zero repeatable to a fraction of a millimetre.</li>
+  <li>Mount switches so the mechanism hits a <strong>hard stop shortly after</strong> the switch, never the switch body itself, and so the switch lever is pressed, not crushed.</li>
+</ul>
+<h3>Power and wiring</h3>
+<ul>
+  <li><strong>Supply</strong>: size it for the peak current of everything running at once, with a bulk capacitor (100–470 µF) near each driver.</li>
+  <li>Keep motor wiring away from sensor wiring, twist motor pairs together, and use a common ground.</li>
+  <li><strong>Strain relief</strong>: every cable that moves must be clamped on both sides of the moving joint, so the solder joints and connectors never take the bending.</li>
   <li><strong>Thermal check</strong>: after a long run, touch the motor and driver. If they are too hot to hold, reduce current or duty cycle.</li>
+  <li><strong>Soft limits and slip clutches</strong> in the mechanism protect the printed parts from a controller mistake (chapter 14).</li>
+</ul>
+<h3>Cables that move: cable chains</h3>
+<p>Wires to a moving carriage or arm break after a few thousand bends if they flex at a sharp point. Spread the bend over a defined radius:</p>
+<ul>
+  <li><strong>Cable chain (drag chain, energy chain)</strong>: a chain of hinged links that carries the cables and bends only one way, at a fixed minimum radius. Printable as snap-together links (print several in place, joined by pin hinges with 0.3–0.4 mm clearance) or bought cheaply. The <strong>bend radius</strong> should be at least 7–10× the thickest cable's diameter. Fix both ends; the moving end travels on the axis at half the chain's length, so plan the space for the loop.</li>
+  <li><strong>Flat flexible cable</strong> or ribbon cable in a long, gentle loop: good for short strokes in one plane.</li>
+  <li><strong>Spiral wrap or a sprung loop</strong>: cheap, for slow, short motion.</li>
+  <li>Use <strong>stranded, high-flex wire</strong> (silicone-insulated, fine strands), never solid core. Rotating joints that must turn continuously need a <strong>slip ring</strong>.</li>
 </ul>
 
 <h2>16.8 Common problems and fixes</h2>

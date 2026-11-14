@@ -92,12 +92,17 @@ Escape wheel with z teeth, one tooth per period: one turn takes z · T</div>
 </div>
 
 <h2>11.5 One-way clutches and torque limiters</h2>
-<ul>
-  <li><strong>Ratchet freewheel:</strong> a ratchet wheel with pawls on the other member. It drives one way, clicks over the other. Use several pawls staggered by a fraction of a tooth so it engages every 1/(z·k) of a turn.</li>
-  <li><strong>Roller/sprag clutch:</strong> rollers or balls wedge in tapered pockets: silent and instantly engaging. A printed version with steel balls or pins can work for light torque.</li>
-  <li><strong>Wrap-spring clutch:</strong> a coil spring around two drums grips one way and slips the other. Cheap and compact.</li>
-  <li><strong>Torque limiter / slip clutch:</strong> a friction plate pressed by a spring, or a ball-and-detent coupling that slips at a set torque. It protects printed gears from jamming and breaking, and is usually worth putting in any hand-cranked or motor-driven gearbox.</li>
-</ul>
+<p>A ratchet is one member of a larger family of parts that pass torque in one direction only (freewheels and one-way clutches), or only up to a limit (torque limiters). They belong here because they too turn continuous motion into stop-and-go motion; Chapter 14 covers the mechanics and sizing in detail (<a href="14-latching-locking-clutching.html">14.5 torque limiters, 14.6 wedge clutches</a>). The choice between them:</p>
+<table>
+  <tr><th>Type</th><th>Engagement</th><th>Noise</th><th>Torque (printed)</th><th>Printability</th><th>Typical use</th></tr>
+  <tr><td><strong>Ratchet freewheel</strong> (pawls on a toothed wheel)</td><td>Steps: every 1/(z·k) turn with k staggered pawls</td><td>Clicks</td><td>Medium–high</td><td>Excellent: all printed, plus a spring or flexure pawl</td><td>Hand cranks, winders, bicycle-hub style drives, the one-way input of a click counter</td></tr>
+  <tr><td><strong>Roller / ball wedge clutch</strong></td><td>Nearly instant</td><td>Silent</td><td>Light (steel rollers help)</td><td>Fair: wedge angle and surface finish matter</td><td>Silent freewheels, backstops, one-way bearings in small drives</td></tr>
+  <tr><td><strong>Sprag clutch</strong> (bought)</td><td>Instant</td><td>Silent</td><td>High</td><td>Buy it; press it into a printed hub</td><td>Anywhere torque is real: drop-in one-way bearings (e.g. HF0612 for 6 mm shafts)</td></tr>
+  <tr><td><strong>Wrap-spring clutch</strong></td><td>Instant</td><td>Silent</td><td>Medium–high for its size</td><td>Printed drums, bought or wound steel spring</td><td>Compact freewheels, brakes that hold one way</td></tr>
+  <tr><td><strong>Friction slip clutch</strong> (spring-pressed plates)</td><td>Slips smoothly above the set torque</td><td>Quiet</td><td>Set by the spring</td><td>Excellent</td><td>Protecting gearboxes, motors and fingers from jams</td></tr>
+  <tr><td><strong>Ball-detent limiter</strong></td><td>Slips in steps above the set torque</td><td>Clicks</td><td>Set by spring and ramp angle</td><td>Good</td><td>Overload protection that also signals that it has slipped</td></tr>
+</table>
+<p>Two rules of thumb. For one-way drive, a printed ratchet is the most reliable choice and a bought one-way bearing is the strongest; a printed wedge clutch is the one to prototype carefully. For overload protection, put the limiter as close to the jam as possible (on the output side of the gearbox if the gears are what you are protecting), and set it between the highest running torque and the torque that damages the weakest part.</p>
 
 <h2>11.6 Detents and indexing positions</h2>
 <p>A <strong>detent</strong> is a spring-loaded ball or tip that snaps into a notch. It gives a click and a set of stable positions without a locked step. Torque to move out of a notch depends on the spring force and the flank slope. On a V-shaped notch with flank slope β from the direction of motion, the tangential force needed to climb out is</p>

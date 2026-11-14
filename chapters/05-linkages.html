@@ -62,6 +62,19 @@ Stroke ≈ 2r (exactly 2r when e = 0)</div>
   <div class="readout" id="sc-out"></div>
 </div>
 
+<h3>The Scotch yoke</h3>
+<p>Replace the connecting rod with a slotted crosshead: the crank pin slides in a slot cut at right angles to the stroke, and the slotted yoke moves back and forth. The output is then a <strong>pure sine</strong>, with no rod-angle distortion:</p>
+<div class="eq">x = r · cos θ        v = −r · ω · sin θ        stroke = 2r exactly</div>
+<table>
+  <tr><th></th><th>Slider-crank</th><th>Scotch yoke</th></tr>
+  <tr><td>Motion</td><td>Nearly sinusoidal; depends on l/r</td><td>Exactly sinusoidal</td></tr>
+  <tr><td>Size</td><td>Long: the rod adds length l</td><td>Compact: length ≈ stroke + yoke</td></tr>
+  <tr><td>Side load on the guide</td><td>From the rod angle; less with a long rod</td><td>None from geometry, but the pin pushes the slot hard at mid-stroke</td></tr>
+  <tr><td>Wear</td><td>Two pin joints (rolling or pivoting)</td><td>A pin <em>sliding</em> in a slot: the wear point</td></tr>
+  <tr><td>Quick return</td><td>Possible with offset</td><td>No (the strokes are symmetric)</td></tr>
+</table>
+<p>For printing: put a ball bearing on the crank pin so it rolls along the slot instead of rubbing (623 or 624 on a shoulder bolt), give the slot 0.2–0.3 mm of clearance over the bearing, and guide the yoke on two rods or a long slot so the pin force does not twist it. Scotch yokes suit compact pumps, shakers, test rigs that need a clean sine wave, and toy engines where compactness matters more than wear.</p>
+
 <h2>5.4 Straight lines and paths</h2>
 <p>A pin joint moves on a circle, so getting a <em>straight</em> line from pins alone is a classic problem. Linkages can solve it two ways:</p>
 <ul>
@@ -79,6 +92,18 @@ Stroke ≈ 2r (exactly 2r when e = 0)</div>
 </div>
 
 <p>You can also design for a path other than a line. Coupler curves of a four-bar form a huge family (the <em>Hrones–Nelson atlas</em> catalogues them). In practice you don't synthesise by hand: you drag the joints in a linkage simulator or CAD motion study until the curve looks right, then check the transmission angle (5.2).</p>
+<h3>Choosing a straight-line linkage</h3>
+<table>
+  <tr><th>Linkage</th><th>Links</th><th>Straightness</th><th>Printing notes</th></tr>
+  <tr><td><strong>Watt</strong></td><td>4-bar, two equal rockers, point at the coupler middle</td><td>Good over a short stretch</td><td>Classic for vehicle axle location; compact and robust.</td></tr>
+  <tr><td><strong>Chebyshev</strong></td><td>4-bar, ground : rocker : coupler ≈ 2 : 2.5 : 1, point at the coupler middle</td><td>Good over a moderate stretch</td><td>Crossed rockers: put them in different planes.</td></tr>
+  <tr><td><strong>Hoeken</strong> (Chebyshev's lambda)</td><td>Crank-rocker 1 : 2 : 2.5 : 2.5, point at twice the coupler</td><td>Long straight edge on a D-shaped path; near-constant speed along it</td><td>The favourite for walkers and pick-and-place strokes; driven by a full-turn crank.</td></tr>
+  <tr><td><strong>Roberts</strong></td><td>4-bar with a triangular coupler</td><td>Good, and symmetric</td><td>All links on one side of the line; useful where space is one-sided.</td></tr>
+  <tr><td><strong>Peaucellier–Lipkin</strong></td><td>7 links plus ground</td><td>Exact in theory</td><td>Slop in its 10 pin joints spoils it; a teaching model rather than a guide.</td></tr>
+  <tr><td><strong>Sarrus</strong></td><td>Two hinged pairs of plates, at 90° to each other</td><td>Exact, perpendicular to the plates</td><td>A spatial linkage: a lifting table or press that stays parallel. Prints well as two hinged "books"; also works as a compliant mechanism with living hinges.</td></tr>
+  <tr><td>Parallel flexure</td><td>Two leaf springs</td><td>Very good for small travel</td><td>No joints, no play (chapter 12).</td></tr>
+</table>
+<p>For a real machine that only needs to move in a straight line, a rod and bushing (chapter 9) beats any of these. Straight-line linkages earn their place where a slider would be impractical: a walking leg, a suspension, a mechanism that must stay joint-only, or where the curve itself (straight part plus return) is wanted.</p>
 <div class="callout tip">
   <span class="tag">Walkers</span>
   Walking toys use linkages that trace a "D" or a bean path with a flat bottom: Hoeken, Klann (a six-bar spider-leg linkage) and Jansen (an eleven-bar leg). They look complicated, but each is a four-bar plus a few extra links, and each leg runs off one crank. They print well because everything lies in parallel planes.
@@ -104,10 +129,31 @@ Stroke ≈ 2r (exactly 2r when e = 0)</div>
 
 <h2>5.6 Parallelograms, pantographs and scissors</h2>
 <ul>
-  <li><strong>Parallelogram linkage</strong>: two equal cranks and two equal links in a parallelogram keep the coupler <em>parallel to the base</em> as it moves along an arc. It's how a desk lamp keeps the head level, a drawer organiser tilts, and a robotic arm holds a platform flat. It is exact only if all four pin-to-pin lengths are exactly equal, and this is the mild over-constraint case we met in chapter 1. A <em>double</em> parallelogram (extra parallel link) adds stiffness against twisting.</li>
-  <li><strong>Pantograph</strong>: a parallelogram with an extended arm, so a tracing point moves a similar shape scaled up or down by a fixed ratio. Used for scaling and for lifting: a <strong>scissor lift</strong> is a stack of crossed links, giving a large height range from a compact base.</li>
-  <li><strong>Scissor and lazy-tongs mechanisms</strong>: crossed links pinned at their middles give a large extension. Loads multiply: stress in the pins gets very high near the retracted position, and each stage amplifies slop, so printed scissors get wobbly if tall.</li>
+  <li><strong>Parallelogram linkage</strong>: two equal cranks and two equal links in a parallelogram keep the coupler <em>parallel to the base</em> as it moves along an arc. It's how a desk lamp keeps the head level, a drawer organiser tilts, and a robotic arm holds a platform flat. It is exact only if all four pin-to-pin lengths are exactly equal, and this is the mild over-constraint case we met in chapter 1. A <em>double</em> parallelogram (extra parallel link) adds stiffness against twisting. Beware the <strong>change point</strong>: when all four links line up, a parallelogram can flip into an anti-parallelogram. Keep it from reaching a straight line with an end stop.</li>
+  <li><strong>Pantograph</strong>: a parallelogram with an extended arm, so a tracing point moves a similar shape scaled up or down by a fixed ratio (the ratio of the arm lengths). Used for copying and engraving, and in some robot arms to keep the motors at the base.</li>
+  <li><strong>Scissor and lazy-tongs mechanisms</strong>: crossed links pinned at their middles give a large extension from a compact base. Scissor lifts, extending arms, folding gates and expandable grilles all use them.</li>
 </ul>
+<h3>Scissor lifts: the forces</h3>
+<p>A scissor lift with n stages of crossed links of length L, at angle θ from horizontal, is driven by pushing the bottom sliding pin sideways. Virtual work gives the height and the actuator force directly:</p>
+<div class="eq">Height        H = n · L · sin θ<br>
+Actuator force (horizontal, at the base slider)    F = n · W / tan θ        (W = load, ignoring friction and link weight)<br>
+Pin forces    of the order of F at the bottom pins and the centre pins</div>
+<p>The force is huge when the lift is low. At θ = 10° with 3 stages, F = 3 × W / 0.176 = 17·W: lifting 20 N takes 340 N of push, and every pin, link and slider sees forces of that size. At θ = 45° the same lift needs only 3·W. Practical consequences:</p>
+<ul>
+  <li><strong>Never start from flat.</strong> Limit the lowest angle to about 10–15° with a stop; the force and the pin loads below that are unmanageable for printed parts.</li>
+  <li><strong>Push diagonally</strong> instead of horizontally (an actuator between a bottom pin and a centre pin of a higher stage) to flatten the force curve; a leadscrew along the base is the common hobby solution, and its high force at low speed matches the need.</li>
+  <li><strong>Use steel pins</strong> in every joint and keep the link-to-pin bearing stress low (chapter 10.6). The links are mostly in bending, so make them deep (tall cross-section), not wide.</li>
+  <li><strong>Slop multiplies.</strong> Each stage adds its pin clearances, and the lever ratio of the links multiplies them at the top. Printed scissors with more than 2–3 stages get wobbly; use close-fitting pins, guide the top platform, or use fewer, longer stages.</li>
+  <li><strong>Two sides.</strong> A lift platform needs two scissor frames tied together with cross-rods so it cannot rack sideways.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 5 · Scissor lift</h4>
+  <p class="desc">Set the number of stages, the link length, the angle and the load. The drawing shows the lift; the readout gives the height, the push needed at the base slider and the force multiplication. Bring the angle down toward 5° and watch the force climb.</p>
+  <canvas id="sx-canvas"></canvas>
+  <div class="controls" id="sx-ctl"></div>
+  <div class="readout" id="sx-out"></div>
+</div>
 
 <h2>5.7 Designing a linkage: a practical workflow</h2>
 <ol>
@@ -169,6 +215,8 @@ Stroke ≈ 2r (exactly 2r when e = 0)</div>
 <details class="quiz"><summary>A slider-crank has r = 20 mm and a 4 mm guide offset. What is the approximate stroke, and what changes compared to the zero-offset version?</summary>
 <p>The stroke stays almost exactly 2r = 40 mm (a 4 mm offset changes it by well under 1 mm), but the forward and return strokes take unequal crank angles: a quick-return effect.</p></details>
 
+<details class="quiz"><summary>A 2-stage scissor lift carries 50 N. What horizontal push does the base slider need at θ = 10° and at θ = 40°?</summary>
+<p>F = n·W/tan θ: at 10°, 2 × 50 / 0.176 = <strong>567 N</strong>; at 40°, 2 × 50 / 0.839 = <strong>119 N</strong>. Start the stroke at 15° or more, or push diagonally, to keep the pin loads printable.</p></details>
 <div class="pager" id="pager"></div>
 </main>
 </div>
@@ -377,6 +425,38 @@ const TAU = Math.PI * 2;
   Sim.slider(hs, { label: 'Knee angle α', min: 1, max: 45, step: 0.5, dec: 1, value: S.a, unit: '°', onInput: v => { S.a = v; refresh(); } });
   Sim.slider(hs, { label: 'Input force', min: 10, max: 200, value: S.F, unit: ' N', onInput: v => { S.F = v; refresh(); } });
   refresh();
+})();
+/* ---------- Sim 5: scissor lift ---------- */
+(function () {
+  const S = { n: 3, L: 80, th: 30, W: 20 };
+  const canvas = document.getElementById('sx-canvas'), out = document.getElementById('sx-out');
+  const view = Sim.make(canvas, 0.6, (c, w, h, col) => {
+    const t = S.th * Math.PI / 180, maxH = S.n * S.L + 20, sc = Math.min((h - 50) / maxH, (w * 0.55) / S.L), x0 = w * 0.18, yb = h - 24, dx = S.L * Math.cos(t) * sc, dy = S.L * Math.sin(t) * sc;
+    c.strokeStyle = col.muted; c.lineWidth = 2; c.beginPath(); c.moveTo(x0 - 30, yb + 6); c.lineTo(x0 + S.L * sc + 40, yb + 6); c.stroke();
+    for (let i = 0; i < S.n; i++) {
+      const y = yb - i * dy;
+      Sim.line(c, x0, y, x0 + dx, y - dy, col.accent, 5); Sim.line(c, x0 + dx, y, x0, y - dy, col.accent2, 5);
+      Sim.dot(c, x0 + dx / 2, y - dy / 2, 4, col.surface, col.ink);
+      [[x0, y], [x0 + dx, y], [x0, y - dy], [x0 + dx, y - dy]].forEach(p => Sim.dot(c, p[0], p[1], 4, col.surface, col.ink));
+    }
+    const yt = yb - S.n * dy;
+    c.fillStyle = col.muted; c.fillRect(x0 - 14, yt - 10, dx + 28, 7);
+    Sim.ground(c, x0, yb, col.muted, 7);
+    c.fillStyle = col.warn; c.font = '12px system-ui'; c.textAlign = 'center'; c.fillText('W = ' + S.W + ' N', x0 + dx / 2, yt - 18);
+    const F = S.n * S.W / Math.tan(t);
+    Sim.line(c, x0 + dx + 50, yb, x0 + dx + 10, yb, col.good, 3);
+    c.fillStyle = col.good; c.beginPath(); c.moveTo(x0 + dx + 8, yb); c.lineTo(x0 + dx + 18, yb - 6); c.lineTo(x0 + dx + 18, yb + 6); c.fill();
+    c.textAlign = 'left'; c.fillText('push ' + F.toFixed(0) + ' N', x0 + dx + 54, yb + 4);
+  });
+  function info() {
+    const t = S.th * Math.PI / 180, H = S.n * S.L * Math.sin(t), k = S.n / Math.tan(t), F = k * S.W;
+    out.innerHTML = 'Height <strong>' + H.toFixed(0) + ' mm</strong> (range ' + (S.n * S.L * Math.sin(10 * Math.PI / 180)).toFixed(0) + '–' + (S.n * S.L * Math.sin(60 * Math.PI / 180)).toFixed(0) + ' mm between 10° and 60°) · push at the base slider <strong style="color:var(--' + (k <= 5 ? 'good' : k <= 15 ? 'accent2' : 'warn') + ')">' + F.toFixed(0) + ' N</strong> = ' + k.toFixed(1) + '× the load' + (k > 15 ? ' <strong style="color:var(--warn)">: too steep for printed pins, raise the lowest angle or push diagonally</strong>' : '') + '. The base slider moves ' + (S.L * (Math.cos(10 * Math.PI / 180) - Math.cos(60 * Math.PI / 180))).toFixed(0) + ' mm over the 10°–60° range.';
+    view.redraw();
+  }
+  const hs = document.getElementById('sx-ctl');
+  [['n', 'Stages', 1, 6, 1, 0, ''], ['L', 'Link length', 30, 200, 5, 0, ' mm'], ['th', 'Link angle θ', 3, 75, 1, 0, '°'], ['W', 'Load', 1, 200, 1, 0, ' N']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
 })();
 </script>
 </body>

@@ -53,7 +53,7 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
 </div>
 
 <h2>17.4 Thermal expansion</h2>
-<p>Everything grows with temperature: <code>ΔL = α · L · ΔT</code>. Plastics expand 3–8× more than steel, so a printed part carrying a steel rod, or sharing a bolt with a metal plate, gets looser when cold and tighter when warm. This matters for long parts (100 mm of PLA grows 0.07 mm per 10 K), for snug fits that must hold at both ends of a temperature range, and for plastic parts clamped to metal.</p>
+<p>Everything grows with temperature: <code>ΔL = α · L · ΔT</code>. Plastics expand 3–8× more than steel, so the fit between plastic and metal changes with temperature: a printed hole around a steel rod grows looser when warm and tighter when cold, while a plastic spacer clamped by a steel bolt gets tighter when warm. This matters for long parts (100 mm of PLA grows 0.07 mm per 10 K), for snug fits that must hold at both ends of a temperature range, and for plastic parts clamped to metal.</p>
 <div class="sim">
   <h4>Simulation 2 · Thermal expansion</h4>
   <p class="desc">Growth of a part of the given length for a temperature change, for different materials (coefficients in µm per metre per kelvin, typical values). The difference between a printed part and its metal neighbour is the change in the fit.</p>
@@ -62,6 +62,15 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
   <div class="controls" id="te-ctl"></div>
   <div class="readout" id="te-out"></div>
 </div>
+<h3>Designing for it</h3>
+<ul>
+  <li><strong>Find the temperature range first</strong>: from the cold storage or workshop temperature to the hottest use, including heat from motors and electronics. A part made at 20 °C and used from 5 °C to 45 °C has to work across 40 K.</li>
+  <li><strong>Check both extremes of every critical fit</strong>: a running fit of a printed hole on a steel rod is tightest when cold (the hole shrinks onto the rod), and a press fit is loosest when hot. Add the thermal change to the tolerance stack (17.3).</li>
+  <li><strong>Let one end float.</strong> A long printed part fixed to a metal frame at both ends bows or cracks as the two grow differently. Fix it at one point and give the others <strong>slotted holes</strong> along the length, with shoulder screws or washers that clamp lightly.</li>
+  <li><strong>Match materials</strong> where expansion matters: a carbon-fibre filament (α ≈ 25–30) is much closer to aluminium (23) than PLA (68) is. Over 300 mm and 30 K, PLA on aluminium differs by 0.4 mm; PA-CF by under 0.05 mm.</li>
+  <li><strong>Use springs and flexures to take up the change</strong>: a preloaded wave washer, a compliant mount, a belt tensioner with a spring.</li>
+  <li><strong>Long parts</strong> (rails, frames, enclosures over ~200 mm): design in expansion gaps of α·L·ΔT plus a margin, and do not glue plastic to metal over a large area.</li>
+</ul>
 
 <h2>17.5 Stick-slip</h2>
 <p>When a part slides slowly against a surface whose static friction is higher than its kinetic friction, and it is driven through something springy, it moves in jerks: it sticks, the drive winds up, it breaks free and lurches ahead, then sticks again. This is the squeal of a door hinge, the judder of a slow slide, the "grunting" of a leadscrew axis. The cure is one of: lower the static-to-kinetic ratio (lubricant, a better material pair), a stiffer drive, or a different speed.</p>
@@ -72,6 +81,17 @@ input.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid 
   <div class="controls" id="ss-ctl"></div>
   <div class="readout" id="ss-out"></div>
 </div>
+<h3>Curing it in practice</h3>
+<table>
+  <tr><th>Lever</th><th>What to do</th></tr>
+  <tr><td><strong>Material pair</strong></td><td>Plastic on polished steel rather than plastic on plastic; PTFE, POM or nylon on steel have a small static–kinetic difference. PLA on PLA is among the worst. A PTFE tape or sleeve on one face is a quick fix.</td></tr>
+  <tr><td><strong>Lubricant</strong></td><td>Silicone or PTFE grease (chapter 10.8) reduces both friction and the static–kinetic gap. Dry joints squeal; greased ones glide.</td></tr>
+  <tr><td><strong>Stiffness of the drive</strong></td><td>A stiffer drive stores less energy before breaking free, so the jumps get smaller. Shorten belts, stiffen brackets, use a steel shaft instead of a printed one (a printed shaft winds up: chapter 2.6), avoid long flexible couplings.</td></tr>
+  <tr><td><strong>Speed</strong></td><td>Stick-slip is worst at low speed. If the mechanism can run a little faster, it may smooth out; for slow motion, go to rolling contact instead.</td></tr>
+  <tr><td><strong>Rolling instead of sliding</strong></td><td>Ball bearings, rollers, linear bearings or flexures have almost no static–kinetic difference. The definitive cure.</td></tr>
+  <tr><td><strong>Load and clamping</strong></td><td>Reduce the normal force on the slide: an over-tight guide or a preload that's too high raises friction and stick-slip together. Check for over-constraint (chapter 1), which is often the hidden cause.</td></tr>
+  <tr><td><strong>Damping</strong></td><td>A viscous grease, a felt pad or a TPU element damps the oscillation of a slow axis, such as a hand-turned focus mechanism.</td></tr>
+</table>
 
 <h2>17.6 The ten fixes that solve most problems</h2>
 <ol>

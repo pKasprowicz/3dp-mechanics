@@ -109,7 +109,7 @@ PV = P · v        (MPa·m/s)         friction heat ≈ μ · F · v  (W)</div>
 
 <div class="sim">
   <h4>Simulation 3 · How much torque can a shaft take?</h4>
-  <p class="desc">Torsion stress in a solid round shaft is τ = 16T/(πd³). The allowable stresses are conservative working values (printed parts: layer-shear limited). Compare a printed shaft with steel.</p>
+  <p class="desc">Torsion stress in a solid round shaft is τ = 16T/(πd³) and its twist is θ = TL/(GJ) (chapter 2.6). The allowable stresses are conservative working values (printed parts: layer-shear limited). Compare a printed shaft with steel, for strength and for wind-up.</p>
   <div class="row"><label>Shaft material <select id="sh-mat"></select></label></div>
   <div class="controls" id="sh-ctl"></div>
   <div class="readout" id="sh-out"></div>
@@ -129,24 +129,94 @@ PV = P · v        (MPa·m/s)         friction heat ≈ μ · F · v  (W)</div>
 <p>Misalignment types: <em>parallel</em> (shifted axes), <em>angular</em> (tilted), and <em>axial</em> (the ends move together/apart). Rule: <strong>if two shafts are each held by their own bearings, the coupling between them must be flexible.</strong> That is the over-constraint rule of chapter 1 again.</p>
 
 <h2>10.6 Hinges and pivots</h2>
+<p>A hinge is the most common rotary joint in printed objects: lids, doors, linkage pivots, folding legs. Most turn slowly and rarely, so the problem is not heat or speed but <strong>strength of the pin and knuckles</strong>, <strong>play</strong>, and <strong>wear of the hole</strong>.</p>
+<table>
+  <tr><th>Type</th><th>Good for</th><th>Notes</th></tr>
+  <tr><td><strong>Pin hinge</strong></td><td>Almost everything</td><td>Knuckles and a pin (steel pin, shoulder bolt, screw, or a length of 1.75 mm filament for light duty). Strong, adjustable, replaceable.</td></tr>
+  <tr><td><strong>Print-in-place hinge</strong></td><td>Light, rarely used parts; toys</td><td>Cone or cylinder pin printed inside its socket with 0.3–0.5 mm clearance (chapter 4). No assembly, but sloppy and weak.</td></tr>
+  <tr><td><strong>Living hinge</strong></td><td>Lids, clips, boxes</td><td>A thin flexing strip; no play, no wear, limited life (chapter 12).</td></tr>
+  <tr><td><strong>Friction / detent hinge</strong></td><td>Screens, arms, lamps that must stay put</td><td>A clamping spring or screw on the knuckle faces, or a printed ratchet or detent ring.</td></tr>
+</table>
+<h3>Sizing the pin and knuckles</h3>
+<p>A pin through a <strong>clevis</strong> (a fork: the pin passes through one knuckle between two others) is loaded in <strong>double shear</strong>, which halves the pin stress compared with a single overhanging pin and, just as important, keeps it from bending. Check three things:</p>
+<div class="eq">Pin shear (double shear)     τ = 2·F / (π·d²)          steel pin: τ_allow ≈ 100 MPa<br>
+Bearing stress in the hole   σ_b = F / (d · t)           t = knuckle length carrying F<br>
+Knuckle tear-out             τ ≈ F / (2 · e · t)         e = edge distance from hole to the end of the knuckle</div>
+<p>The pin is almost never the problem: a Ø3 mm steel pin in double shear carries over 1 kN. The <strong>plastic around the hole</strong> is. Keep the bearing stress σ<sub>b</sub> under about 5–10 MPa for a printed hole that must not wear oval (roughly the plastic's strength divided by a safety factor of 4–6, because the load is concentrated and repeated). Give each knuckle an edge distance e of at least 1.5·d, and a wall of at least 2 mm around the pin.</p>
+<p>Example: a lid hinge carries 30 N (someone leans on the open lid) on a Ø3 mm pin, shared by two hinges, so 15 N each. Each hinge has a 6 mm long centre knuckle: σ<sub>b</sub> = 15 / (3 × 6) = 0.8 MPa. Comfortable. A 300 N load from a toddler standing on it would be 8 MPa, at the limit, so a larger pin or longer knuckles are cheap insurance.</p>
+<h3>Layout and printing</h3>
 <ul>
-  <li><strong>Pin hinge</strong>: two knuckles and a pin (a screw, a steel pin, filament). Use a pin through a <em>clevis</em> (fork) so the pin is loaded in double shear. The hole in each knuckle should be a snug fit on the pin and a looser fit in the fixed part.</li>
-  <li><strong>Print-in-place hinge</strong> (chapter 4): needs 0.3–0.5 mm clearance and a break-free step; only light duty.</li>
-  <li><strong>Living hinge</strong> (a thin flexing strip): chapter 12.</li>
-  <li><strong>Friction/detent hinge</strong>: a washer, a spring or a printed ratchet holds the angle.</li>
-  <li><strong>Axial stops</strong>: washers keep links from rubbing flat faces and leave a defined side gap.</li>
+  <li><strong>Odd number of knuckles</strong> (3 or 5), with the outer ones on the fixed part. The pin is then supported at both ends and the joint is symmetric.</li>
+  <li><strong>The pin is a snug fit in one part and a running fit in the other.</strong> Let it be held tight (or glued, or headed) in the outer knuckles and turn in the inner one, so all the wear happens in one place, a hole you can ream or bush.</li>
+  <li><strong>Print the knuckles with the hole axis vertical</strong> where you can: the hole is round and the knuckle's load runs within the layers. A hole printed horizontally is slightly oval and the knuckle is loaded across its layers. If the part must print with the axis horizontal, use a teardrop hole and ream it.</li>
+  <li><strong>Side gaps:</strong> 0.2–0.3 mm between knuckles, or a thin washer, so faces do not rub. Chamfer the knuckle ends so elephant foot does not fuse them.</li>
+  <li><strong>End stops</strong> belong in the hinge leaves, not on the pin. A lid that slams open puts its whole momentum into whatever stops it: make it a broad face, not a thin tab.</li>
+  <li><strong>Retaining the pin:</strong> a shoulder bolt with a nyloc nut, an E-clip in a groove, a headed pin peened over, or a printed cap. Not friction alone: a press-fit pin walks out as the plastic creeps.</li>
 </ul>
+<h3>Friction hinges: holding an angle</h3>
+<p>A screen or a lamp arm stays where you leave it if the hinge friction torque exceeds the gravity torque. Clamp the knuckle faces axially with a screw and a spring (a wave washer or a Belleville washer, so the clamp survives creep):</p>
+<div class="eq">Friction torque   T_f ≈ n · μ · F_clamp · r_m      (n = number of rubbing faces, r_m = mean radius of the faces)<br>
+Needed            T_f ≥ 1.3 · m · g · r_cg        (r_cg = horizontal distance to the centre of mass, at the worst angle)</div>
+<p>A 200 g arm with its centre of mass 100 mm out needs 0.26 N·m. With 4 rubbing faces of 6 mm mean radius and μ ≈ 0.3, the clamp must be 0.26 / (4 × 0.3 × 0.006) ≈ 36 N: a light squeeze from an M4 screw and a spring washer. A PTFE or leather washer between faces gives smoother, more consistent friction than plastic on plastic, which tends to stick-slip (chapter 17).</p>
+<p>For positive positions instead of a continuous hold, put a ring of shallow detent notches in one knuckle face and a spring-loaded ball or printed bump in the other (chapter 11).</p>
 
 <h2>10.7 Thrust loads and turntables</h2>
-<p>Radial ball bearings tolerate a little axial load; heavy axial load (a turntable under a weight, a leadscrew) needs a <strong>thrust bearing</strong> (flat race) or, cheaply, a <strong>thrust washer</strong> (PTFE, nylon or bronze) between a shoulder and the rotating part. A <strong>printed lazy-susan</strong> is a ring of 6–8 mm steel balls in two printed grooved rings (groove radius a little larger than the ball radius, smooth surfaces, a printed cage to space the balls): inexpensive, big diameter, surprisingly smooth. A <strong>wheel-on-a-ring</strong> alternative (3–4 skate bearings on a printed track) is even easier.</p>
+<p>Radial ball bearings tolerate an axial load of only a fraction of their radial rating. A heavy axial load (a turntable under a weight, the end of a leadscrew, a rotating stand) needs a component made for it. In rising order of cost and capacity:</p>
+<table>
+  <tr><th>Option</th><th>Capacity</th><th>Notes</th></tr>
+  <tr><td><strong>Thrust washer</strong> (PTFE, nylon, bronze, or a printed nylon ring)</td><td>Low–medium, slow</td><td>A plain bearing in the axial direction; the PV rule (10.2) applies, using the washer's face area.</td></tr>
+  <tr><td><strong>Pair of angular-contact or deep-groove bearings</strong>, preloaded against each other</td><td>Medium</td><td>Handles thrust both ways and tilting moments; the standard for leadscrew ends (chapter 9).</td></tr>
+  <tr><td><strong>Thrust ball bearing</strong> (e.g. 51100 series: 10 × 24 × 9)</td><td>High axial, no radial</td><td>Needs a separate radial bearing or bushing to centre the shaft.</td></tr>
+  <tr><td><strong>Lazy-susan (slewing) ring</strong>, bought</td><td>High axial and moment</td><td>Cheap pressed-steel rings from 75 to 300 mm+: often the right answer for a turntable.</td></tr>
+  <tr><td><strong>Printed ball race</strong></td><td>Medium</td><td>Steel balls in two printed grooved rings: large diameter, very cheap. Design below.</td></tr>
+  <tr><td><strong>Wheels on a track</strong></td><td>Medium–high</td><td>3–4 skate bearings (608) on axles running on a printed or aluminium ring. The easiest large turntable.</td></tr>
+</table>
+<h3>Designing a printed ball race</h3>
+<p>Two printed rings with facing grooves, a ring of steel balls between them, and a central pin or bearing to keep them concentric. Getting it smooth depends on a few details:</p>
+<ul>
+  <li><strong>Balls:</strong> steel or bearing balls, 4–8 mm. Larger balls spread the load over more plastic and roll over layer ridges more smoothly. Airsoft BBs (6 mm plastic) work for light displays.</li>
+  <li><strong>Groove shape:</strong> a circular arc with a radius of about 0.52–0.55 × the ball diameter (the <em>conformity</em>). Closer conformity carries more load but rubs more; a V-groove at 90° is easier to print and gives two contact points.</li>
+  <li><strong>Number of balls:</strong> fill about 60–80% of the circumference if there is no cage. Too full and the balls rub against each other in opposite directions; a printed cage (a ring with holes) spaces them and lets you use fewer.</li>
+  <li><strong>Load per ball:</strong> the load is not shared evenly. Treat it as if only about a third of the balls carry it, and with an off-centre load the side nearest the load takes much more (see the simulation). Keep each ball's share under about 20–50 N for printed PETG or nylon grooves, and keep the ring flat: a warped ring loads two or three balls only.</li>
+  <li><strong>Printing:</strong> print the rings flat, groove up, with a fine layer height (0.12 mm) so the groove floor is smooth; ironing on the groove helps. A drop of light grease or dry PTFE quietens it.</li>
+  <li><strong>Tilting:</strong> a single ball row resists tipping only if the load stays inside the ring. If it can hang outside (an arm, a camera on a long bracket), add a second row or a clamping ring underneath, preloaded with a light spring.</li>
+</ul>
+
+<div class="sim">
+  <h4>Simulation 4 · Printed ball-race turntable</h4>
+  <p class="desc">Set the ring's ball-circle diameter, the ball size, the load and how far off centre it sits. The plan view shows the balls (coloured and shaded by how much load each takes; red means over 50 N) and the load point. The readout gives the ball count, the share of the most loaded ball and whether the table tips.</p>
+  <canvas id="tt-canvas"></canvas>
+  <div class="row"><label><input type="checkbox" id="tt-cage" checked> printed cage (spaced balls)</label></div>
+  <div class="controls" id="tt-ctl"></div>
+  <div class="readout" id="tt-out"></div>
+</div>
 
 <h2>10.8 Materials, lubrication and care</h2>
 <ul>
   <li><strong>Shaft:</strong> steel, polished. Not PLA on PLA.</li>
   <li><strong>Sleeve / hole:</strong> nylon or PETG against steel; avoid printing a bearing surface on a vertical wall with visible layer ridges if you can ream it.</li>
-  <li><strong>Lubricant:</strong> silicone or PTFE grease for plastic-on-steel. Mineral oils and some greases can cause stress cracking in ABS, polycarbonate and some other plastics: check compatibility. Don't lubricate a press fit you're relying on.</li>
+  <li><strong>Reaming:</strong> run a drill bit of exact size by hand through a printed hole to smooth it, remove stringing and round it up. A hand reamer is better still.</li>
   <li><strong>Ball bearings:</strong> fine in dusty places if sealed. Keep chips and printing debris out of the housing; do not wash bearings with solvents that dissolve their grease.</li>
-  <li><strong>Reaming:</strong> run a drill bit of exact size by hand through a printed hole to smooth it, remove stringing and round it up.</li>
+  <li>Don't lubricate a press fit or a friction clutch you're relying on.</li>
+</ul>
+<h3>Which lubricant on which plastic</h3>
+<p>Lubrication cuts friction and wear several-fold, but some lubricants attack plastics. <strong>Amorphous plastics under stress</strong> (ABS, ASA, PC, and to a lesser degree PETG) can develop fine cracks (environmental stress cracking) when exposed to mineral oils, some synthetic oils, and solvent carriers in sprays. Crystalline plastics (nylon, POM, PP) are much more tolerant. Indicative guidance:</p>
+<table>
+  <tr><th>Lubricant</th><th>PLA</th><th>PETG</th><th>ABS / ASA / PC</th><th>Nylon</th><th>Notes</th></tr>
+  <tr><td>Silicone grease</td><td>Good</td><td>Good</td><td>Good</td><td>Good</td><td>The safe default for plastic. Don't use near surfaces you will later glue or paint.</td></tr>
+  <tr><td>PTFE-based grease</td><td>Good</td><td>Good</td><td>Good</td><td>Good</td><td>Low friction, plastic-safe; check that the base oil is synthetic and plastic-compatible.</td></tr>
+  <tr><td>Dry PTFE spray</td><td>Good</td><td>Good</td><td>Test first</td><td>Good</td><td>Leaves a dry film, so no dust collects. The solvent carrier can stress-crack ABS/PC.</td></tr>
+  <tr><td>Graphite powder</td><td>Good</td><td>Good</td><td>Good</td><td>Good</td><td>Dry, for slow sliding; messy.</td></tr>
+  <tr><td>Lithium (mineral-oil) grease</td><td>OK</td><td>Test first</td><td>Avoid</td><td>Good</td><td>Common in hardware stores; the mineral oil is the risk.</td></tr>
+  <tr><td>Light machine oil, WD-40-type sprays</td><td>OK short-term</td><td>Test first</td><td>Avoid</td><td>OK</td><td>Thin, washes out, attracts dust; penetrating sprays are cleaners, not lubricants.</td></tr>
+  <tr><td>Petroleum jelly (Vaseline)</td><td>OK</td><td>OK</td><td>Avoid</td><td>OK</td><td>Acceptable for toys and light duty.</td></tr>
+</table>
+<p>To test: put a dab on a stressed sample (a snap-fit arm held bent, or a part with a screw tightened into it) and leave it for a week. Crazing or cracks mean no.</p>
+<h3>Care and maintenance</h3>
+<ul>
+  <li>After the first few hours of running, plastic joints <strong>run in</strong>: layer ridges polish off and some play appears. Check fits and retighten clamps then.</li>
+  <li>Re-grease plastic-on-steel sliding joints every few months of regular use, or when they start to squeak.</li>
+  <li>Wear dust (a fine powder near a joint) means the material pair or the load is wrong, not that it needs more grease. Fix the cause: a steel counterface, lower pressure, a bushing.</li>
 </ul>
 
 <h2>10.9 Common problems and fixes</h2>
@@ -188,6 +258,8 @@ PV = P · v        (MPa·m/s)         friction heat ≈ μ · F · v  (W)</div>
 <details class="quiz"><summary>Why do two bearings on one shaft sometimes bind even though each is fine alone?</summary>
 <p>Their seats are not perfectly coaxial, so the shaft is held at two slightly different centres: over-constraint. Print both seats in one part, ream them together, or let one bearing float.</p></details>
 
+<details class="quiz"><summary>A clevis hinge with a Ø4 mm steel pin carries 200 N; the centre knuckle is 8 mm long. Is the printed hole OK?</summary>
+<p>Bearing stress σ_b = F/(d·t) = 200 / (4 × 8) = <strong>6.3 MPa</strong>: inside the 5–10 MPa range, but at the top end for a hole that must not wear oval with repeated loading. A 10–12 mm knuckle or a bronze sleeve gives margin. The pin itself is fine: τ = 2 × 200 / (π × 16) = 8 MPa.</p></details>
 <div class="pager" id="pager"></div>
 </main>
 </div>
@@ -259,16 +331,54 @@ PV = P · v        (MPa·m/s)         friction heat ≈ μ · F · v  (W)</div>
 
 /* ---------- Sim 3: shaft torsion ---------- */
 (function () {
-  const MAT = { 'Printed PETG shaft (layer-shear limited)': 6, 'Printed nylon shaft': 8, 'Aluminium rod': 40, 'Brass rod': 40, 'Steel rod (silver steel)': 100 };
-  const S = { d: 5, T: 0.5 }, sel = document.getElementById('sh-mat'), out = document.getElementById('sh-out'); Object.keys(MAT).forEach(k => sel.add(new Option(k + ' (τ ≈ ' + MAT[k] + ' MPa)', k))); sel.value = 'Steel rod (silver steel)';
+  const MAT = { 'Printed PETG shaft (layer-shear limited)': [6, 700], 'Printed nylon shaft': [8, 500], 'Aluminium rod': [40, 26000], 'Brass rod': [40, 37000], 'Steel rod (silver steel)': [100, 80000] };
+  const S = { d: 5, T: 0.5, L: 100 }, sel = document.getElementById('sh-mat'), out = document.getElementById('sh-out'); Object.keys(MAT).forEach(k => sel.add(new Option(k + ' (τ ≈ ' + MAT[k][0] + ' MPa)', k))); sel.value = 'Steel rod (silver steel)';
   function info() {
-    const tau = MAT[sel.value], Tmax = tau * Math.PI * S.d ** 3 / 16 / 1000, sf = Tmax / S.T, stress = 16 * S.T * 1000 / (Math.PI * S.d ** 3);
-    out.innerHTML = 'Allowable torque for a Ø' + S.d + ' mm shaft: <strong>' + Tmax.toFixed(2) + ' N·m</strong>. Applied ' + S.T.toFixed(2) + ' N·m gives τ = ' + stress.toFixed(1) + ' MPa → safety factor <strong style="color:var(--' + (sf >= 3 ? 'good' : sf >= 1.5 ? 'accent2' : 'warn') + ')">' + sf.toFixed(1) + '</strong>' + (sf < 3 ? ' (want ≥ 3 for printed, ≥ 2 for steel in steady use)' : '') + '. Note that the connection to the hub is usually the weaker part, not the shaft.';
+    const [tau, G] = MAT[sel.value], twist = S.T * 1000 * S.L / (G * Math.PI * S.d ** 4 / 32) * 180 / Math.PI, Tmax = tau * Math.PI * S.d ** 3 / 16 / 1000, sf = Tmax / S.T, stress = 16 * S.T * 1000 / (Math.PI * S.d ** 3);
+    out.innerHTML = 'Allowable torque for a Ø' + S.d + ' mm shaft: <strong>' + Tmax.toFixed(2) + ' N·m</strong>. Applied ' + S.T.toFixed(2) + ' N·m gives τ = ' + stress.toFixed(1) + ' MPa → safety factor <strong style="color:var(--' + (sf >= 3 ? 'good' : sf >= 1.5 ? 'accent2' : 'warn') + ')">' + sf.toFixed(1) + '</strong>' + (sf < 3 ? ' (want ≥ 3 for printed, ≥ 2 for steel in steady use)' : '') + '. Twist over ' + S.L + ' mm: <strong style="color:var(--' + (twist <= 0.5 ? 'good' : twist <= 2 ? 'accent2' : 'warn') + ')">' + (twist < 0.1 ? twist.toFixed(3) : twist.toFixed(1)) + '°</strong>' + (twist > 2 ? ' (enough wind-up to feel like backlash)' : '') + '. Note that the connection to the hub is usually the weaker part, not the shaft.';
   }
   const hs = document.getElementById('sh-ctl');
   Sim.slider(hs, { label: 'Shaft Ø', min: 3, max: 25, step: 1, value: S.d, unit: ' mm', onInput: v => { S.d = v; info(); } });
   Sim.slider(hs, { label: 'Torque', min: 0.01, max: 5, step: 0.01, dec: 2, value: S.T, unit: ' N·m', onInput: v => { S.T = v; info(); } });
+  Sim.slider(hs, { label: 'Length', min: 10, max: 400, step: 5, value: S.L, unit: ' mm', onInput: v => { S.L = v; info(); } });
   sel.onchange = info; info();
+})();
+/* ---------- Sim 4: ball-race turntable ---------- */
+(function () {
+  const S = { D: 120, b: 6, W: 50, e: 20 };
+  const cage = document.getElementById('tt-cage'), canvas = document.getElementById('tt-canvas'), out = document.getElementById('tt-out');
+  const calc = () => {
+    const R = S.D / 2, fill = cage.checked ? 0.45 : 0.75, n = Math.max(3, Math.floor(fill * Math.PI * S.D / S.b));
+    // rigid flat ring on n equal springs: ball load = W/n * (1 + 2e/R cos(phi)), negative = unloaded
+    const loads = [];
+    for (let i = 0; i < n; i++) { const ph = 2 * Math.PI * i / n; loads.push(S.W / n * (1 + 2 * S.e / R * Math.cos(ph))); }
+    const pos = loads.filter(v => v > 0), max = Math.max(...loads);
+    return { R, n, loads, max, tips: S.e >= R, unloaded: loads.length - pos.length };
+  };
+  const view = Sim.make(canvas, 0.55, (c, w, h, col) => {
+    const k = calc(), cx = w * 0.32, cy = h / 2, sc = (h - 30) / (S.D + 2 * S.b + 20);
+    c.strokeStyle = col.muted; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, (k.R + S.b) * sc, 0, 6.2832); c.stroke();
+    c.beginPath(); c.arc(cx, cy, Math.max(2, (k.R - S.b) * sc), 0, 6.2832); c.stroke();
+    k.loads.forEach((v, i) => {
+      const ph = 2 * Math.PI * i / k.n, x = cx + k.R * sc * Math.cos(ph), y = cy - k.R * sc * Math.sin(ph), f = Math.max(0, v) / k.max;
+      Sim.dot(c, x, y, Math.max(2.5, S.b / 2 * sc), v <= 0 ? col.surface : (v > 50 ? col.warn : f > 0.8 ? col.accent2 : col.accent) + (v <= 0 ? '' : Math.round(80 + 175 * f).toString(16).padStart(2, '0')), col.line);
+    });
+    const lx = cx + S.e * sc; Sim.line(c, lx - 8, cy - 8, lx + 8, cy + 8, col.ink, 2.5); Sim.line(c, lx - 8, cy + 8, lx + 8, cy - 8, col.ink, 2.5);
+    Sim.dot(c, cx, cy, 3, col.muted);
+    c.fillStyle = col.ink; c.font = '12px system-ui'; c.textAlign = 'left';
+    const tx = w * 0.62;
+    [['× load point (' + S.e + ' mm off centre)', col.ink], ['● orange: most loaded', col.accent2], ['● blue: lightly loaded', col.accent], ['○ hollow: lifted off', col.muted]].forEach((r, i) => { c.fillStyle = r[1]; c.fillText(r[0], tx, cy - 20 + i * 20); });
+  });
+  function info() {
+    const k = calc();
+    out.innerHTML = '<strong>' + k.n + ' balls</strong> of Ø' + S.b + ' mm on a Ø' + S.D + ' mm circle (' + (cage.checked ? 'caged, ~45% filled' : 'uncaged, ~75% filled') + '). Even share ' + (S.W / k.n).toFixed(1) + ' N; the most loaded ball takes about <strong style="color:var(--' + (k.max <= 20 ? 'good' : k.max <= 50 ? 'accent2' : 'warn') + ')">' + k.max.toFixed(1) + ' N</strong> (aim for under 20–50 N on printed grooves; real rings share load less evenly than this ideal, so leave margin).<br>' +
+      (k.tips ? '<strong style="color:var(--warn)">The load is outside the ball circle: the table tips. Enlarge the ring, add a second row or a hold-down ring.</strong>' : k.unloaded ? 'The far side lifts off ' + k.unloaded + ' balls: the load sits more than R/4 off centre, so the remaining balls carry even more than shown. Fine while the load stays inside the ring, but a clamping ring underneath will stop it rocking.' : 'Every ball stays loaded: the table is stable.');
+    view.redraw();
+  }
+  const hs = document.getElementById('tt-ctl');
+  [['D', 'Ball-circle Ø', 40, 300, 5, 0, ' mm'], ['b', 'Ball Ø', 3, 12, 0.5, 1, ' mm'], ['W', 'Load', 5, 500, 5, 0, ' N'], ['e', 'Load offset', 0, 160, 1, 0, ' mm']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  cage.onchange = info; info();
 })();
 </script>
 </body>

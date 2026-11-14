@@ -78,10 +78,22 @@
   <li><strong>The load path was designed</strong>, not left to chance: metal pins and rods where the force concentrates, printed parts around them.</li>
   <li><strong>The weak link was chosen on purpose</strong>: a slip clutch, a cheap pad, a replaceable bushing.</li>
   <li><strong>Calculations were done first</strong>, in a few lines, and the first print was a test of the calculation.</li>
+  <li><strong>Every axis of freedom was accounted for</strong>: each design removes exactly the motions it should, with one guide fixed and one floating, or a flexure where a joint would add play (chapter 1).</li>
+  <li><strong>Adjustment was built in</strong> where tolerances could not be held: slotted motor mounts, a tensioner, a shim, a clamp screw.</li>
 </ul>
+<p>Use the same order on your own projects: requirements, the critical interface, the load path, a hand calculation, a coupon, and only then the full part (chapter 18).</p>
 
 <h2>Practice projects</h2>
-<p>If you want exercises, in rising difficulty: (1) a click-pen mechanism with a heart-cam (chapter 11); (2) a box with a printed living-hinge lid and a snap latch (chapters 12, 14); (3) a hand-cranked automaton with two cams (chapter 6); (4) a 3-stage gear train with torque limiter (chapters 7, 14); (5) a wheel-less walker (case 5); (6) a belt-driven turntable with indexing (chapters 8, 11, 10).</p>
+<p>Six exercises in rising difficulty. Each brief gives the requirement, the chapters to lean on and the trap most first attempts fall into. Write the requirements sheet (chapter 18) before you start, and treat the first print as a test of your calculation.</p>
+<table>
+  <tr><th>Project</th><th>Requirement</th><th>Chapters</th><th>The trap</th></tr>
+  <tr><td><strong>1. Click pen</strong></td><td>A push button that alternates between two positions (in, out) on successive pushes, using a heart-shaped cam track or a rotating indexer, with a return spring.</td><td>6, 11, 12</td><td>The cam track's steps are too shallow to index reliably with printing tolerances; make them deep and give the follower a definite spring preload.</td></tr>
+  <tr><td><strong>2. Box with living-hinge lid and snap latch</strong></td><td>A box of 80 × 60 × 30 mm whose lid opens 180° on a printed hinge and closes with a latch that holds against a 10 N shake but opens with a thumb.</td><td>4, 12, 14</td><td>A short, thick hinge that cracks on the tenth opening. Size it with Simulation 1 of chapter 12, print it in PETG or nylon, and orient the strip along the layers.</td></tr>
+  <tr><td><strong>3. Hand-cranked automaton</strong></td><td>One crank drives two cams that move two figures with different, timed motions; one full crank turn = one cycle.</td><td>2, 6, 10</td><td>Pressure angles too steep for a gravity-return follower: it sticks. Check the pressure angle, use a larger base circle and roller followers on bearings.</td></tr>
+  <tr><td><strong>4. Three-stage gear train with torque limiter</strong></td><td>A 27:1 reduction from a small DC motor to an output shaft, protected by a slip clutch that slips before any tooth breaks.</td><td>7, 10, 14, 16</td><td>Centre distances drift because each shaft is held in a separate bracket. Put all shaft seats in one printed frame and check the weakest gear's torque with the Lewis formula.</td></tr>
+  <tr><td><strong>5. Linkage walker</strong></td><td>A wheel-less walker on Hoeken legs, driven by one motor, that walks on a flat table without falling over.</td><td>5, 10, case 5</td><td>Too few legs or legs in phase: the body drops between steps. Use three or more legs per side with phase offsets, and steel pins in every joint.</td></tr>
+  <tr><td><strong>6. Belt-driven indexing turntable</strong></td><td>A 150 mm turntable carrying 1 kg that steps through 8 positions with a Geneva or detent, driven by a stepper through a belt.</td><td>8, 10, 11, 16</td><td>A turntable on a single small bearing that rocks under an off-centre load. Use a ball race or wheels on a track (chapter 10.7, Simulation 4) and lock the positions with a detent, not the motor.</td></tr>
+</table>
 
 <h2>Check yourself</h2>
 <details class="quiz"><summary>In the gripper, doubling the pinion radius does what to the opening stroke, the grip force and the holdable mass?</summary>

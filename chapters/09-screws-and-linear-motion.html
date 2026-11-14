@@ -121,19 +121,48 @@ Run at ≤ 80% of this value.</div>
 
 <div class="sim">
   <h4>Simulation 3 · Leadscrew critical speed</h4>
-  <p class="desc">Root diameter, unsupported length and how the ends are held. The maximum safe speed and the matching linear speed follow.</p>
+  <p class="desc">Root diameter, unsupported length and how the ends are held. The maximum safe speed and the matching linear speed follow, and, if the screw pushes, the compressive load at which it buckles.</p>
   <div class="row"><label>Supports <select id="cs-k"><option value="0.36">Fixed–free (motor end only)</option><option value="1" selected>Pinned–pinned (a bearing at each end)</option><option value="1.56">Fixed–pinned</option><option value="2.27">Fixed–fixed</option></select></label></div>
   <div class="controls" id="cs-ctl"></div>
   <div class="readout" id="cs-out"></div>
 </div>
 <p>Fixes for a screw that whips: shorten the unsupported length, support the free end with a bearing, use a larger diameter, or slow it down. A leadscrew with a <em>bent</em> shaft wobbles at every speed, so check straightness by rolling it on a flat surface.</p>
+<h3>Buckling: when the screw pushes</h3>
+<p>A screw that <em>pushes</em> a load (a press, a jack, a linear actuator extending) is a slender column in compression, and it can buckle sideways long before the thread or the nut gives up. Euler's formula (chapter 2) applies, with the root diameter d<sub>r</sub>:</p>
+<div class="eq">F_buckle = c · π² · E · I / L²      I = π · d_r⁴ / 64      E ≈ 200 GPa for steel<br>
+c = 0.25 (fixed–free), 1 (pinned–pinned), 2 (fixed–pinned), 4 (fixed–fixed)      Use ≤ 50% of F_buckle.</div>
+<p>Example: a T8 screw (root ≈ 6 mm) with 300 mm between nut and support, a bearing at each end: I = 64 mm⁴ and F<sub>buckle</sub> ≈ 1.4 kN, so about 700 N is usable. The same screw held only at the motor (fixed–free) buckles at ~350 N. Hobby loads rarely get there, but a screw press or a jack can. The cheapest fix is often to turn the load path around: put the thrust bearing at the far end so the screw <strong>pulls</strong> the load (tension cannot buckle), or support the free end.</p>
 
 <h2>9.4 Vertical axes and holding loads</h2>
-<ul>
-  <li>A belt or a high-lead (non-self-locking) screw <strong>lets the load fall</strong> when the motor loses power. A stepper motor's holding torque disappears with the power.</li>
-  <li>Options: a <strong>self-locking low-lead screw</strong>; a <strong>brake</strong> on the motor; a <strong>counterweight or gas/constant-force spring</strong> that cancels most of the weight; a <strong>worm drive</strong> (chapter 7).</li>
-  <li>For a Z axis carrying a heavy printed head, a counterweight or spring both saves motor torque and avoids crashing on power loss.</li>
-</ul>
+<p>A horizontal axis only has to overcome friction and inertia. A vertical one also fights gravity all the time, including when it is standing still and when the power is off. Three questions decide the design: <strong>can the motor lift it</strong>, <strong>does it fall when the power goes</strong>, and <strong>how much of the motor is spent just holding</strong>.</p>
+<h3>Will it fall? Back-driving a screw</h3>
+<p>A load pushing on a screw tries to turn it backwards. Whether it can depends on the same lead angle λ and friction μ′ as in 9.1:</p>
+<div class="eq">Torque to lift          T_up   = F · l / (2π · η)<br>
+Back-driving efficiency η_back = (1 − μ′ / tan λ) / (1 + μ′ · tan λ)     (≤ 0 means self-locking)<br>
+Torque the load applies T_back = F · l · η_back / (2π)                  (must be resisted to hold it)</div>
+<p>If η<sub>back</sub> is negative the screw is self-locking and the load stays put on its own. If it is positive, the unpowered motor must resist T<sub>back</sub> with only its <strong>detent torque</strong> (the notchy feel of an unpowered stepper, typically 1–5% of its holding torque, about 0.01–0.03 N·m for a NEMA 17) plus whatever friction the axis has. Self-locking only holds on a <em>still</em> screw with friction that stays put: vibration can let a marginally self-locking screw creep down, so keep a margin (lead angle well under the friction angle), or add one of the measures below.</p>
+<p>The penalty of self-locking is efficiency: a self-locking screw is always below 50% efficient going forward, so the motor works hard to lift. A T8×2 is self-locking and slow; a T8×8 is four times faster, not self-locking, and back-drives readily. A belt is never self-locking.</p>
+<h3>Ways to hold a vertical load</h3>
+<table>
+  <tr><th>Method</th><th>How it works</th><th>Use when</th></tr>
+  <tr><td><strong>Self-locking screw</strong> (low lead) or <strong>worm drive</strong></td><td>Friction stops back-driving</td><td>Slow axes; the simplest answer. Worms: chapter 7.</td></tr>
+  <tr><td><strong>Counterweight</strong></td><td>A weight on a cord over a pulley balances most of the moving mass</td><td>Heavy carriages; adds inertia (the motor now accelerates both masses) and needs a guarded path.</td></tr>
+  <tr><td><strong>Constant-force spring</strong> (a pre-curled steel strip)</td><td>Nearly flat force over its whole extension</td><td>Compact balancing of a fixed load over long travel. Sized by force (e.g. 5, 10, 20 N).</td></tr>
+  <tr><td><strong>Gas spring</strong></td><td>Compressed gas, nearly constant force, built-in damping</td><td>Lids, arms, heavy flaps; force rises 20–40% at full compression.</td></tr>
+  <tr><td><strong>Tension or torsion spring</strong> (with linkage)</td><td>Spring force rises with travel; a lever or cam can flatten it</td><td>Arms that pivot (lamp arms, the zero-gravity spring balance).</td></tr>
+  <tr><td><strong>Brake</strong></td><td>A spring-applied, power-released brake on the motor or screw</td><td>Fast, heavy axes where safety matters; adds cost and wiring.</td></tr>
+  <tr><td><strong>Ratchet or pawl</strong></td><td>Positive one-way lock (chapter 11)</td><td>Hand-cranked lifts and hoists.</td></tr>
+</table>
+<p>Balance about 80–90% of the weight, not 100%. A slightly heavy axis drifts gently down rather than up when unpowered, it keeps the drive preloaded in one direction (which hides backlash in the nut or belt), and homing remains repeatable. The motor then only has to supply the remainder plus friction and acceleration.</p>
+<h3>Sizing the motor for lifting</h3>
+<p>Add up the torques at the screw or pulley: lifting the unbalanced weight (T<sub>up</sub> above), friction in the guides, and acceleration of the moving mass (F = m·a, plus the screw's own inertia for fast moves). Then apply the 1.5–2× margin of chapter 16. A stepper loses torque with speed, so check at the fastest speed you will run, not at standstill.</p>
+
+<div class="sim">
+  <h4>Simulation 4 · Vertical axis: lift, hold and fall</h4>
+  <p class="desc">A screw-driven vertical axis carrying a mass. Set the screw, the friction and how much of the weight is balanced by a counterweight or spring. The readout tells you the lifting torque, whether the axis back-drives, and whether an unpowered stepper's detent torque holds it.</p>
+  <div class="controls" id="va-ctl"></div>
+  <div class="readout" id="va-out"></div>
+</div>
 
 <h2>9.5 Common problems and fixes</h2>
 <table>
@@ -174,6 +203,8 @@ Run at ≤ 80% of this value.</div>
 <details class="quiz"><summary>Why can't you simply tighten two parallel rods and bearings to remove the play?</summary>
 <p>Because two rigid guides fix the same degrees of freedom twice. Any slight non-parallelism makes the carriage bind. Use one precise guide and let the other float or flex.</p></details>
 
+<details class="quiz"><summary>A T8×8 screw (lead angle ≈ 20°, μ′ ≈ 0.2) carries a 2 kg vertical carriage. Will an unpowered NEMA 17 with 0.02 N·m detent torque hold it?</summary>
+<p>tan λ ≈ 0.36, so η_back = (1 − 0.2/0.36)/(1 + 0.2 × 0.36) ≈ 0.41 and T_back = 19.6 × 0.008 × 0.41 / 2π ≈ <strong>0.010 N·m</strong>. Half the detent torque: it probably holds at rest, but with little margin, and vibration or a heavier load lets it creep down. A counterweight or spring balancing 80% of the weight makes it safe.</p></details>
 <div class="pager" id="pager"></div>
 </main>
 </div>
@@ -247,14 +278,32 @@ const TAU = Math.PI * 2, R2D = 180 / Math.PI;
 
 /* ---------- Sim 3: critical speed ---------- */
 (function () {
-  const S = { d: 6, L: 300, lead: 8 }, sel = document.getElementById('cs-k'), out = document.getElementById('cs-out');
+  const S = { d: 6, L: 300, lead: 8, F: 200 }, sel = document.getElementById('cs-k'), out = document.getElementById('cs-out'), CB = { '0.36': 0.25, '1': 1, '1.56': 2, '2.27': 4 };
   function info() {
-    const ncr = 1.22e8 * +sel.value * S.d / (S.L * S.L), nmax = 0.8 * ncr, v = S.lead * nmax / 60;
-    out.innerHTML = 'Critical speed ≈ <strong>' + Math.round(ncr) + ' rpm</strong>; keep below <strong>' + Math.round(nmax) + ' rpm</strong> → with lead ' + S.lead + ' mm the fastest safe linear speed is <strong>' + v.toFixed(0) + ' mm/s</strong>.' + (nmax < 600 ? ' <strong style="color:var(--warn)">Low: support the end, shorten, or use a thicker screw.</strong>' : '');
+    const ncr = 1.22e8 * +sel.value * S.d / (S.L * S.L), nmax = 0.8 * ncr, v = S.lead * nmax / 60, Fb = CB[sel.value] * Math.PI ** 2 * 200000 * (Math.PI * S.d ** 4 / 64) / (S.L * S.L), bsf = Fb / S.F;
+    out.innerHTML = 'Critical speed ≈ <strong>' + Math.round(ncr) + ' rpm</strong>; keep below <strong>' + Math.round(nmax) + ' rpm</strong> → with lead ' + S.lead + ' mm the fastest safe linear speed is <strong>' + v.toFixed(0) + ' mm/s</strong>.' + (nmax < 600 ? ' <strong style="color:var(--warn)">Low: support the end, shorten, or use a thicker screw.</strong>' : '') + '<br>If the screw pushes: buckling load ≈ <strong>' + Math.round(Fb) + ' N</strong>' + (S.F > 0 ? ', ' + S.F + ' N applied → margin <strong style="color:var(--' + (bsf >= 2 ? 'good' : bsf >= 1 ? 'accent2' : 'warn') + ')">' + bsf.toFixed(1) + '×</strong>' + (bsf < 2 ? ' (want ≥ 2: support the free end, shorten it, or make the screw pull instead of push)' : '') : '') + '.';
   }
   const hs = document.getElementById('cs-ctl');
-  [['d', 'Root Ø', 3, 20, 0.5, 1, ' mm'], ['L', 'Unsupported length', 100, 1200, 10, 0, ' mm'], ['lead', 'Lead', 1, 20, 1, 0, ' mm']].forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  [['d', 'Root Ø', 3, 20, 0.5, 1, ' mm'], ['L', 'Unsupported length', 100, 1200, 10, 0, ' mm'], ['lead', 'Lead', 1, 20, 1, 0, ' mm'], ['F', 'Push (compression)', 0, 3000, 10, 0, ' N']].forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
   sel.onchange = info; info();
+})();
+/* ---------- Sim 4: vertical axis ---------- */
+(function () {
+  const S = { m: 2, d: 8, lead: 8, mu: 0.2, bal: 0, det: 0.02 }, out = document.getElementById('va-out');
+  function info() {
+    const F = S.m * 9.81 * (1 - S.bal / 100), mup = S.mu / Math.cos(15 / R2D), dm = 0.875 * S.d, lam = Math.atan(S.lead / (Math.PI * dm)), t = Math.tan(lam);
+    const eta = t * (1 - mup * t) / (t + mup), back = (1 - mup / t) / (1 + mup * t), l = S.lead / 1000;
+    const Tup = Math.abs(F) * l / (TAU * eta), Tback = Math.abs(F) * l * Math.max(0, back) / TAU;
+    let msg;
+    if (Math.abs(F) < 0.01) msg = '<strong style="color:var(--good)">Fully balanced: nothing to hold, but the drive is not preloaded (backlash shows up).</strong>';
+    else if (back <= 0) msg = '<strong style="color:var(--good)">Self-locking</strong> (lead angle ' + (lam * R2D).toFixed(1) + '° < friction angle ' + (Math.atan(mup) * R2D).toFixed(1) + '°): the load stays put without power' + (Math.atan(mup) * R2D - lam * R2D < 2 ? ', <strong style="color:var(--accent2)">but only just: vibration may let it creep</strong>.' : '.');
+    else msg = 'Back-drives: the load applies <strong>' + Tback.toFixed(3) + ' N·m</strong> to the screw. ' + (Tback <= S.det * 0.7 ? '<strong style="color:var(--good)">The unpowered detent torque (' + S.det.toFixed(3) + ' N·m) holds it, with some margin.</strong>' : '<strong style="color:var(--warn)">The unpowered detent torque (' + S.det.toFixed(3) + ' N·m) is not enough: the axis ' + (F > 0 ? 'falls' : 'rises') + ' when the power goes. Add balance, a brake, or a lower lead.</strong>');
+    out.innerHTML = 'Unbalanced force <strong>' + F.toFixed(1) + ' N</strong> · lead angle ' + (lam * R2D).toFixed(1) + '° · lifting efficiency ' + (eta * 100).toFixed(0) + '% · torque to lift (no acceleration) <strong>' + Tup.toFixed(3) + ' N·m</strong> (' + (Tup * 1.75).toFixed(3) + ' N·m with a 1.75× margin).<br>' + msg;
+  }
+  const hs = document.getElementById('va-ctl');
+  [['m', 'Moving mass', 0.1, 20, 0.1, 1, ' kg'], ['bal', 'Balanced', 0, 100, 5, 0, ' %'], ['d', 'Screw Ø', 6, 16, 1, 0, ' mm'], ['lead', 'Lead', 1, 20, 1, 0, ' mm'], ['mu', 'Friction μ', 0.05, 0.4, 0.01, 2, ''], ['det', 'Detent torque', 0, 0.1, 0.005, 3, ' N·m']]
+    .forEach(([k, l, mn, mx, st, dec, u]) => Sim.slider(hs, { label: l, min: mn, max: mx, step: st, dec, value: S[k], unit: u, onInput: v => { S[k] = v; info(); } }));
+  info();
 })();
 </script>
 </body>

@@ -131,12 +131,40 @@
 </ul>
 
 <h2>4.8 Splitting parts, alignment and assembly</h2>
-<p>Don't be afraid to cut a part in two. A split lets each piece print in the best orientation, with no supports, within the bed volume. Rules:</p>
+<p>Don't be afraid to cut a part in two. A split lets each piece print in the best orientation, with no supports, within the bed volume, and often makes the part stronger, because each piece can have its layers running the right way. The cost is a joint, and a joint is only as good as its alignment and its fastening.</p>
+<h3>Where to put the split</h3>
 <ul>
-  <li>Cut <strong>away from highly stressed regions</strong> and across weak axes, not through them.</li>
-  <li>Add <strong>alignment features</strong>: pins and sockets, dovetails, keys, a tongue-and-groove, or a large stepped lip. Do not depend on glue or screws to locate.</li>
-  <li>Join with <strong>screws into heat-set inserts</strong> or bolts through the part (chapter 13), adhesive (CA, epoxy, solvent weld for ABS/ASA) or snap-fits.</li>
+  <li><strong>Away from highly stressed regions</strong>: in a low-moment zone, near a support rather than at mid-span of a beam, never through a fillet or a hole that carries load.</li>
+  <li><strong>On a natural feature line</strong>: an edge, a step, a change of section. A split along an existing edge disappears visually and gives the joint a corner to locate against.</li>
+  <li><strong>So each half prints flat on its cut face</strong>, which is usually the reason for splitting in the first place.</li>
+  <li><strong>So the load presses the halves together</strong> rather than peeling them apart, wherever you have the choice.</li>
+  <li><strong>Through a bearing bore or shaft line, never</strong>: two half-bores held by screws never line up perfectly. Keep a bore whole in one piece.</li>
+</ul>
+<h3>Alignment features</h3>
+<p>Locate with features, fasten with something else. Screws and glue hold parts together but do not position them accurately.</p>
+<table>
+  <tr><th>Feature</th><th>Good for</th><th>Clearance (0.4 mm nozzle)</th><th>Notes</th></tr>
+  <tr><td><strong>Steel dowel pins</strong> in printed holes</td><td>Precise, repeatable location</td><td>Press fit in one half, 0.05–0.1 mm slip in the other</td><td>Two pins, or one pin and one slot (chapter 1: avoid over-constraint). Ø3 or Ø4 mm, from a coupon.</td></tr>
+  <tr><td><strong>Printed pins and sockets</strong></td><td>Quick, cheap</td><td>0.15–0.25 mm</td><td>Make the pins ≥ Ø4 mm and chamfer them; or print sockets in both halves and use a cut piece of filament or a steel pin.</td></tr>
+  <tr><td><strong>Stepped lip / rebate</strong></td><td>Enclosures, shells</td><td>0.15–0.2 mm</td><td>A 1–2 mm step around the edge; also seals light and dust.</td></tr>
+  <tr><td><strong>Tongue and groove</strong></td><td>Long straight joints</td><td>0.15–0.25 mm</td><td>Resists shear across the joint; adds glue area.</td></tr>
+  <tr><td><strong>Dovetail</strong></td><td>Slide-together joints, bed-size extensions</td><td>0.2–0.3 mm</td><td>Locks in two directions; add a stop or a screw for the third. Print with the dovetail profile in XY.</td></tr>
+  <tr><td><strong>Keys / tabs in slots</strong></td><td>Angular location of round parts</td><td>0.15–0.2 mm</td><td>One asymmetric key prevents assembling it the wrong way round.</td></tr>
+  <tr><td><strong>Cone or pyramid locators</strong></td><td>Self-centring, tolerant of warp</td><td>Zero (it seats by contact)</td><td>Centres itself as it closes; good for lids and stacked modules.</td></tr>
+</table>
+<h3>Fastening the halves</h3>
+<ul>
+  <li><strong>Screws into heat-set inserts</strong> or bolts right through with nuts (chapter 13): strong and reversible. Put screws close to the alignment features and the load path.</li>
+  <li><strong>Adhesive</strong> (CA, epoxy, solvent weld for ABS/ASA): permanent; size the glue area so the joint is loaded in shear, not peel (chapter 13). A 0.1–0.2 mm gap holds glue better than a squeezed-dry joint.</li>
+  <li><strong>Snap-fits</strong> (chapter 12): tool-free, but they limit the clamp force and the number of openings.</li>
+  <li><strong>Hidden fasteners</strong>: a captive nut inside one half and a screw from below keeps the outer surface clean.</li>
+</ul>
+<h3>Making the joint seat</h3>
+<ul>
   <li>Leave a small <strong>clearance (0.1–0.2 mm) on mating surfaces</strong> so a slightly warped face still seats.</li>
+  <li><strong>Relieve the faces</strong>: a shallow recess in the middle of a large mating face so only the rim touches. A large flat face never prints perfectly flat.</li>
+  <li><strong>Chamfer every edge</strong> of a mating face and every pin end: it removes elephant foot and guides the parts together.</li>
+  <li><strong>Print a joint coupon</strong> of the two mating features before committing to the full parts, just as for fits.</li>
 </ul>
 
 <h2>4.9 Features and minimum sizes</h2>

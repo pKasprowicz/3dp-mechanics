@@ -16,7 +16,7 @@
 
 <div class="callout warn">
   <span class="tag">About the numbers</span>
-  Material values here are typical, order-of-magnitude figures for FDM parts, used to build intuition and for a first sizing. Real strength depends on your printer, settings, filament brand, moisture, and orientation. Treat results as "will it survive, roughly", then confirm with a printed test. Do not use these for safety-critical parts (see 2.9).
+  Material values here are typical, order-of-magnitude figures for FDM parts, used to build intuition and for a first sizing. Real strength depends on your printer, settings, filament brand, moisture, and orientation. Treat results as "will it survive, roughly", then confirm with a printed test. Do not use these for safety-critical parts (see 2.10).
 </div>
 
 <h2>2.1 Force, moment, torque</h2>
@@ -132,7 +132,25 @@ Simply supported, centre load: δ = F·L³ / (48·E·I)</div>
 </div>
 
 <h2>2.6 Torsion (twisting)</h2>
-<p>A shaft transmitting torque <em>T</em> has shear stress <code>τ = 16·T / (π·d³)</code> for a solid round shaft of diameter <em>d</em>: <strong>cubic in diameter</strong>, so a 20% larger shaft is 1.7× stronger. Printed shafts have a second problem: layer lines. Torque transmitted across layer interfaces is weak, and the connection from shaft to printed hub (keys, set-screw flats, D-profiles) concentrates stress. As a rule, <strong>do not transmit significant torque through a thin printed shaft</strong>; use a steel or brass rod and let the plastic be a hub or housing (chapters 10 and 15).</p>
+<p>A shaft transmitting torque <em>T</em> carries shear stress that is zero on the axis and highest at the surface. Two numbers matter: how hard the surface is stressed, and how far the shaft winds up.</p>
+<div class="eq">Solid round shaft, diameter d     τ = 16·T / (π·d³)          J = π·d⁴ / 32<br>
+Angle of twist over length L       θ = T·L / (G·J)   (radians; G = shear modulus)<br>
+Hollow shaft, outer D, inner d     τ = 16·T·D / (π·(D⁴ − d⁴))   J = π·(D⁴ − d⁴) / 32<br>
+Square bar, side a                 τ ≈ 4.81·T / a³            θ ≈ T·L / (0.141·G·a⁴)</div>
+<p>Stress is <strong>cubic in diameter</strong>, so a 20% larger shaft is 1.7× stronger; twist is <strong>quartic</strong>, so the same 20% makes it 2.1× stiffer. Two consequences:</p>
+<ul>
+  <li><strong>Hollow is efficient.</strong> The material near the axis does almost nothing. A tube with a bore of 0.6·D keeps 87% of the solid shaft's strength and stiffness at 64% of the mass. A printed shaft with 4 walls and sparse infill behaves like a tube, which is why perimeters matter more than infill for torsion.</li>
+  <li><strong>Twist is the hidden problem with plastic.</strong> The shear modulus G of printed plastic is about 1% of steel's (steel ≈ 80 GPa, aluminium ≈ 26, brass ≈ 37, printed PETG ≈ 0.7, printed nylon ≈ 0.5). A plastic shaft that is strong enough can still wind up by several degrees, which feels like backlash and throws off anything that needs angular accuracy.</li>
+</ul>
+<h3>Worked example</h3>
+<p>An 8 mm printed PETG shaft, 100 mm long, carries 0.5 N·m. Stress: τ = 16 × 500 / (π × 8³) = <strong>5.0 MPa</strong>, close to the ~6 MPa a printed PETG shaft can carry in steady use (layer shear limits it). Twist: J = π × 8⁴ / 32 = 402 mm⁴, so θ = 500 × 100 / (700 × 402) = 0.18 rad = <strong>10°</strong>. A steel rod of the same size twists 0.09° and has a safety factor of about 20. The plastic shaft "works", but the output lags the input by 10° under load and springs back when the load drops.</p>
+<h3>Why printed shafts are especially weak in torsion</h3>
+<ul>
+  <li>Torsional shear acts on the cross-section <em>and</em> on planes along the axis. Whichever way you print the shaft, some layer interface carries the full shear stress. Derate printed shafts to roughly half the in-layer strength.</li>
+  <li>Twisting puts the largest tensile stress on a 45° helix around the surface. Brittle shafts (PLA) crack along that helix; tough ones (nylon) twist permanently first.</li>
+  <li>Flats, keyways, cross holes and hex ends are stress raisers (2.7). The hub connection usually fails before the shaft does.</li>
+</ul>
+<p>As a rule, <strong>do not transmit significant torque through a thin printed shaft</strong>. Use a steel or brass rod and let the plastic be a hub or housing (chapters 10 and 15). Chapter 10, Simulation 3 compares printed and metal shafts, both for strength and for twist.</p>
 
 <h2>2.7 Stress concentrations: why parts crack at corners</h2>
 <p>The stress formulas above give <em>nominal</em> stress for smooth shapes. Wherever a section changes abruptly (a sharp inside corner, a hole, a groove, the root of a thread), the stress flow bunches up and the local peak stress is <code>σ_peak = Kt × σ_nominal</code>. For a sharp internal corner Kt can be 3 to 10+. A simple estimate for a notch of depth <em>d</em> and root radius <em>r</em> is <code>Kt ≈ 1 + 2·√(d / r)</code> (pessimistic for gentle fillets). The practical lesson is the cheapest in the whole book: <strong>put a fillet on every inside corner.</strong></p>
@@ -155,12 +173,37 @@ Simply supported, centre load: δ = F·L³ / (48·E·I)</div>
   <li><strong>Anisotropy.</strong> Parts are strong along the extruded lines and weak <em>between</em> layers (typically 30–70% of the in-layer strength, lower for brittle or poorly-bonded prints). Orient parts so the main tensile or bending stress runs <em>along</em> layers, never pulling them apart. Chapter 4 makes this a design rule.</li>
   <li><strong>Creep and stress relaxation.</strong> Under constant load, plastics slowly deform further; under constant deformation, the force relaxes. A PLA clip that's tight on day one is loose after weeks. For parts under permanent load, derate strength drastically (a factor 0.3–0.5 for PLA) or pick a more creep-resistant material (PETG, ASA, CF-nylon), or let a metal part carry the sustained load.</li>
   <li><strong>Temperature.</strong> Stiffness and strength fall as plastic warms, long before it melts. PLA gets soft around 55–60 °C, which a car dashboard in the sun reaches. Heated motors and hot-ends are close neighbours.</li>
-  <li><strong>Fatigue.</strong> Repeated loading breaks things at stresses far below their static strength. A snap-fit or living hinge flexed 10,000 times needs strain well below the one-shot limit.</li>
+  <li><strong>Fatigue.</strong> Repeated loading breaks things at stresses far below their static strength. A snap-fit or living hinge flexed 10,000 times needs strain well below the one-shot limit (2.9).</li>
   <li><strong>Moisture.</strong> Nylon (and to a lesser extent PETG/PLA) absorbs water, which changes stiffness and dimensions.</li>
   <li><strong>Infill, perimeters.</strong> For bending and torsion, the outer walls carry the load. Adding perimeters (and top/bottom layers) strengthens a part far more per gram than adding infill.</li>
 </ul>
 
-<h2>2.9 Safety factors</h2>
+<h2>2.9 Repeated loads: fatigue and wear</h2>
+<p>Most mechanisms do not fail the first time they are loaded. They fail on the ten-thousandth cycle, from a crack that grew a little each time, or from a surface that wore away a little each turn. Static strength alone does not predict either.</p>
+<h3>Fatigue</h3>
+<p>Under repeated stress, a small crack starts at the worst spot (a sharp corner, a layer line, a seam, a void) and grows a little each cycle until the remaining section snaps. The lower the stress, the more cycles it survives, and the curve of stress against cycles to failure (an <strong>S–N curve</strong>) falls steadily. Unlike steel, plastics have no true endurance limit: there is no stress below which they last forever. Indicative fractions of the static, already-derated strength for printed parts:</p>
+<table>
+  <tr><th>Cycles</th><th>Allowable stress (fraction of static)</th><th>Typical example</th></tr>
+  <tr><td>10³</td><td>~0.6</td><td>A battery cover opened twice a week for 10 years</td></tr>
+  <tr><td>10⁴</td><td>~0.45</td><td>A tool clip, a daily-use latch</td></tr>
+  <tr><td>10⁵</td><td>~0.35</td><td>A hinge or button on something used constantly</td></tr>
+  <tr><td>10⁶</td><td>~0.25</td><td>A gear tooth at 100 rpm for a week of running</td></tr>
+  <tr><td>10⁷+</td><td>~0.2 or less</td><td>Motor-driven parts running for months; test them</td></tr>
+</table>
+<p>Count cycles honestly. A gear tooth sees one load cycle per revolution, so 100 rpm for an hour is 6000 cycles. A leg of a walker sees one per step. Vibration counts too: a part buzzing at 50 Hz collects 180 000 cycles an hour.</p>
+<ul>
+  <li><strong>Reversed loading is worse</strong> than loading in one direction. A part bent back and forth sees twice the stress range of one bent and released.</li>
+  <li><strong>Stress raisers dominate.</strong> Kt (2.7) multiplies the peak stress, and in fatigue every bit of peak stress counts. Fillets matter more for repeated loads than for one-off loads.</li>
+  <li><strong>Seams and layer lines start cracks.</strong> Move the seam away from the most stressed face and orient the part so the cyclic stress runs along the layers (chapter 4).</li>
+  <li><strong>Toughness helps.</strong> PETG and nylon tolerate cyclic loading far better than PLA; PA-CF is stiff but has a lower strain budget (chapter 12).</li>
+  <li><strong>Heat builds up.</strong> Plastic flexed quickly warms from internal friction (hysteresis), which lowers strength further. Fast-cycling flexures and snap-fits can soften themselves.</li>
+</ul>
+<h3>Wear</h3>
+<p>Wherever two surfaces slide, material is lost. A useful model is <strong>Archard's law</strong>: worn volume is proportional to load times sliding distance, and inversely proportional to hardness.</p>
+<div class="eq">Wear volume   V ≈ k · F · s / H      (k = wear coefficient of the material pair, F = load, s = sliding distance, H = hardness)</div>
+<p>You rarely know k, but the proportionality tells you what to change. Halving the contact pressure (a wider face, a longer bushing) or the sliding distance (a roller instead of a slider, a smaller pin) halves the wear. Pairing plastic with smooth hard steel, rather than with the same plastic, cuts k by a large factor, and lubrication cuts it again. Printed surfaces "run in" during the first hours, as the layer ridges polish off; expect some play to appear and then stabilise. Keep debris out: abrasive dust in a joint grinds plastic quickly. Chapter 10 turns this into the PV rule for plain bearings.</p>
+
+<h2>2.10 Safety factors</h2>
 <p>The <strong>safety factor</strong> is <code>SF = allowable stress / actual stress</code>. The allowable is the material strength <em>after</em> derating for orientation, creep, temperature and stress concentration. Then you add a margin for the unknown. A reasonable starting point for printed parts:</p>
 <table>
   <tr><th>Situation</th><th>Minimum SF on derated strength</th></tr>
@@ -171,7 +214,7 @@ Simply supported, centre load: δ = F·L³ / (48·E·I)</div>
 </table>
 <p>For critical parts such as climbing, lifting, vehicle, medical or pressure-bearing, use certified components. Printing is not the right way to make them.</p>
 
-<h2>2.10 A quick-estimate workflow</h2>
+<h2>2.11 A quick-estimate workflow</h2>
 <ol>
   <li>Write down the <strong>loads</strong> in newtons (weights, motor torque ÷ radius, spring forces, a person pushing: 20–100 N is typical; a hard push or drop can be several times that).</li>
   <li>Sketch a <strong>free-body diagram</strong> of the part; find the reaction forces and the worst moment.</li>
@@ -181,7 +224,7 @@ Simply supported, centre load: δ = F·L³ / (48·E·I)</div>
   <li>Print a <strong>test part</strong>, load it, and measure. A bathroom scale and some stacked weights is a legitimate test rig.</li>
 </ol>
 
-<h2>2.11 Common mistakes</h2>
+<h2>2.12 Common mistakes</h2>
 <ul>
   <li>Designing in tension when the part is actually in bending: bending stresses are far higher than F/A suggests.</li>
   <li>Making a long, thin arm and then being surprised by the L³ deflection.</li>
@@ -191,7 +234,7 @@ Simply supported, centre load: δ = F·L³ / (48·E·I)</div>
   <li>Forgetting units: kg vs N, mm vs m, kgf·cm vs N·m.</li>
 </ul>
 
-<h2>2.12 Check yourself</h2>
+<h2>2.13 Check yourself</h2>
 <details class="quiz"><summary>A servo is rated 5 kgf·cm. What force can it exert at the end of a 25 mm horn?</summary>
 <p>T = 5 × 0.0981 = 0.49 N·m. F = T / r = 0.49 / 0.025 ≈ <strong>19.6 N</strong> (about 2 kg). In practice use half or less of the rated stall torque.</p></details>
 <details class="quiz"><summary>An arm deflects 4 mm and carries stress near its limit. You make it 1.5× thicker (deeper). What happens?</summary>
@@ -201,6 +244,8 @@ Simply supported, centre load: δ = F·L³ / (48·E·I)</div>
 <details class="quiz"><summary>A block on a plastic ramp starts to slide at 25°. What is μₛ?</summary>
 <p>μₛ = tan 25° ≈ <strong>0.47</strong>.</p></details>
 
+<details class="quiz"><summary>A printed nylon shaft (G ≈ 0.5 GPa) and a steel one (G ≈ 80 GPa) of the same size carry the same torque. How do their stress and twist compare?</summary>
+<p>The stress is identical (τ = 16T/πd³ does not depend on the material), but the nylon shaft twists 80/0.5 = <strong>160× more</strong>. It may be strong enough and still wind up so far that the output lags the input noticeably.</p></details>
 <div class="pager" id="pager"></div>
 </main>
 </div>
