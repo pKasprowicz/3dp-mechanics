@@ -37,12 +37,14 @@ The version lives in one place, `assets/version.js`; history is in `CHANGELOG.md
 # 1. describe the changes under "## Unreleased" in CHANGELOG.md, then:
 python tools/bump-version.py minor        # or major / patch
 git commit -am "Release v1.1.0"
-git push origin master                    # deploys the site with the new badge
-git tag v1.1.0 && git push origin v1.1.0  # creates the GitHub Release from the changelog
+git push origin master                    # deploys the site and creates the tag and GitHub Release
 ```
 
-The release workflow (`.github/workflows/release.yml`) refuses a tag that does not match `assets/version.js` or has no
-changelog entry.
+Pushing a change to `assets/version.js` on `master` is all it takes: the release workflow
+(`.github/workflows/release.yml`) creates the `vX.Y.Z` tag on that commit and the GitHub Release, with notes taken from
+the matching `CHANGELOG.md` section. It refuses a version with no changelog entry, and does nothing if the release
+already exists. Pushing a `v*` tag by hand still works the same way. To create a missing release for an earlier commit,
+run the workflow from the Actions tab ("Run workflow") with the version and the commit.
 
 ## Layout
 

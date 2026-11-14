@@ -1,29 +1,76 @@
 name: Create release
 
+# A release (and its tag) is created automatically when a push to master changes assets/version.js,
+# so cutting a release only needs a push: no tag push required. Pushing a v* tag by hand still works,
+# and "Run workflow" (workflow_dispatch) can create a missing release for an earlier commit.
+# Every run is idempotent: if the release already exists, nothing happens.
+
 on:
   push:
+    branches: [master]
+    paths: ['assets/version.js']   # not evaluated for tag pushes, which always run
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 1.1.0 (default: the version in assets/version.js at the chosen commit)'
+        required: false
+      ref:
+        description: 'Commit, branch or tag to release (default: the head of the selected branch)'
+        required: false
 
 permissions:
   contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check the tag matches the site version
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - name: Work out the version and check it against assets/version.js
+        id: ver
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          v=$(grep -oP "version: '\K[^']+" assets/version.js)
-          if [ "v$v" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match assets/version.js (v$v)"; exit 1
+          file_v=$(grep -oP "version: '\K[^']+" assets/version.js)
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            want="${GITHUB_REF_NAME#v}"
+          else
+            want="${INPUT_VERSION:-$file_v}"
+            want="${want#v}"
           fi
-      - name: Extract release notes from CHANGELOG.md
-        run: |
-          ver="${GITHUB_REF_NAME#v}"
-          awk -v v="$ver" '/^## /{p=($2==v); next} p' CHANGELOG.md > notes.md
-          test -s notes.md || { echo "No changelog entry for $ver"; exit 1; }
-      - name: Create GitHub release
+          if [ "$want" != "$file_v" ]; then
+            echo "Version $want does not match assets/version.js ($file_v) at $(git rev-parse --short HEAD)"; exit 1
+          fi
+          echo "tag=v$want" >> "$GITHUB_OUTPUT"
+          echo "version=$want" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Skip if the release already exists
+        id: exists
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --title "3D-Printed Mechanics $GITHUB_REF_NAME" --notes-file notes.md
+        run: |
+          if gh release view "${{ steps.ver.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Release ${{ steps.ver.outputs.tag }} already exists; nothing to do."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Extract release notes from CHANGELOG.md
+        if: steps.exists.outputs.skip != 'true'
+        run: |
+          awk -v v="${{ steps.ver.outputs.version }}" '/^## /{p=($2==v); next} p' CHANGELOG.md > notes.md
+          test -s notes.md || { echo "No changelog entry for ${{ steps.ver.outputs.version }}"; exit 1; }
+      - name: Create the tag and the GitHub release
+        if: steps.exists.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" \
+            --target "${{ steps.ver.outputs.sha }}" \
+            --title "3D-Printed Mechanics ${{ steps.ver.outputs.tag }}" \
+            --notes-file notes.md

@@ -6,6 +6,10 @@ All notable changes to this compendium are recorded here. The format follows
 
 ## Unreleased
 
+### Changed
+
+- Releases are created automatically: a push to master that changes `assets/version.js` creates the tag and the GitHub Release, so no tag push is needed. Missing releases can be created from the Actions tab.
+
 ## 1.2.0 - 2026-11-14
 
 Reviewed every mechanism for how clearly its principle of operation is explained, and added interactive models where a picture in motion explains it better than words.
