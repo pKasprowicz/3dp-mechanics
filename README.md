@@ -46,6 +46,11 @@ the matching `CHANGELOG.md` section. It refuses a version with no changelog entr
 already exists. Pushing a `v*` tag by hand still works the same way. To create a missing release for an earlier commit,
 run the workflow from the Actions tab ("Run workflow") with the version and the commit.
 
+One limit: the workflow's built-in token is not allowed to create a tag on a commit whose `.github/workflows/` files
+differ from `master`'s (GitHub reserves that for tokens with the `workflows` permission). Releasing the current
+`master` head always works. For an older commit from before a workflow change, push that tag by hand instead; the
+workflow then only has to create the release, which it can.
+
 ## Layout
 
 - `index.html` – table of contents
